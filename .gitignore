@@ -1,0 +1,10 @@
+#
+# @file     .gitignore
+# @brief    Main project gitignore.
+#
+# @author   Chris Vig (chris@invictus.so)
+# @date     2025-08-16
+#
+
+# Ignore build directory
+build/
