@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "name": "AVR (ATMega1284P)",
+            "includePath": [
+                "${workspaceFolder}/lib"
+            ],
+            "defines": [
+                "BAUD=115200",
+                "F_CPU=1000000"
+            ],
+            "compilerPath": "/usr/bin/avr-gcc",
+            "compilerArgs": [
+                "-mmcu=atmega1284p",
+                "-Os"
+            ],
+            "cStandard": "c11",
+            "cppStandard": "gnu++14",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}

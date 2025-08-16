@@ -1,0 +1,4 @@
+{
+    // Recommend a maximum of 120 characters per line
+    "editor.rulers": [120],
+}
