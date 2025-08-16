@@ -13,17 +13,17 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
+#include "utility.h"
+
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
 
 int main( void )
 {
-    DDRD = ( 1 << 6 );
+    set_bit( DDRD, 6 );
 
     while( true )
     {
-        PORTD = ( 1 << 6 );
-        _delay_ms( 1000 );
-        PORTD = 0;
+        toggle_bit( PORTD, 6 );
         _delay_ms( 1000 );
     }
 
