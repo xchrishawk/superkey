@@ -9,7 +9,9 @@
 # -- Executable Configuration --
 
 set(EXECUTABLE_NAME     exakey)
-set(EXECUTABLE_SOURCE   debug.c
+set(EXECUTABLE_SOURCE   buzzer.c
+                        buzzer.h
+                        debug.c
                         debug.h
                         gpio.c
                         gpio.h

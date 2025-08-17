@@ -15,6 +15,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
+#include "buzzer.h"
 #include "debug.h"
 #include "gpio.h"
 #include "input.h"
@@ -108,6 +109,7 @@ static void init( void )
     gpio_init();
     led_init();
     input_init();
+    buzzer_init();
 
 }   /* init() */
 
@@ -154,5 +156,6 @@ static void test( void )
 static void update_keyer( void )
 {
     led_set( LED_KEY, input_get( INPUT_STRAIGHT_KEY ) );
+    buzzer_set_buzz( input_get( INPUT_STRAIGHT_KEY ) );
 
 }   /* update_keyer() */
