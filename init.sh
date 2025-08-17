@@ -32,4 +32,4 @@ make_build_dir() {
 }
 
 # Make all required directories
-make_build_dir atmega1284p 1000000 115200
+make_build_dir atmega1284p 8000000 115200
