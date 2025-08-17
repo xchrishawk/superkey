@@ -15,6 +15,7 @@
 #include <avr/io.h>
 #include <avr/sleep.h>
 
+#include "debug.h"
 #include "sys.h"
 #include "utility.h"
 
@@ -27,8 +28,9 @@ static tick_t s_tick = 0;
 
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
+// Validation macros
 #define validate_event( _event )                                                        \
-    assert( ( _event ) < EVENT_COUNT )
+    assert_always( ( _event ) < EVENT_COUNT )
 
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
 

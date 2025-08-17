@@ -15,6 +15,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
+#include "debug.h"
 #include "sys.h"
 #include "types.h"
 #include "utility.h"
@@ -94,7 +95,7 @@ static void main_loop( void )
 
         default:
             // Unknown event type??
-            assert( false );
+            fail();
             break;
         }
     }
