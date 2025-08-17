@@ -13,17 +13,21 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
+#include "types.h"
 #include "utility.h"
 
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
 
 int main( void )
 {
-    set_bit( DDRD, 6 );
+    register_t dir = register_addr( DDRD );
+    register_t state = register_addr( PORTD );
+
+    set_bit( * dir, 6 );
 
     while( true )
     {
-        toggle_bit( PORTD, 6 );
+        toggle_bit( * state, 6 );
         _delay_ms( 1000 );
     }
 

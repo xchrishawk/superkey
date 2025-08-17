@@ -9,7 +9,7 @@
 # -- Executable Configuration --
 
 set(EXECUTABLE_NAME     exakey)
-set(EXECUTABLE_SOURCE   main.c utility.h)
+set(EXECUTABLE_SOURCE   main.c types.h utility.h)
 
 # -- Set Up Project --
 
