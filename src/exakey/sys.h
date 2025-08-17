@@ -57,14 +57,14 @@ enum
  * @def     sys_cli()
  * @brief   Globally disables interrupts.
  */
-#define sys_cli()                                                               \
+#define sys_cli()                                                                       \
     sys_set_intrpt_enabled( false )
 
 /**
  * @def     sys_sei()
  * @brief   Globally enables interrupts.
  */
-#define sys_sei()                                                               \
+#define sys_sei()                                                                       \
     sys_set_intrpt_enabled( true )
 
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */

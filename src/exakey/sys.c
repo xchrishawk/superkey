@@ -27,7 +27,7 @@ static tick_t s_tick = 0;
 
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
-#define validate_event( _event )                                                \
+#define validate_event( _event )                                                        \
     assert( ( _event ) < EVENT_COUNT )
 
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */

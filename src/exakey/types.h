@@ -33,7 +33,7 @@ typedef volatile byte_t * register_t;
  * @def     register_addr( _reg )
  * @brief   Returns the address of the specified register as a `register_t`.
  */
-#define register_addr( _reg )                                                   \
+#define register_addr( _reg )                                                           \
     ( ( register_t )( & ( _reg ) ) )
 
 #endif /* !defined( EXAKEY_TYPES_H) */
