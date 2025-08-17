@@ -19,7 +19,22 @@
 
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
 
+/**
+ * @def     DISABLE_BUZZER
+ * @brief   Set to `true` to globally disable the buzzer, in order to avoid annoying your spouse.
+ */
+#define DISABLE_BUZZER      true
+
+/**
+ * @def     DEFAULT_FREQUENCY
+ * @brief   The default frequency that the buzzer will use.
+ */
 #define DEFAULT_FREQUENCY   700
+
+/**
+ * @def     OCRA_GPIO_PIN
+ * @brief   The GPIO pin associated with the OCRA pin connected to the buzzer.
+ */
 #define OCRA_GPIO_PIN       GPIO_PIN_D5
 
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
@@ -42,7 +57,11 @@ void buzzer_init( void )
 
 void buzzer_set_buzz( bool buzz )
 {
+#if !DISABLE_BUZZER
     assign_bit( TCCR1A, COM1A0, buzz );
+#else
+    clear_bit( TCCR1A, COM1A0 );
+#endif
 
 }   /* buzzer_set() */
 
