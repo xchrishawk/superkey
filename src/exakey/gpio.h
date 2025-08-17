@@ -103,6 +103,21 @@ enum
 };
 
 /**
+ * @typedef gpio_port_t
+ * @brief   Enumeration of GPIO ports.
+ */
+typedef uint8_t gpio_port_t;
+enum
+{
+    GPIO_PORT_A,                            /**< GPIO port A.                           */
+    GPIO_PORT_B,                            /**< GPIO port B.                           */
+    GPIO_PORT_C,                            /**< GPIO port C.                           */
+    GPIO_PORT_D,                            /**< GPIO port D.                           */
+
+    GPIO_PORT_COUNT,                        /**< Number of valid GPIO ports.            */
+};
+
+/**
  * @typedef gpio_state_t
  * @brief   Enumeration of GPIO pin states.
  */
@@ -124,6 +139,12 @@ enum
 gpio_dir_t gpio_get_dir( gpio_pin_t pin );
 
 /**
+ * @fn      gpio_get_pin_port( gpio_pin_t )
+ * @brief   Returns the port for the specified pin.
+ */
+gpio_port_t gpio_get_pin_port( gpio_pin_t pin );
+
+/**
  * @fn      gpio_get_state( gpio_pin_t )
  * @brief   Returns the current state of the specified pin.
  */
@@ -140,6 +161,20 @@ void gpio_init( void );
  * @brief   Sets the I/O direction for the specified pin.
  */
 void gpio_set_dir( gpio_pin_t pin, gpio_dir_t dir );
+
+/**
+ * @fn      gpio_set_pcint_enabled_pin( gpio_pin_t )
+ * @brief   Enables or disables the pin change interrupt for the specified GPIO pin.
+ * @note    The interrupt must also be enabled on the corresponding GPIO port - see `gpio_set_pcint_enabled_port()`.
+ */
+void gpio_set_pcint_enabled_pin( gpio_pin_t pin, bool enabled );
+
+/**
+ * @fn      gpio_set_pcint_enabled_port( gpio_port_t )
+ * @brief   Enables or disables the pin change interrupt for the specified GPIO port.
+ * @note    The interrupt must also be enabled on the corresponding GPIO pin - see `gpio_set_pcint_enabled_pin()`.
+ */
+void gpio_set_pcint_enabled_port( gpio_port_t port, bool enabled );
 
 /**
  * @fn      gpio_set_pullup( gpio_pin_t, bool )

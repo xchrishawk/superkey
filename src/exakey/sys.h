@@ -30,6 +30,7 @@ typedef uint8_t event_t;
 enum
 {
     EVENT_TICK,                             /**< 1 millisecond tick event.              */
+    EVENT_INPUT_STATE,                      /**< Key input state changed.               */
 
     EVENT_COUNT,                            /**< Number of valid events.                */
 

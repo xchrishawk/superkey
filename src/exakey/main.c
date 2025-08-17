@@ -17,6 +17,7 @@
 
 #include "debug.h"
 #include "gpio.h"
+#include "input.h"
 #include "led.h"
 #include "sys.h"
 #include "types.h"
@@ -25,8 +26,14 @@
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
 
 /**
+ * @fn      handle_input_state( void )
+ * @brief   Handles the `EVENT_INPUT_STATE` event.
+ */
+static void handle_input_state( void );
+
+/**
  * @fn      handle_tick( void )
- * @brief   Handles the EVENT_TICK event.
+ * @brief   Handles the `EVENT_TICK` event.
  */
 static void handle_tick( void );
 
@@ -54,6 +61,12 @@ static void periodic_1s( void );
  */
 static void test( void );
 
+/**
+ * @fn      update_keyer( void )
+ * @brief   Updates the keyer based on current input state.
+ */
+static void update_keyer( void );
+
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
 
 int main( void )
@@ -65,8 +78,18 @@ int main( void )
 }   /* main() */
 
 
+static void handle_input_state( void )
+{
+    update_keyer();
+
+}   /* handle_input_state() */
+
+
 static void handle_tick( void )
 {
+    // Handle events which happen every tick
+    update_keyer();
+
     // Handle 1 second events
     static uint16_t count_1s = ( 1 * TICKS_PER_SEC );
     if( --count_1s == 0 )
@@ -84,6 +107,7 @@ static void init( void )
     sys_init();
     gpio_init();
     led_init();
+    input_init();
 
 }   /* init() */
 
@@ -98,6 +122,10 @@ static void main_loop( void )
         {
         case EVENT_TICK:
             handle_tick();
+            break;
+
+        case EVENT_INPUT_STATE:
+            handle_input_state();
             break;
 
         default:
@@ -121,3 +149,10 @@ static void test( void )
 {
 
 }   /* test() */
+
+
+static void update_keyer( void )
+{
+    led_set( LED_KEY, input_get( INPUT_STRAIGHT_KEY ) );
+
+}   /* update_keyer() */
