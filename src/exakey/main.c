@@ -16,6 +16,7 @@
 #include <util/delay.h>
 
 #include "debug.h"
+#include "gpio.h"
 #include "sys.h"
 #include "types.h"
 #include "utility.h"
@@ -46,11 +47,18 @@ static void main_loop( void );
  */
 static void periodic_1s( void );
 
+/**
+ * @fn      test( void )
+ * @brief   Test / prototyping function run after `init()`.
+ */
+static void test( void );
+
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
 
 int main( void )
 {
     init();
+    test();
     main_loop();
 
 }   /* main() */
@@ -59,12 +67,11 @@ int main( void )
 static void handle_tick( void )
 {
     // Handle 1 second events
-    static uint16_t const COUNT_1S = 1000;
-    static uint16_t count_1s = COUNT_1S;
+    static uint16_t count_1s = ( 1 * TICKS_PER_SEC );
     if( --count_1s == 0 )
     {
         periodic_1s();
-        count_1s = COUNT_1S;
+        count_1s = ( 1 * TICKS_PER_SEC );
     }
 
 }   /* handle_tick() */
@@ -72,11 +79,12 @@ static void handle_tick( void )
 
 static void init( void )
 {
-    // Initialize system module
+    // Initialize all system modules
     sys_init();
+    gpio_init();
 
     // TEMP - init GPIO
-    set_bit( DDRD, DD6 );
+    gpio_set_dir( GPIO_PIN_D6, GPIO_DIR_OUT );
 
 }   /* init() */
 
@@ -105,6 +113,12 @@ static void main_loop( void )
 
 static void periodic_1s( void )
 {
-    toggle_bit( PORTD, PORTD6 );
+    gpio_toggle_state( GPIO_PIN_D6 );
 
 }   /* periodic_1s() */
+
+
+static void test( void )
+{
+
+}   /* test() */

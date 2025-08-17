@@ -14,18 +14,51 @@
 #include <util/delay.h>
 
 #include "debug.h"
+#include "gpio.h"
 #include "utility.h"
 
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
 
 void fail( void )
 {
-    // Flash the status LED at an irritating rate
-    set_bit( DDRD, 6 );
-    while( true )
-    {
-        toggle_bit( PORTD, 6 );
-        _delay_ms( 25 );
-    }
+    fail_code( 0 );
 
 }   /* fail() */
+
+
+void fail_code( uint8_t code )
+{
+#define FLASH_DELAY 150
+#define NUMBER_DELAY 1000
+
+    gpio_set_dir( GPIO_PIN_D6, GPIO_DIR_OUT );
+
+    if( code != 0 )
+    {
+        // Flash the provided status code
+        while( true )
+        {
+            for( uint8_t idx = 0; idx < code; idx++ )
+            {
+                gpio_set_state( GPIO_PIN_D6, GPIO_STATE_HIGH );
+                _delay_ms( FLASH_DELAY );
+                gpio_set_state( GPIO_PIN_D6, GPIO_STATE_LOW );
+                _delay_ms( FLASH_DELAY );
+            }
+            _delay_ms( NUMBER_DELAY );
+        }
+    }
+    else
+    {
+        // No code provided - just flash continuously at an irritating rate
+        while( true )
+        {
+            gpio_toggle_state( GPIO_PIN_D6 );
+            _delay_ms( FLASH_DELAY );
+        }
+    }
+
+#undef FLASH_DELAY
+#undef NUMBER_DELAY
+
+}   /* fail_code() */

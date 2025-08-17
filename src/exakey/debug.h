@@ -9,6 +9,10 @@
 #if !defined( EXAKEY_DEBUG_H )
 #define EXAKEY_DEBUG_H
 
+/* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
+
+#include <stdint.h>
+
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
 /**
@@ -32,5 +36,11 @@
  * @brief   Aborts the application. Enters an infinite loop which flashes the status LED.
  */
 void fail( void ) __attribute__((__noreturn__));
+
+/**
+ * @fn      fail( uint8_t )
+ * @brief   Aborts the application. Enters an infinite loop which flashes the specified code on the status LED.
+ */
+void fail_code( uint8_t code ) __attribute__((__noreturn__));
 
 #endif /* !defined( EXAKEY_DEBUG_H ) */
