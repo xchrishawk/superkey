@@ -13,6 +13,8 @@ set(EXECUTABLE_SOURCE   debug.c
                         debug.h
                         gpio.c
                         gpio.h
+                        led.c
+                        led.h
                         main.c
                         sys.c
                         sys.h

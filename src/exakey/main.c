@@ -17,6 +17,7 @@
 
 #include "debug.h"
 #include "gpio.h"
+#include "led.h"
 #include "sys.h"
 #include "types.h"
 #include "utility.h"
@@ -82,9 +83,7 @@ static void init( void )
     // Initialize all system modules
     sys_init();
     gpio_init();
-
-    // TEMP - init GPIO
-    gpio_set_dir( GPIO_PIN_D6, GPIO_DIR_OUT );
+    led_init();
 
 }   /* init() */
 
@@ -113,7 +112,7 @@ static void main_loop( void )
 
 static void periodic_1s( void )
 {
-    gpio_toggle_state( GPIO_PIN_D6 );
+    led_toggle( LED_STATUS );
 
 }   /* periodic_1s() */
 

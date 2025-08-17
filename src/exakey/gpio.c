@@ -76,6 +76,7 @@ const s_reg_tbl[] =
     gpio_reg( D, 4 ),
     gpio_reg( D, 5 ),
     gpio_reg( D, 6 ),
+    gpio_reg( D, 7 )
 };
 _Static_assert( array_count( s_reg_tbl ) == GPIO_PIN_COUNT, "Invalid register table!" );
 

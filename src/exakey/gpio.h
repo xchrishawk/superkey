@@ -74,7 +74,7 @@ enum
     GPIO_PIN_D4,                            /**< GPIO port D pin 4.                     */
     GPIO_PIN_D5,                            /**< GPIO port D pin 5.                     */
     GPIO_PIN_D6,                            /**< GPIO port D pin 6.                     */
-    /* There is no GPIO_PIN_D7 */
+    GPIO_PIN_D7,                            /**< GPIO pord D pin 7.                     */
 
     GPIO_PIN_COUNT,                         /**< Number of valid GPIO pins.             */
 
@@ -99,7 +99,7 @@ enum
     GPIO_PIN_PORT_D_FIRST                   /**< First GPIO pin in port D.              */
         = GPIO_PIN_D0,
     GPIO_PIN_PORT_D_LAST                    /**< Last GPIO pin in port D.               */
-        = GPIO_PIN_D6,
+        = GPIO_PIN_D7,
 };
 
 /**
