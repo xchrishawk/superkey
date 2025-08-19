@@ -38,9 +38,9 @@ void fail_code( uint8_t code )
         {
             for( uint8_t idx = 0; idx < code; idx++ )
             {
-                led_set( LED_STATUS, true );
+                led_set_on( LED_STATUS, true );
                 _delay_ms( FLASH_DELAY );
-                led_set( LED_STATUS, false );
+                led_set_on( LED_STATUS, false );
                 _delay_ms( FLASH_DELAY );
             }
             _delay_ms( NUMBER_DELAY );
@@ -51,7 +51,7 @@ void fail_code( uint8_t code )
         // No code provided - just flash continuously at an irritating rate
         while( true )
         {
-            led_toggle( LED_STATUS );
+            led_toggle_on( LED_STATUS );
             _delay_ms( FLASH_DELAY );
         }
     }

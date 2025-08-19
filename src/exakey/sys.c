@@ -17,6 +17,7 @@
 
 #include "debug.h"
 #include "sys.h"
+#include "types.h"
 #include "utility.h"
 
 /* --------------------------------------------------- VARIABLES ---------------------------------------------------- */

@@ -56,7 +56,7 @@ void led_init( void )
 }   /* led_init() */
 
 
-void led_set( led_t led, bool on )
+void led_set_on( led_t led, bool on )
 {
     validate_led( led );
 
@@ -67,13 +67,13 @@ void led_set( led_t led, bool on )
             ( on ? GPIO_STATE_HIGH : GPIO_STATE_LOW )
     );
 
-}   /* led_set() */
+}   /* led_set_on() */
 
 
-void led_toggle( led_t led )
+void led_toggle_on( led_t led )
 {
     validate_led( led );
 
     gpio_toggle_state( LED_PIN( led ) );
 
-}   /* led_toggle() */
+}   /* led_toggle_on() */

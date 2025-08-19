@@ -19,6 +19,7 @@
 #include "debug.h"
 #include "gpio.h"
 #include "input.h"
+#include "keyer.h"
 #include "led.h"
 #include "sys.h"
 #include "types.h"
@@ -51,22 +52,22 @@ static void init( void );
 static void main_loop( void );
 
 /**
+ * @fn      periodic_1ms( void )
+ * @brief   Performs periodic processing which should be executed every 1 millisecond.
+ */
+static void periodic_1ms( tick_t tick );
+
+/**
  * @fn      periodic_1s( void )
  * @brief   Performs periodic processing which should be executed every 1 second.
  */
-static void periodic_1s( void );
+static void periodic_1s( tick_t tick );
 
 /**
  * @fn      test( void )
  * @brief   Test / prototyping function run after `init()`.
  */
 static void test( void );
-
-/**
- * @fn      update_keyer( void )
- * @brief   Updates the keyer based on current input state.
- */
-static void update_keyer( void );
 
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
 
@@ -81,21 +82,29 @@ int main( void )
 
 static void handle_input_state( void )
 {
-    update_keyer();
+    keyer_update( sys_tick() );
 
 }   /* handle_input_state() */
 
 
 static void handle_tick( void )
 {
-    // Handle events which happen every tick
-    update_keyer();
+    // Get system tick count
+    tick_t tick = sys_tick();
+
+    // Handle 1 millisecond events
+    static uint16_t count_1ms = ( 1 * TICKS_PER_MSEC );
+    if( --count_1ms == 0 )
+    {
+        periodic_1ms( tick );
+        count_1ms = ( 1 * TICKS_PER_MSEC );
+    }
 
     // Handle 1 second events
     static uint16_t count_1s = ( 1 * TICKS_PER_SEC );
     if( --count_1s == 0 )
     {
-        periodic_1s();
+        periodic_1s( tick );
         count_1s = ( 1 * TICKS_PER_SEC );
     }
 
@@ -110,6 +119,7 @@ static void init( void )
     led_init();
     input_init();
     buzzer_init();
+    keyer_init();
 
 }   /* init() */
 
@@ -140,9 +150,16 @@ static void main_loop( void )
 }   /* main_loop() */
 
 
-static void periodic_1s( void )
+static void periodic_1ms( tick_t tick )
 {
-    led_toggle( LED_STATUS );
+    keyer_update( tick );
+
+}   /* periodic_1ms() */
+
+
+static void periodic_1s( tick_t tick )
+{
+    led_toggle_on( LED_STATUS );
 
 }   /* periodic_1s() */
 
@@ -151,11 +168,3 @@ static void test( void )
 {
 
 }   /* test() */
-
-
-static void update_keyer( void )
-{
-    led_set( LED_KEY, input_get( INPUT_STRAIGHT_KEY ) );
-    buzzer_set_buzz( input_get( INPUT_STRAIGHT_KEY ) );
-
-}   /* update_keyer() */

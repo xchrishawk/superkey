@@ -23,7 +23,7 @@
  * @def     DISABLE_BUZZER
  * @brief   Set to `true` to globally disable the buzzer, in order to avoid annoying your spouse.
  */
-#define DISABLE_BUZZER      true
+#define DISABLE_BUZZER      false
 
 /**
  * @def     DEFAULT_FREQUENCY

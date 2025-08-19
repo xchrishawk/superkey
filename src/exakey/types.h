@@ -27,6 +27,12 @@ typedef uint8_t byte_t;
  */
 typedef volatile byte_t * register_t;
 
+/**
+ * @typedef tick_t
+ * @brief   Typedef representing the system tick count.
+ */
+typedef uint32_t tick_t;
+
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
 /**

@@ -38,15 +38,15 @@ enum
 void led_init( void );
 
 /**
- * @fn      led_set( led_t, bool )
+ * @fn      led_set_on( led_t, bool )
  * @brief   Turns the specified LED on or off.
  */
-void led_set( led_t led, bool on );
+void led_set_on( led_t led, bool on );
 
 /**
- * @fn      led_toggle( led_t )
+ * @fn      led_toggle_on( led_t )
  * @brief   Toggles the state of the specified LED.
  */
-void led_toggle( led_t led );
+void led_toggle_on( led_t led );
 
 #endif /* !defined( EXAKEY_LED_H ) */

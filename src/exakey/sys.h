@@ -14,13 +14,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-/* ----------------------------------------------------- TYPES ------------------------------------------------------ */
+#include "types.h"
 
-/**
- * @typedef tick_t
- * @brief   Typedef representing the system tick count.
- */
-typedef uint32_t tick_t;
+/* ----------------------------------------------------- TYPES ------------------------------------------------------ */
 
 /**
  * @typedef event_t

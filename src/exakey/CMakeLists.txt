@@ -17,6 +17,8 @@ set(EXECUTABLE_SOURCE   buzzer.c
                         gpio.h
                         input.c
                         input.h
+                        keyer.c
+                        keyer.h
                         led.c
                         led.h
                         main.c
