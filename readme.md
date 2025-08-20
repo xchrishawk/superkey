@@ -27,8 +27,12 @@ the embedded AVR compiler:
             "defines": [
                 "BAUD=250000",
                 "F_CPU=8000000",
+                "EXAKEY_DFLT_BUZZER_ENABLED=true",
                 "EXAKEY_DFLT_BUZZER_FREQ=700",
-                "EXAKEY_OPT_DISABLE_BUZZER=FALSE"
+                "EXAKEY_DFLT_LED_STATUS_ENABLED=true",
+                "EXAKEY_DFLT_LED_STATUS_ACTIVE_LO=false",
+                "EXAKEY_DFLT_LED_KEY_ENABLED=true",
+                "EXAKEY_DFLT_LED_KEY_ACTIVE_LO=false"
             ],
             "compilerPath": "/usr/bin/avr-gcc",
             "compilerArgs": [
@@ -42,7 +46,6 @@ the embedded AVR compiler:
             "cppStandard": "gnu++14",
             "intelliSenseMode": "linux-gcc-x64"
         }
-    ],
-    "version": 4
+    ]
 }
 ```

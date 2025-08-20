@@ -19,6 +19,7 @@
 #include "application/input.h"
 #include "application/keyer.h"
 #include "application/led.h"
+#include "core/config.h"
 #include "core/sys.h"
 #include "drivers/gpio.h"
 #include "drivers/usart.h"
@@ -166,6 +167,7 @@ static void handle_usart_tx_complete( usart_t usart )
 static void init( void )
 {
     // Initialize all system modules
+    config_init();
     sys_init();
     led_init();
     input_init();

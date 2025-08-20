@@ -50,17 +50,6 @@ set(PROJECT_OPTIMIZE_FLAGS  "-Os")
 set(CMAKE_ASM_FLAGS         "${PROJECT_COMMON_FLAGS} ${PROJECT_DEBUG_FLAGS}")
 set(CMAKE_C_FLAGS           "${PROJECT_COMMON_FLAGS} ${PROJECT_DEBUG_FLAGS} ${PROJECT_OPTIMIZE_FLAGS}")
 
-# Set preprocessor macros
-add_compile_definitions(
-    # Device setup (required by avrlibc)
-    F_CPU=${EXAKEY_DEVICE_F_CPU}
-    BAUD=${EXAKEY_DEVICE_BAUD}
-    # Default configuration
-    EXAKEY_DFLT_BUZZER_FREQ=${EXAKEY_DFLT_BUZZER_FREQ}
-    # Application options
-    EXAKEY_OPT_DISABLE_BUZZER=${EXAKEY_OPT_DISABLE_BUZZER}
-)
-
 # -- Subdirectories --
 
 add_subdirectory(${PROJECT_EXECUTABLE_DIR}/exakey)

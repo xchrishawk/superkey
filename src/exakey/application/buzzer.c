@@ -15,6 +15,7 @@
 
 #include "application/buzzer.h"
 #include "application/led.h"
+#include "core/config.h"
 #include "drivers/gpio.h"
 #include "utility/utility.h"
 
@@ -26,40 +27,42 @@
  */
 #define OCRA_GPIO_PIN       GPIO_PIN_D5
 
+/* --------------------------------------------------- VARIABLES ---------------------------------------------------- */
+
+bool s_on = false;                          /**< Is the buzzer currently requested on?  */
+
+/* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
+
+/**
+ * @fn      update_hardware( void )
+ * @brief   Updates the buzzer hardware based on current state and configuration.
+ */
+static void update_hardware( void );
+
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
 
 void buzzer_init( void )
 {
-    // Pin must be configured as an output
-    gpio_set_dir( OCRA_GPIO_PIN, GPIO_DIR_OUT );
+    // Update local state
+    s_on = false;
 
     // Configure timer
     // - Waveform generation mode = CTC
     // - Clock prescaler = /8
+    // - OCRA pin must be configured as an output
     TCCR1B = bitmask2( WGM12, CS11 );
+    gpio_set_dir( OCRA_GPIO_PIN, GPIO_DIR_OUT );
 
-    // Set default frequency
-    buzzer_set_frequency( EXAKEY_DFLT_BUZZER_FREQ );
+    // Initialize hardware
+    update_hardware();
 
 }   /* buzzer_init() */
 
 
-void buzzer_set_frequency( uint16_t freq )
-{
-    // thx chatgpt
-    OCR1A = ( F_CPU / ( 2UL * 8 /* prescaler */ * freq ) ) - 1;
-
-}   /* buzzer_set_frequency() */
-
-
 void buzzer_set_on( bool on )
 {
-#if defined( EXAKEY_OPT_DISABLE_BUZZER ) && EXAKEY_OPT_DISABLE_BUZZER
-    ( void )on;
-    clear_bit( TCCR1A, COM1A0 );
-#else
-    assign_bit( TCCR1A, COM1A0, on );
-#endif
+    s_on = on;
+    update_hardware();
 
 }   /* buzzer_set_on() */
 
@@ -67,5 +70,20 @@ void buzzer_set_on( bool on )
 void buzzer_tick( tick_t tick )
 {
     ( void )tick;
+    update_hardware();
 
 }   /* buzzer_tick() */
+
+
+static void update_hardware( void )
+{
+    bool enabled = config()->buzzer_enabled;
+    uint16_t freq = config()->buzzer_freq;
+
+    // Update OCR1A register to set frequency
+    OCR1A = ( F_CPU / ( 2UL * 8 /* prescaler */ * freq ) ) - 1;
+
+    // If the buzzer is requested to be on, and the buzzer is enabled, then start the timer
+    assign_bit( TCCR1A, COM1A0, s_on && enabled );
+
+}   /* update_hardware() */
