@@ -41,7 +41,7 @@ set(PROJECT_BIN_DIR         ${PROJECT_BUILD_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BIN_DIR})
 
 # Shared variables for compilation flags
-set(PROJECT_COMMON_FLAGS    "-mmcu=${EXAKEY_DEVICE_MCU} -Wall -Wextra -Wpedantic")
+set(PROJECT_COMMON_FLAGS    "-mmcu=${EXAKEY_DEVICE_MCU} -Wall -Wextra -Wpedantic -Werror")
 set(PROJECT_DEBUG_FLAGS     "-g")
 set(PROJECT_OPTIMIZE_FLAGS  "-Os")
 
