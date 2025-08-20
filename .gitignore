@@ -6,5 +6,8 @@
 # @date     2025-08-16
 #
 
+# Ignore tool directories
+.vscode/
+
 # Ignore build directory
 build/
