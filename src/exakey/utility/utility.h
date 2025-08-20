@@ -12,6 +12,21 @@
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
 /**
+ * @def     FUNC_MAY_BE_UNUSED
+ * @brief   May be placed after a function declaration to inform the compiler that a function may not be called, and
+ *          that this should be allowed without issuing a warning.
+ */
+#define FUNC_MAY_BE_UNUSED                                                              \
+    __attribute__((unused))
+
+/**
+ * @def     FUNC_NEVER_RETURNS
+ * @brief   May be placed after a function declaration to inform that compiler that a function never returns.
+ */
+#define FUNC_NEVER_RETURNS                                                              \
+    __attribute__((noreturn))
+
+/**
  * @def     array_count( _a )
  * @brief   Returns the number of elements in the specified array.
  */

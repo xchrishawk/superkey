@@ -69,7 +69,7 @@ static void init( void );
  * @fn      main_loop( void )
  * @brief   Runs the main loop of the application.
  */
-static void main_loop( void );
+static void main_loop( void ) FUNC_NEVER_RETURNS;
 
 /**
  * @fn      periodic_1ms( tick_t )
@@ -151,12 +151,14 @@ static void handle_tick( void )
 
 static void handle_usart_rx_complete( usart_t usart )
 {
+    ( void )usart;
 
 }   /* handle_usart_rx_complete() */
 
 
 static void handle_usart_tx_complete( usart_t usart )
 {
+    ( void )usart;
 
 }   /* handle_usart_tx_complete() */
 
@@ -216,8 +218,8 @@ static void periodic_50ms( tick_t tick )
 
 static void periodic_1s( tick_t tick )
 {
-    // Periodic processing for modules with 1 Hz tick rates
-    // ...TBD?
+    // Periodic processing for modules with 1 Hz tick rates... TBD?
+    ( void )tick;
 
     // Toggle the status LED. We're still alive!
     led_toggle_on( LED_STATUS );

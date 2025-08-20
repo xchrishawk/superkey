@@ -255,13 +255,13 @@ static void wait_data_register_empty( usart_t usart );
  * @fn      wait_rx_complete( usart_t )
  * @brief   Waits for the RXCn bit to be set for the specified USART.
  */
-static void wait_rx_complete( usart_t usart );
+static void wait_rx_complete( usart_t usart ) FUNC_MAY_BE_UNUSED;
 
 /**
  * @fn      wait_tx_complete( usart_t )
  * @brief   Waits for the TXCn bit to be set for the specified USART.
  */
-static void wait_tx_complete( usart_t usart );
+static void wait_tx_complete( usart_t usart ) FUNC_MAY_BE_UNUSED;
 
 /**
  * @fn      write( usart_t )
@@ -471,6 +471,8 @@ static void isr_rx_complete( usart_t usart, event_t event )
 
 static void isr_tx_complete( usart_t usart, event_t event )
 {
+    ( void )usart;
+
     // Set system event
     sys_enqueue_event( event );
 

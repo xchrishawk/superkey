@@ -13,6 +13,9 @@
             "compilerPath": "/usr/bin/avr-gcc",
             "compilerArgs": [
                 "-mmcu=atmega1284p",
+                "-Wall",
+                "-Wextra",
+                "-Wpedantic",
                 "-Os"
             ],
             "cStandard": "c11",

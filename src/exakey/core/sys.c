@@ -105,7 +105,7 @@ tick_t sys_tick( void )
     tick_t ret = s_tick;
     sys_set_intrpt_enabled( int_en );
 
-    return( s_tick );
+    return( ret );
 
 }   /* sys_tick() */
 

@@ -73,7 +73,7 @@ void led_set_on( led_t led, bool on )
 
 void led_tick( tick_t tick )
 {
-    // no-op
+    ( void )tick;
 
 }   /* led_tick() */
 

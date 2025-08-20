@@ -67,6 +67,7 @@ void input_init( void )
 
 void input_tick( tick_t tick )
 {
+    ( void )tick;
 
 }   /* input_tick() */
 

@@ -13,6 +13,8 @@
 
 #include <stdint.h>
 
+#include "utility/utility.h"
+
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
 /**
@@ -35,12 +37,12 @@
  * @fn      fail( void )
  * @brief   Aborts the application. Enters an infinite loop which flashes the status LED.
  */
-void fail( void ) __attribute__((__noreturn__));
+void fail( void ) FUNC_NEVER_RETURNS;
 
 /**
  * @fn      fail( uint8_t )
  * @brief   Aborts the application. Enters an infinite loop which flashes the specified code on the status LED.
  */
-void fail_code( uint8_t code ) __attribute__((__noreturn__));
+void fail_code( uint8_t code ) FUNC_NEVER_RETURNS;
 
 #endif /* !defined( EXAKEY_DEBUG_H ) */

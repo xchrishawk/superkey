@@ -54,6 +54,8 @@ void keyer_panic( void )
 
 void keyer_tick( tick_t tick )
 {
+    ( void )tick;
+
     bool keyed = ( input_get( INPUT_STRAIGHT_KEY ) ||
                    input_get( INPUT_PADDLE_A ) ||
                    input_get( INPUT_PADDLE_B ) );

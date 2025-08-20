@@ -121,7 +121,8 @@ gpio_port_t gpio_get_pin_port( gpio_pin_t pin )
 {
     validate_pin( pin );
 
-    if( pin >= GPIO_PIN_PORT_A_FIRST && pin <= GPIO_PIN_PORT_A_LAST )
+    // GPIO_PIN_PORT_A_FIRST is 0, so that comparison would be redundant
+    if( /* pin >= GPIO_PIN_PORT_A_FIRST && */ pin <= GPIO_PIN_PORT_A_LAST )
         return( GPIO_PORT_A );
     else if( pin >= GPIO_PIN_PORT_B_FIRST && pin <= GPIO_PIN_PORT_B_LAST )
         return( GPIO_PORT_B );
