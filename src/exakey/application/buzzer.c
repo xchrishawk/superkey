@@ -9,6 +9,7 @@
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
 
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include <avr/io.h>
 
@@ -18,12 +19,6 @@
 #include "utility/utility.h"
 
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
-
-/**
- * @def     DEFAULT_FREQUENCY
- * @brief   The default frequency that the buzzer will use.
- */
-#define DEFAULT_FREQUENCY   700
 
 /**
  * @def     OCRA_GPIO_PIN
@@ -44,7 +39,7 @@ void buzzer_init( void )
     TCCR1B = bitmask2( WGM12, CS11 );
 
     // Set default frequency
-    buzzer_set_frequency( DEFAULT_FREQUENCY );
+    buzzer_set_frequency( EXAKEY_DFLT_BUZZER_FREQ );
 
 }   /* buzzer_init() */
 
@@ -59,7 +54,8 @@ void buzzer_set_frequency( uint16_t freq )
 
 void buzzer_set_on( bool on )
 {
-#if defined( DISABLE_BUZZER ) && DISABLE_BUZZER
+#if defined( EXAKEY_OPT_DISABLE_BUZZER ) && EXAKEY_OPT_DISABLE_BUZZER
+    ( void )on;
     clear_bit( TCCR1A, COM1A0 );
 #else
     assign_bit( TCCR1A, COM1A0, on );

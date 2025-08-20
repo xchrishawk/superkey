@@ -8,23 +8,9 @@
 
 cmake_minimum_required(VERSION 3.22)
 
-# -- Device Configuration --
+# -- Project Configuration --
 
-# Ensure required arguments are specified
-if(NOT DEFINED DEVICE_MCU)
-    message(FATAL_ERROR "The DEVICE_MCU argument must be specified.")
-endif()
-if(NOT DEFINED DEVICE_F_CPU)
-    message(FATAL_ERROR "The DEVICE_F_CPU argument must be specified.")
-endif()
-if(NOT DEFINED DEVICE_BAUD)
-    message(FATAL_ERROR "The DEVICE_BAUD argument must be specified.")
-endif()
-
-# Set defaults for optional arguments
-if(NOT DEFINED DISABLE_BUZZER)
-    set(DISABLE_BUZZER      0)
-endif()
+include(configuration.cmake)
 
 # -- Toolchain Configuration --
 
@@ -55,7 +41,7 @@ set(PROJECT_BIN_DIR         ${PROJECT_BUILD_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BIN_DIR})
 
 # Shared variables for compilation flags
-set(PROJECT_COMMON_FLAGS    "-mmcu=${DEVICE_MCU} -Wall -Wextra -Wpedantic -DDISABLE_BUZZER=${DISABLE_BUZZER}")
+set(PROJECT_COMMON_FLAGS    "-mmcu=${EXAKEY_DEVICE_MCU} -Wall -Wextra -Wpedantic")
 set(PROJECT_DEBUG_FLAGS     "-g")
 set(PROJECT_OPTIMIZE_FLAGS  "-Os")
 
@@ -66,8 +52,13 @@ set(CMAKE_C_FLAGS           "${PROJECT_COMMON_FLAGS} ${PROJECT_DEBUG_FLAGS} ${PR
 
 # Set preprocessor macros
 add_compile_definitions(
-    F_CPU=${DEVICE_F_CPU}
-    BAUD=${DEVICE_BAUD}
+    # Device setup (required by avrlibc)
+    F_CPU=${EXAKEY_DEVICE_F_CPU}
+    BAUD=${EXAKEY_DEVICE_BAUD}
+    # Default configuration
+    EXAKEY_DFLT_BUZZER_FREQ=${EXAKEY_DFLT_BUZZER_FREQ}
+    # Application options
+    EXAKEY_OPT_DISABLE_BUZZER=${EXAKEY_OPT_DISABLE_BUZZER}
 )
 
 # -- Subdirectories --

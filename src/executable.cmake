@@ -114,8 +114,7 @@ add_custom_command(
     OUTPUT ${EXECUTABLE_ELF_STRIPPED_FILE}
     OUTPUT ${EXECUTABLE_IHEX_FILE}
     # Make this command depend on the main ELF file
-    # (the ${PROJECT_BIN_DIR} prefix is necessary for some reason)
-    DEPENDS ${PROJECT_BIN_DIR}/${EXECUTABLE_ELF_FILE}
+    DEPENDS ${EXECUTABLE_NAME}
     # Step 1 - Generate the dump file using avr-objdump
     COMMAND ${AVR_OBJDUMP}
     ARGS -x -D -S ${EXECUTABLE_ELF_FILE} > ${EXECUTABLE_DUMP_FILE}

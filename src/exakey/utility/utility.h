@@ -27,6 +27,24 @@
     __attribute__((noreturn))
 
 /**
+ * @def     TRUE
+ * @brief   Define the `TRUE` macro as `1`.
+ * @note    This is mostly intended to support CMake option flags specified as booleans. In almost all other cases, the
+ *          constant `true` from `<stdbool.h>` should be used instead.
+ */
+#define TRUE                                                                            \
+    ( 1 )
+
+/**
+ * @def     FALSE
+ * @brief   Define the `FALSE` macro as `0`.
+ * @note    This is mostly intended to support CMake option flags specified as booleans. In almost all other cases, the
+ *          constant `false` from `<stdbool.h>` should be used instead.
+ */
+#define FALSE                                                                           \
+    ( 0 )
+
+/**
  * @def     array_count( _a )
  * @brief   Returns the number of elements in the specified array.
  */

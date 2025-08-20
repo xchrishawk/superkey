@@ -26,7 +26,9 @@ the embedded AVR compiler:
             ],
             "defines": [
                 "BAUD=250000",
-                "F_CPU=8000000"
+                "F_CPU=8000000",
+                "EXAKEY_DFLT_BUZZER_FREQ=700",
+                "EXAKEY_OPT_DISABLE_BUZZER=FALSE"
             ],
             "compilerPath": "/usr/bin/avr-gcc",
             "compilerArgs": [
@@ -41,5 +43,6 @@ the embedded AVR compiler:
             "intelliSenseMode": "linux-gcc-x64"
         }
     ],
+    "version": 4
 }
 ```
