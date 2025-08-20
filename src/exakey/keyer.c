@@ -45,6 +45,13 @@ void keyer_init( void )
 }   /* keyer_init() */
 
 
+void keyer_panic( void )
+{
+    set_keyed( false );
+
+}   /* keyer_panic() */
+
+
 void keyer_update( tick_t tick )
 {
     bool keyed = ( input_get( INPUT_STRAIGHT_KEY ) ||

@@ -12,21 +12,34 @@
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
 /**
- * @def     array_count
+ * @def     array_count( _a )
  * @brief   Returns the number of elements in the specified array.
  */
 #define array_count( _a )                                                               \
     ( sizeof( _a ) / sizeof( _a[ 0 ] ) )
 
 /**
- * @def     stringize
+ * @def     increment_rollover
+ * @brief   Increments `_value` by one. If the result is greater than or equal to `_max`, resets `_value` to 0.
+ */
+#define increment_rollover( _value, _max )                                              \
+    do                                                                                  \
+    {                                                                                   \
+        ( _value )++;                                                                   \
+        if( ( _value ) >= ( _max ) )                                                    \
+            ( _value ) = 0;                                                             \
+    }                                                                                   \
+    while( 0 )
+
+/**
+ * @def     stringize( _x )
  * @brief   Returns a string representation of the argument.
  */
 #define stringize( _x )                                                                 \
     # _x
 
 /**
- * @def     stringize_value
+ * @def     stringize_value( _x )
  * @brief   Returns a string representation of the *value* of the argument.
  */
 #define stringize_value( _x )                                                           \

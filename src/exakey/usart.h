@@ -1,0 +1,168 @@
+/**
+ * @file    usart.h
+ * @brief   Header for the USART driver module.
+ *
+ * @author  Chris Vig (chris@invictus.so)
+ * @date    2025-08-17
+ */
+
+#if !defined( EXAKEY_USART_H )
+#define EXAKEY_USART_H
+
+/* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
+
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+#include "types.h"
+#include "utility.h"
+
+/* ----------------------------------------------------- TYPES ------------------------------------------------------ */
+
+/**
+ * @typedef usart_t
+ * @brief   Enumeration of the USARTs supported by the system.
+ */
+typedef uint8_t usart_t;
+enum
+{
+    USART_0,                                /**< USART 0.                               */
+    USART_1,                                /**< USART 1.                               */
+
+    USART_COUNT,                            /**< Number of valid USARTs.                */
+};
+
+/**
+ * @typedef usart_data_bits_t
+ * @brief   Enumeration of the supported data bits settings for the USARTs.
+ * @note    9-bit words are not supported.
+ */
+typedef uint8_t usart_data_bits_t;
+enum
+{
+    USART_DATA_BITS_5,                      /**< Each word has 5 data bits.             */
+    USART_DATA_BITS_6,                      /**< Each word has 6 data bits.             */
+    USART_DATA_BITS_7,                      /**< Each word has 7 data bits.             */
+    USART_DATA_BITS_8,                      /**< Each word has 8 data bits.             */
+
+    USART_DATA_BITS_COUNT,                  /**< Number of valid data bits settings.    */
+};
+
+/**
+ * @typedef usart_error_t
+ * @brief   Enumeration of the errors which may be returned by a USART.
+ */
+typedef uint8_t usart_error_t;
+enum
+{
+    USART_ERROR_NONE            = 0,            /**< No error occurred.                 */
+    USART_ERROR_FRAME_ERROR     = bitmask( 0 ), /**< Frame error occurred.              */
+    USART_ERROR_PARITY_ERROR    = bitmask( 1 ), /**< Parity error occurred.             */
+    USART_ERROR_DATA_OVERRUN    = bitmask( 2 ), /**< Data overrun occurred.             */
+};
+
+/**
+ * @typedef usart_parity_t
+ * @brief   Enumeration of the supported parity settings for the USARTs.
+ */
+typedef uint8_t usart_parity_t;
+enum
+{
+    USART_PARITY_DISABLED,                  /**< Parity bit is disabled.                */
+    USART_PARITY_EVEN,                      /**< Even parity bit is enabled.            */
+    USART_PARITY_ODD,                       /**< Odd parity bit is enabled.             */
+
+    USART_PARITY_COUNT,                     /**< Number of valid parity settings.       */
+};
+
+/**
+ * @typedef usart_stop_bits_t
+ * @brief   Enumeration of the supported stop bits settings for the USARTs.
+ */
+typedef uint8_t usart_stop_bits_t;
+enum
+{
+    USART_STOP_BITS_1,                      /**< Each word has 1 stop bit.              */
+    USART_STOP_BITS_2,                      /**< Each word has 2 stop bits.             */
+
+    USART_STOP_BITS_COUNT,                  /**< Number of valid stop bits settings.    */
+};
+
+/* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
+
+/**
+ * @fn      usart_deinit( usart_t )
+ * @brief   De-initializes the specified USART, making it unusable until re-initialized.
+ */
+void usart_deinit( usart_t usart );
+
+/**
+ * @fn      usart_get_errors( usart_t )
+ * @brief   Returns the currently set error flags for the specified USART.
+ * @note    Does not currently return anything meaningful.
+ */
+usart_error_t usart_get_errors( usart_t usart );
+
+/**
+ * @fn      usart_init( usart_t, bool, bool, usart_data_bits_t, usart_stop_bits_t, usart_parity_t )
+ * @brief   Initializes the specified USART with the specified configuration.
+ * @note    Must be called prior to attempting any use of the USART.
+ */
+void usart_init( usart_t usart,
+                 bool rx_enabled,
+                 bool tx_enabled,
+                 usart_data_bits_t data_bits,
+                 usart_stop_bits_t stop_bits,
+                 usart_parity_t parity );
+
+/**
+ * @fn      usart_max_rx_size( void )
+ * @brief   Returns the maximum supported RX buffer size for all USARTs.
+ */
+size_t usart_max_rx_size( void );
+
+/**
+ * @fn      usart_max_tx_size( void )
+ * @brief   Returns the maximum supported TX buffer size for all USARTs.
+ */
+size_t usart_max_tx_size( void );
+
+/**
+ * @fn      usart_rx( usart_t, byte_t *, size_t )
+ * @brief   Receives up to `max_size` bytes from the RX buffer for the specified USART.
+ * @returns The number of bytes written to `data`.
+ */
+size_t usart_rx( usart_t usart, byte_t * data, size_t max_size );
+
+/**
+ * @fn      usart_tx( usart_t, byte_t const *, size_t )
+ * @brief   Asynchronously tranmits the specified data buffer.
+ * @returns `true` if the buffer was successfully queued for transmission, or `false` if there was not enough space in
+ *          the transmit buffer for the message.
+ */
+bool usart_tx( usart_t usart, byte_t const * data, size_t size );
+
+/**
+ * @fn      usart_tx_str( usart_t, char const * )
+ * @brief   Asynchronously transmits the specified string.
+ * @returns `true` if the string was successfully queued for transmission, or `false` if there was not enough space in
+ *          the transmit buffer for the message.
+ */
+bool usart_tx_str( usart_t usart, char const * str );
+
+/**
+ * @fn      usart_tx_sync( usart_t, byte_t const *, size_t )
+ * @brief   Synchronously transmits the specified data buffer.
+ * @note    This function is intended for debugging. The `usart_tx()` function should be used for normal purposes.
+ */
+void usart_tx_sync( usart_t usart, byte_t const * data, size_t size );
+
+/**
+ * @fn      usart_tx_sync_str( usart_t, char const * )
+ * @brief   Synchronously transmits the specified string.
+ * @note    This function is intended for debugging. The `usart_tx_str()` function should be used for normal purposes.
+ */
+void usart_tx_sync_str( usart_t usart, char const * str );
+
+#endif /* !defined( EXAKEY_USART_H ) */

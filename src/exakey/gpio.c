@@ -130,7 +130,7 @@ gpio_port_t gpio_get_pin_port( gpio_pin_t pin )
     else if( pin >= GPIO_PIN_PORT_D_FIRST && pin <= GPIO_PIN_PORT_D_LAST )
         return( GPIO_PORT_D );
     else
-        return( GPIO_PORT_COUNT ); // never executed
+        fail(); // never executed
 
 }   /* gpio_get_pin_port() */
 
@@ -191,8 +191,6 @@ void gpio_set_pcint_enabled_port( gpio_port_t port, bool enabled )
     case GPIO_PORT_D:
         assign_bit( PCICR, PCIE3, enabled );
         break;
-    default:
-        break; // never executed
     }
 
 }   /* gpio_set_pcint_enabled_port() */

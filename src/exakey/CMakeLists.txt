@@ -11,6 +11,7 @@
 set(EXECUTABLE_NAME     exakey)
 set(EXECUTABLE_SOURCE   buzzer.c
                         buzzer.h
+                        constants.h
                         debug.c
                         debug.h
                         gpio.c
@@ -25,6 +26,8 @@ set(EXECUTABLE_SOURCE   buzzer.c
                         sys.c
                         sys.h
                         types.h
+                        usart.c
+                        usart.h
                         utility.h)
 
 # -- Set Up Project --

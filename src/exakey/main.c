@@ -23,6 +23,7 @@
 #include "led.h"
 #include "sys.h"
 #include "types.h"
+#include "usart.h"
 #include "utility.h"
 
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
@@ -38,6 +39,18 @@ static void handle_input_state( void );
  * @brief   Handles the `EVENT_TICK` event.
  */
 static void handle_tick( void );
+
+/**
+ * @fn      handle_usart_rx_complete( usart_t )
+ * @brief   Handles the `EVENT_USART_n_RX_COMPLETE` event for the specified USART.
+ */
+static void handle_usart_rx_complete( usart_t usart );
+
+/**
+ * @fn      handle_usart_tx_complete( usart_t )
+ * @brief   Handles the `EVENT_USART_n_TX_COMPLETE` event for the specified USART.
+ */
+static void handle_usart_tx_complete( usart_t usart );
 
 /**
  * @fn      init( void )
@@ -111,6 +124,18 @@ static void handle_tick( void )
 }   /* handle_tick() */
 
 
+static void handle_usart_rx_complete( usart_t usart )
+{
+
+}   /* handle_usart_rx_complete() */
+
+
+static void handle_usart_tx_complete( usart_t usart )
+{
+
+}   /* handle_usart_tx_complete() */
+
+
 static void init( void )
 {
     // Initialize all system modules
@@ -129,22 +154,19 @@ static void main_loop( void )
     while( true )
     {
         // Wait for next system event
-        event_t event = sys_wait();
-        switch( event )
-        {
-        case EVENT_TICK:
+        event_field_t events = sys_wait();
+        if( is_bit_set( events, EVENT_TICK ) )
             handle_tick();
-            break;
-
-        case EVENT_INPUT_STATE:
+        if( is_bit_set( events, EVENT_INPUT_STATE ) )
             handle_input_state();
-            break;
-
-        default:
-            // Unknown event type??
-            fail();
-            break;
-        }
+        if( is_bit_set( events, EVENT_USART_0_RX_COMPLETE ) )
+            handle_usart_rx_complete( USART_0 );
+        if( is_bit_set( events, EVENT_USART_0_TX_COMPLETE ) )
+            handle_usart_tx_complete( USART_0 );
+        if( is_bit_set( events, EVENT_USART_1_RX_COMPLETE ) )
+            handle_usart_rx_complete( USART_1 );
+        if( is_bit_set( events, EVENT_USART_1_TX_COMPLETE ) )
+            handle_usart_tx_complete( USART_1 );
     }
 
 }   /* main_loop() */
@@ -166,5 +188,7 @@ static void periodic_1s( tick_t tick )
 
 static void test( void )
 {
+    usart_init( USART_0, true, true, USART_DATA_BITS_8, USART_STOP_BITS_1, USART_PARITY_DISABLED );
+    usart_init( USART_1, false, true, USART_DATA_BITS_8, USART_STOP_BITS_1, USART_PARITY_DISABLED );
 
 }   /* test() */

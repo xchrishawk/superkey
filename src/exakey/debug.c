@@ -14,7 +14,9 @@
 #include <util/delay.h>
 
 #include "debug.h"
+#include "keyer.h"
 #include "led.h"
+#include "sys.h"
 #include "utility.h"
 
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
@@ -28,8 +30,15 @@ void fail( void )
 
 void fail_code( uint8_t code )
 {
+#define ANNOYING_DELAY 37
 #define FLASH_DELAY 150
 #define NUMBER_DELAY 1000
+
+    // Disable interrupts
+    sys_cli();
+
+    // Stop keying, if required
+    keyer_panic();
 
     if( code != 0 )
     {
@@ -52,10 +61,11 @@ void fail_code( uint8_t code )
         while( true )
         {
             led_toggle_on( LED_STATUS );
-            _delay_ms( FLASH_DELAY );
+            _delay_ms( ANNOYING_DELAY );
         }
     }
 
+#undef ANNOYING_DELAY
 #undef FLASH_DELAY
 #undef NUMBER_DELAY
 

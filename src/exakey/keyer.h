@@ -24,6 +24,12 @@
 void keyer_init( void );
 
 /**
+ * @fn      keyer_panic( void )
+ * @brief   Immediately and unconditionally stops the keyer.
+ */
+void keyer_panic( void );
+
+/**
  * @fn      keyer_update( tick_t )
  * @brief   Updates keyer state at the specified tick count.
  */

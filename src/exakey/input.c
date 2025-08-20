@@ -66,6 +66,6 @@ void input_init( void )
 
 ISR( PCINT0_vect )
 {
-    sys_set_pending_event( EVENT_INPUT_STATE );
+    sys_enqueue_event( EVENT_INPUT_STATE );
 
 } /* ISR( PCINT0_vect ) */
