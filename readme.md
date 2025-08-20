@@ -2,8 +2,44 @@
 
 This will be a readme someday.
 
-## Upload Command
+## Notes
+
+### `avrdude` Upload Command
 
 ```
 avrdude -c avrispmkii -P usb -p m1284p -U flash:w:exakey.ihex -D
+```
+
+### VS Code Setup
+
+The following may be added to the `.vscode/c_cpp_properties.json` file to properly configure the C / C++ environment for
+the embedded AVR compiler:
+
+```json
+{
+    "configurations": [
+        {
+            "name": "AVR (ATMega1284P)",
+            "includePath": [
+                "${workspaceFolder}/lib",
+                "${workspaceFolder}/src/exakey"
+            ],
+            "defines": [
+                "BAUD=250000",
+                "F_CPU=8000000"
+            ],
+            "compilerPath": "/usr/bin/avr-gcc",
+            "compilerArgs": [
+                "-mmcu=atmega1284p",
+                "-Wall",
+                "-Wextra",
+                "-Wpedantic",
+                "-Os"
+            ],
+            "cStandard": "c11",
+            "cppStandard": "gnu++14",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+}
 ```
