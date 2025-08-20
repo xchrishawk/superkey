@@ -317,6 +317,10 @@ void usart_init( usart_t usart,
     validate_stop_bits( stop_bits );
     validate_parity( parity );
 
+    // Initialize RX buffer
+    RX_HEAD( usart ) = 0;
+    RX_TAIL( usart ) = 0;
+
     // Initialize TX buffer
     TX_HEAD( usart ) = 0;
     TX_TAIL( usart ) = 0;

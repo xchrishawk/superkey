@@ -23,15 +23,15 @@
 void buzzer_init( void );
 
 /**
- * @fn      buzzer_set_buzz( bool )
- * @brief   Turns the buzzer on or off.
- */
-void buzzer_set_buzz( bool buzz );
-
-/**
  * @fn      buzzer_set_frequency( uint16_t )
  * @brief   Sets the frequency of the buzzer.
  */
 void buzzer_set_frequency( uint16_t freq );
+
+/**
+ * @fn      buzzer_set_on( bool )
+ * @brief   Turns the buzzer on or off.
+ */
+void buzzer_set_on( bool on );
 
 #endif /* !defined( EXAKEY_BUZZER_H ) */

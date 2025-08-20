@@ -55,19 +55,20 @@ void buzzer_init( void )
 }   /* buzzer_init() */
 
 
-void buzzer_set_buzz( bool buzz )
+void buzzer_set_frequency( uint16_t freq )
+{
+    // thx chatgpt
+    OCR1A = ( F_CPU / ( 2UL * 8 /* prescaler */ * freq ) ) - 1;
+
+}   /* buzzer_set_frequency() */
+
+
+void buzzer_set_on( bool on )
 {
 #if !DISABLE_BUZZER
-    assign_bit( TCCR1A, COM1A0, buzz );
+    assign_bit( TCCR1A, COM1A0, on );
 #else
     clear_bit( TCCR1A, COM1A0 );
 #endif
 
-}   /* buzzer_set() */
-
-
-void buzzer_set_frequency( uint16_t freq )
-{
-    OCR1A = ( F_CPU / ( 2UL * 8 /* prescaler */ * freq ) ) - 1;
-
-}   /* buzzer_set_frequency() */
+}   /* buzzer_set_on() */

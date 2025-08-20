@@ -88,13 +88,14 @@ int main( void )
 {
     init();
     test();
-    main_loop();
+    main_loop(); // never returns
 
 }   /* main() */
 
 
 static void handle_input_state( void )
 {
+    // An input state changed - immediately update the keyer
     keyer_update( sys_tick() );
 
 }   /* handle_input_state() */
@@ -140,7 +141,6 @@ static void init( void )
 {
     // Initialize all system modules
     sys_init();
-    gpio_init();
     led_init();
     input_init();
     buzzer_init();

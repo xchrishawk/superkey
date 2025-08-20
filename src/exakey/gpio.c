@@ -147,13 +147,6 @@ gpio_state_t gpio_get_state( gpio_pin_t pin )
 }   /* gpio_get_state() */
 
 
-void gpio_init( void )
-{
-    // Currently nothing required
-
-}   /* gpio_init() */
-
-
 void gpio_set_dir( gpio_pin_t pin, gpio_dir_t dir )
 {
     validate_pin( pin );

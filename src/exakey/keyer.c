@@ -75,6 +75,6 @@ static void set_keyed( bool keyed )
     led_set_on( LED_KEY, keyed );
 
     // Update buzzer
-    buzzer_set_buzz( keyed );
+    buzzer_set_on( keyed );
 
 }   /* set_keyed() */

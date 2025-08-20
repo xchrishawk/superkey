@@ -151,12 +151,6 @@ gpio_port_t gpio_get_pin_port( gpio_pin_t pin );
 gpio_state_t gpio_get_state( gpio_pin_t pin );
 
 /**
- * @fn      gpio_init( void )
- * @brief   Initializes the GPIO driver module.
- */
-void gpio_init( void );
-
-/**
  * @fn      gpio_set_dir( gpio_pin_t, gpio_dir_t )
  * @brief   Sets the I/O direction for the specified pin.
  */

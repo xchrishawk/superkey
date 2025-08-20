@@ -58,21 +58,24 @@ void sys_init( void )
     sys_cli();
 
     //
-    // Initialize timer 0 for main system tick at 1 millisecond period
+    // Initialize timer 0 for main system tick at 1 millisecond period. Based on the following:
+    //
+    // - F_CPU      = 8 MHz
+    // - P_CPU      = 1 / 8 MHz         = 0.125 us
+    // - Prescaler  = F_CPU / 64
+    // - P_TIMER    = 0.125 us * 64     = 8 us
+    // - Clocks     = 1 ms / 8 us       = 125
+    // - OCRA       = Clocks - 1        = 124
+    //
+    // Therefore we have:
     //
     // - Waveform generation mode set to CTC
     // - Clock prescaler set to F_CPU / 64 (F_CPU = 8 MHz)
-    // - Compare value set to 125
-    //
-    // This leads to the following values;
-    //
-    // - P_CPU      = 1 / 8 MHz         = 0.125 us
-    // - P_TIMER    = 0.125 us * 64     = 8 us
-    // - OCRA       = 1 ms / 8 us       = 125
+    // - Compare value set to 124
     //
     TCCR0A = bitmask1( WGM01 );
     TCCR0B = bitmask2( CS00, CS01 );
-    OCR0A = 125;
+    OCR0A = 124;
 
     // Enable interrupt for timer 0
     TIMSK0 = bitmask1( OCIE0A );
