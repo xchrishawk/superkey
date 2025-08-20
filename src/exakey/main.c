@@ -26,6 +26,13 @@
 #include "usart.h"
 #include "utility.h"
 
+/* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
+
+// Periodic processing periods in ticks
+#define TICKS_1_MS      ( 1 * TICKS_PER_MSEC )
+#define TICKS_50_MS     ( 50 * TICKS_PER_MSEC )
+#define TICKS_1_S       ( 1 * TICKS_PER_SEC )
+
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
 
 /**
@@ -65,14 +72,20 @@ static void init( void );
 static void main_loop( void );
 
 /**
- * @fn      periodic_1ms( void )
- * @brief   Performs periodic processing which should be executed every 1 millisecond.
+ * @fn      periodic_1ms( tick_t )
+ * @brief   Performs periodic processing which should be executed every 1 millisecond (i.e., 1000 Hz).
  */
 static void periodic_1ms( tick_t tick );
 
 /**
- * @fn      periodic_1s( void )
- * @brief   Performs periodic processing which should be executed every 1 second.
+ * @fn      periodic_50ms( tick_t )
+ * @brief   Performs periodic processing which should be executed every 50 milliseconds (i.e., 20 Hz).
+ */
+static void periodic_50ms( tick_t tick );
+
+/**
+ * @fn      periodic_1s( tick_t )
+ * @brief   Performs periodic processing which should be executed every 1 second (i.e., 1 Hz).
  */
 static void periodic_1s( tick_t tick );
 
@@ -96,7 +109,7 @@ int main( void )
 static void handle_input_state( void )
 {
     // An input state changed - immediately update the keyer
-    keyer_update( sys_tick() );
+    keyer_tick( sys_tick() );
 
 }   /* handle_input_state() */
 
@@ -106,20 +119,31 @@ static void handle_tick( void )
     // Get system tick count
     tick_t tick = sys_tick();
 
-    // Handle 1 millisecond events
-    static uint16_t count_1ms = ( 1 * TICKS_PER_MSEC );
+    // Handle 1 millisecond (1000 Hz) events
+    _Static_assert( TICKS_1_MS < UINT8_MAX, "Tick counter too small!" );
+    static uint8_t count_1ms = TICKS_1_MS;
     if( --count_1ms == 0 )
     {
         periodic_1ms( tick );
-        count_1ms = ( 1 * TICKS_PER_MSEC );
+        count_1ms = TICKS_1_MS;
     }
 
-    // Handle 1 second events
-    static uint16_t count_1s = ( 1 * TICKS_PER_SEC );
+    // Handle 50 millisecond (20 Hz) events
+    _Static_assert( TICKS_50_MS < UINT8_MAX, "Tick counter too small!" );
+    static uint8_t count_50ms = TICKS_50_MS;
+    if( --count_50ms == 0 )
+    {
+        periodic_50ms( tick );
+        count_50ms = TICKS_50_MS;
+    }
+
+    // Handle 1 second (1 Hz) events
+    _Static_assert( TICKS_1_S < UINT16_MAX, "Tick counter too small!" );
+    static uint16_t count_1s = TICKS_1_S;
     if( --count_1s == 0 )
     {
         periodic_1s( tick );
-        count_1s = ( 1 * TICKS_PER_SEC );
+        count_1s = TICKS_1_S;
     }
 
 }   /* handle_tick() */
@@ -174,13 +198,28 @@ static void main_loop( void )
 
 static void periodic_1ms( tick_t tick )
 {
-    keyer_update( tick );
+    // Periodic processing for modules with 1000 Hz tick rates
+    input_tick( tick );
+    keyer_tick( tick );
 
 }   /* periodic_1ms() */
 
 
+static void periodic_50ms( tick_t tick )
+{
+    // Periodic processing for modules with 20 Hz tick rates
+    buzzer_tick( tick );
+    led_tick( tick );
+
+}   /* periodic_50ms() */
+
+
 static void periodic_1s( tick_t tick )
 {
+    // Periodic processing for modules with 1 Hz tick rates
+    // ...TBD?
+
+    // Toggle the status LED. We're still alive!
     led_toggle_on( LED_STATUS );
 
 }   /* periodic_1s() */
@@ -188,7 +227,5 @@ static void periodic_1s( tick_t tick )
 
 static void test( void )
 {
-    usart_init( USART_0, true, true, USART_DATA_BITS_8, USART_STOP_BITS_1, USART_PARITY_DISABLED );
-    usart_init( USART_1, false, true, USART_DATA_BITS_8, USART_STOP_BITS_1, USART_PARITY_DISABLED );
 
 }   /* test() */

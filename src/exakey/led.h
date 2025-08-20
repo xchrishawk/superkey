@@ -14,6 +14,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "types.h"
+
 /* ----------------------------------------------------- TYPES ------------------------------------------------------ */
 
 /**
@@ -42,6 +44,12 @@ void led_init( void );
  * @brief   Turns the specified LED on or off.
  */
 void led_set_on( led_t led, bool on );
+
+/**
+ * @fn      led_tick( tick_t )
+ * @brief   Performs periodic processing at the specified tick count.
+ */
+void led_tick( tick_t tick );
 
 /**
  * @fn      led_toggle_on( led_t )

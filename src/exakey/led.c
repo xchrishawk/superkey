@@ -14,6 +14,7 @@
 #include "debug.h"
 #include "gpio.h"
 #include "led.h"
+#include "types.h"
 #include "utility.h"
 
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
@@ -68,6 +69,13 @@ void led_set_on( led_t led, bool on )
     );
 
 }   /* led_set_on() */
+
+
+void led_tick( tick_t tick )
+{
+    // no-op
+
+}   /* led_tick() */
 
 
 void led_toggle_on( led_t led )

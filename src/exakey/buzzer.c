@@ -66,3 +66,9 @@ void buzzer_set_on( bool on )
 #endif
 
 }   /* buzzer_set_on() */
+
+
+void buzzer_tick( tick_t tick )
+{
+
+}   /* buzzer_tick() */

@@ -52,7 +52,7 @@ void keyer_panic( void )
 }   /* keyer_panic() */
 
 
-void keyer_update( tick_t tick )
+void keyer_tick( tick_t tick )
 {
     bool keyed = ( input_get( INPUT_STRAIGHT_KEY ) ||
                    input_get( INPUT_PADDLE_A ) ||
@@ -60,7 +60,7 @@ void keyer_update( tick_t tick )
 
     set_keyed( keyed );
 
-}   /* keyer_periodic() */
+}   /* keyer_tick() */
 
 
 static void set_keyed( bool keyed )

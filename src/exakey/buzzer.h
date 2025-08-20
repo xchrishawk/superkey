@@ -14,6 +14,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "types.h"
+
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
 
 /**
@@ -33,5 +35,11 @@ void buzzer_set_frequency( uint16_t freq );
  * @brief   Turns the buzzer on or off.
  */
 void buzzer_set_on( bool on );
+
+/**
+ * @fn      buzzer_tick( tick_t )
+ * @brief   Performs periodic processing at the specified tick count.
+ */
+void buzzer_tick( tick_t tick );
 
 #endif /* !defined( EXAKEY_BUZZER_H ) */

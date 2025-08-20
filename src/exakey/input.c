@@ -15,6 +15,7 @@
 #include "gpio.h"
 #include "input.h"
 #include "sys.h"
+#include "types.h"
 #include "utility.h"
 
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
@@ -62,6 +63,12 @@ void input_init( void )
     }
 
 }   /* input_init() */
+
+
+void input_tick( tick_t tick )
+{
+
+}   /* input_tick() */
 
 
 ISR( PCINT0_vect )

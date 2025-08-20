@@ -13,6 +13,8 @@
 
 #include <stdint.h>
 
+#include "types.h"
+
 /* ----------------------------------------------------- TYPES ------------------------------------------------------ */
 
 /**
@@ -42,5 +44,11 @@ bool input_get( input_t input );
  * @brief   Initializes the key input module.
  */
 void input_init( void );
+
+/**
+ * @fn      input_tick( tick_t )
+ * @brief   Performs periodic processing at the specified tick count.
+ */
+void input_tick( tick_t tick );
 
 #endif /* !defined( EXAKEY_INPUT_H ) */

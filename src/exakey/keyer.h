@@ -30,9 +30,10 @@ void keyer_init( void );
 void keyer_panic( void );
 
 /**
- * @fn      keyer_update( tick_t )
- * @brief   Updates keyer state at the specified tick count.
+ * @fn      keyer_tick( tick_t )
+ * @brief   Performs periodic processing at the specified tick count.
+ * @note    It is not required to call this function at a uniform rate.
  */
-void keyer_update( tick_t tick );
+void keyer_tick( tick_t tick );
 
 #endif /* !defined( EXAKEY_KEYER_H ) */
