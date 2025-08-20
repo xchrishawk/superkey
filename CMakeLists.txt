@@ -21,6 +21,11 @@ if(NOT DEFINED DEVICE_BAUD)
     message(FATAL_ERROR "The DEVICE_BAUD argument must be specified.")
 endif()
 
+# Set defaults for optional arguments
+if(NOT DEFINED DISABLE_BUZZER)
+    set(DISABLE_BUZZER      0)
+endif()
+
 # -- Toolchain Configuration --
 
 # Tool names
@@ -50,7 +55,7 @@ set(PROJECT_BIN_DIR         ${PROJECT_BUILD_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BIN_DIR})
 
 # Shared variables for compilation flags
-set(PROJECT_COMMON_FLAGS    "-mmcu=${DEVICE_MCU}")
+set(PROJECT_COMMON_FLAGS    "-mmcu=${DEVICE_MCU} -DDISABLE_BUZZER=${DISABLE_BUZZER}")
 set(PROJECT_DEBUG_FLAGS     "-g")
 set(PROJECT_OPTIMIZE_FLAGS  "-Os")
 

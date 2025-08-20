@@ -20,12 +20,6 @@
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
 
 /**
- * @def     DISABLE_BUZZER
- * @brief   Set to `true` to globally disable the buzzer, in order to avoid annoying your spouse.
- */
-#define DISABLE_BUZZER      false
-
-/**
  * @def     DEFAULT_FREQUENCY
  * @brief   The default frequency that the buzzer will use.
  */
@@ -65,10 +59,10 @@ void buzzer_set_frequency( uint16_t freq )
 
 void buzzer_set_on( bool on )
 {
-#if !DISABLE_BUZZER
-    assign_bit( TCCR1A, COM1A0, on );
-#else
+#if defined( DISABLE_BUZZER ) && DISABLE_BUZZER
     clear_bit( TCCR1A, COM1A0 );
+#else
+    assign_bit( TCCR1A, COM1A0, on );
 #endif
 
 }   /* buzzer_set_on() */

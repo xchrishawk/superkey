@@ -28,8 +28,9 @@ make_build_dir() {
         -B "${THIS_BUILD_DIR}"          \
         -DDEVICE_MCU:STRING=${1}        \
         -DDEVICE_F_CPU:STRING=${2}UL    \
-        -DDEVICE_BAUD:STRING=${3}
+        -DDEVICE_BAUD:STRING=${3}       \
+        -DDISABLE_BUZZER=${4}
 }
 
 # Make all required directories
-make_build_dir atmega1284p 8000000 250000
+make_build_dir atmega1284p 8000000 250000 1
