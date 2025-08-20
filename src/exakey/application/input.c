@@ -1,5 +1,5 @@
 /**
- * @file    input.c
+ * @file    src/exakey/application/input.c
  * @brief   Implementation for the key input module.
  *
  * @author  Chris Vig (chris@invictus.so)
@@ -11,12 +11,12 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#include "debug.h"
-#include "gpio.h"
-#include "input.h"
-#include "sys.h"
-#include "types.h"
-#include "utility.h"
+#include "application/input.h"
+#include "core/sys.h"
+#include "drivers/gpio.h"
+#include "utility/debug.h"
+#include "utility/types.h"
+#include "utility/utility.h"
 
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
 

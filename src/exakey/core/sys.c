@@ -1,5 +1,5 @@
 /**
- * @file    sys.c
+ * @file    src/exakey/core/sys.c
  * @brief   Implementation for the main system module.
  *
  * @author  Chris Vig (chris@invictus.so)
@@ -15,10 +15,10 @@
 #include <avr/io.h>
 #include <avr/sleep.h>
 
-#include "debug.h"
-#include "sys.h"
-#include "types.h"
-#include "utility.h"
+#include "core/sys.h"
+#include "utility/debug.h"
+#include "utility/types.h"
+#include "utility/utility.h"
 
 /* --------------------------------------------------- VARIABLES ---------------------------------------------------- */
 

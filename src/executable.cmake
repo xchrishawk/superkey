@@ -77,6 +77,13 @@ target_compile_options(
     ${EXECUTABLE_COMPILE_OPTIONS}
 )
 
+# Ensure that the main application directory is included as an include dir
+target_include_directories(
+    ${EXECUTABLE_NAME}
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
 # Set linker options
 target_link_options(
     ${EXECUTABLE_NAME}

@@ -1,5 +1,5 @@
 /**
- * @file    gpio.c
+ * @file    src/exakey/drivers/gpio.c
  * @brief   Implementation for the low-level GPIO driver module.
  *
  * @author  Chris Vig (chris@invictus.so)
@@ -14,10 +14,10 @@
 
 #include <avr/io.h>
 
-#include "debug.h"
-#include "gpio.h"
-#include "types.h"
-#include "utility.h"
+#include "drivers/gpio.h"
+#include "utility/debug.h"
+#include "utility/types.h"
+#include "utility/utility.h"
 
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
 

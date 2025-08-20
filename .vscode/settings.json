@@ -1,4 +1,10 @@
 {
     // Recommend a maximum of 120 characters per line
-    "editor.rulers": [120],
+    "editor.rulers": [
+        120
+    ],
+    "files.associations": {
+        "buzzer.h": "c",
+        "led.h": "c"
+    },
 }

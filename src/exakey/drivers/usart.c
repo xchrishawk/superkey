@@ -1,5 +1,5 @@
 /**
- * @file    usart.c
+ * @file    src/exakey/drivers/usart.c
  * @brief   Implementation for the USART driver module.
  *
  * @author  Chris Vig (chris@invictus.so)
@@ -18,11 +18,11 @@
 #include <avr/io.h>
 #include <util/setbaud.h>
 
-#include "debug.h"
-#include "sys.h"
-#include "types.h"
-#include "usart.h"
-#include "utility.h"
+#include "core/sys.h"
+#include "drivers/usart.h"
+#include "utility/debug.h"
+#include "utility/types.h"
+#include "utility/utility.h"
 
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
 

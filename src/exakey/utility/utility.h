@@ -1,5 +1,5 @@
 /**
- * @file    utility.h
+ * @file    src/exakey/utility/utility.h
  * @brief   Header defining common utility macros.
  *
  * @author  Chris Vig (chris@invictus.so)

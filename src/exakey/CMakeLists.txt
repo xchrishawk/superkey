@@ -9,26 +9,26 @@
 # -- Executable Configuration --
 
 set(EXECUTABLE_NAME     exakey)
-set(EXECUTABLE_SOURCE   buzzer.c
-                        buzzer.h
-                        constants.h
-                        debug.c
-                        debug.h
-                        gpio.c
-                        gpio.h
-                        input.c
-                        input.h
-                        keyer.c
-                        keyer.h
-                        led.c
-                        led.h
-                        main.c
-                        sys.c
-                        sys.h
-                        types.h
-                        usart.c
-                        usart.h
-                        utility.h)
+set(EXECUTABLE_SOURCE   application/buzzer.c
+                        application/buzzer.h
+                        application/input.c
+                        application/input.h
+                        application/keyer.c
+                        application/keyer.h
+                        application/led.c
+                        application/led.h
+                        core/main.c
+                        core/sys.c
+                        core/sys.h
+                        drivers/gpio.c
+                        drivers/gpio.h
+                        drivers/usart.c
+                        drivers/usart.h
+                        utility/constants.h
+                        utility/debug.c
+                        utility/debug.h
+                        utility/types.h
+                        utility/utility.h)
 
 # -- Set Up Project --
 

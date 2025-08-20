@@ -1,5 +1,5 @@
 /**
- * @file    main.c
+ * @file    src/exakey/core/main.c
  * @brief   Main entry point for the application.
  *
  * @author  Chris Vig (chris@invictus.so)
@@ -15,16 +15,16 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
-#include "buzzer.h"
-#include "debug.h"
-#include "gpio.h"
-#include "input.h"
-#include "keyer.h"
-#include "led.h"
-#include "sys.h"
-#include "types.h"
-#include "usart.h"
-#include "utility.h"
+#include "application/buzzer.h"
+#include "application/input.h"
+#include "application/keyer.h"
+#include "application/led.h"
+#include "core/sys.h"
+#include "drivers/gpio.h"
+#include "drivers/usart.h"
+#include "utility/debug.h"
+#include "utility/types.h"
+#include "utility/utility.h"
 
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
 

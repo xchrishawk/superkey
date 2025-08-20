@@ -1,5 +1,5 @@
 /**
- * @file    led.h
+ * @file    src/exakey/application/led.h
  * @brief   Header for the LED driver module.
  *
  * @author  Chris Vig (chris@invictus.so)
@@ -14,7 +14,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "types.h"
+#include "utility/types.h"
 
 /* ----------------------------------------------------- TYPES ------------------------------------------------------ */
 

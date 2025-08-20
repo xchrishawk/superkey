@@ -1,5 +1,5 @@
 /**
- * @file    types.h
+ * @file    src/exakey/utility/types.h
  * @brief   Header defining generic types.
  *
  * @author  Chris Vig (chris@invictus.so)

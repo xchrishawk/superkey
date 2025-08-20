@@ -1,5 +1,5 @@
 /**
- * @file    debug.c
+ * @file    src/exakey/utility/debug.c
  * @brief   Implementation for debug utilities.
  *
  * @author  Chris Vig (chris@invictus.so)
@@ -13,11 +13,11 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
-#include "debug.h"
-#include "keyer.h"
-#include "led.h"
-#include "sys.h"
-#include "utility.h"
+#include "application/keyer.h"
+#include "application/led.h"
+#include "core/sys.h"
+#include "utility/debug.h"
+#include "utility/utility.h"
 
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
 

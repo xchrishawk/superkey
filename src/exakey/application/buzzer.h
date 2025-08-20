@@ -1,5 +1,5 @@
 /**
- * @file    buzzer.h
+ * @file    src/exakey/application/buzzer.h
  * @brief   Header for the buzzer driver module.
  *
  * @author  Chris Vig (chris@invictus.so)
@@ -14,7 +14,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "types.h"
+#include "utility/types.h"
 
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
 

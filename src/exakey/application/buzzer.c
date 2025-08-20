@@ -1,5 +1,5 @@
 /**
- * @file    buzzer.h
+ * @file    src/exakey/application/buzzer.c
  * @brief   Implementation for the buzzer driver module.
  *
  * @author  Chris Vig (chris@invictus.so)
@@ -12,10 +12,10 @@
 
 #include <avr/io.h>
 
-#include "buzzer.h"
-#include "gpio.h"
-#include "led.h"
-#include "utility.h"
+#include "application/buzzer.h"
+#include "application/led.h"
+#include "drivers/gpio.h"
+#include "utility/utility.h"
 
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
 

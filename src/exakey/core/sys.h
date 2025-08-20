@@ -1,5 +1,5 @@
 /**
- * @file    sys.h
+ * @file    src/exakey/core/sys.h
  * @brief   Header for the main system module.
  *
  * @author  Chris Vig (chris@invictus.so)
@@ -14,8 +14,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "constants.h"
-#include "types.h"
+#include "utility/constants.h"
+#include "utility/types.h"
 
 /* ----------------------------------------------------- TYPES ------------------------------------------------------ */
 

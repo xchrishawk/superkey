@@ -1,5 +1,5 @@
 /**
- * @file    gpio.h
+ * @file    src/exakey/drivers/gpio.h
  * @brief   Header for the low-level GPIO driver module.
  *
  * @author  Chris Vig (chris@invictus.so)

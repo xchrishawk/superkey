@@ -1,5 +1,5 @@
 /**
- * @file    keyer.h
+ * @file    src/exakey/application/keyer.h
  * @brief   Header for the keyer module.
  *
  * @author  Chris Vig (chris@invictus.so)
@@ -13,7 +13,7 @@
 
 #include <stdint.h>
 
-#include "types.h"
+#include "utility/types.h"
 
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
 

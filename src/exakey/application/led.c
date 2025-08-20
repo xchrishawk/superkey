@@ -1,5 +1,5 @@
 /**
- * @file    led.c
+ * @file    src/exakey/application/led.c
  * @brief   Implementation for the LED driver module.
  *
  * @author  Chris Vig (chris@invictus.so)
@@ -11,11 +11,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "debug.h"
-#include "gpio.h"
-#include "led.h"
-#include "types.h"
-#include "utility.h"
+#include "application/led.h"
+#include "drivers/gpio.h"
+#include "utility/debug.h"
+#include "utility/types.h"
+#include "utility/utility.h"
 
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
 

@@ -3,7 +3,8 @@
         {
             "name": "AVR (ATMega1284P)",
             "includePath": [
-                "${workspaceFolder}/lib"
+                "${workspaceFolder}/lib",
+                "${workspaceFolder}/src/exakey"
             ],
             "defines": [
                 "BAUD=250000",

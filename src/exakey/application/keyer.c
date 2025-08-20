@@ -1,5 +1,5 @@
 /**
- * @file    keyer.c
+ * @file    src/exakey/application/keyer.c
  * @brief   Implementation for the keyer module.
  *
  * @author  Chris Vig (chris@invictus.so)
@@ -11,13 +11,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "buzzer.h"
-#include "debug.h"
-#include "gpio.h"
-#include "input.h"
-#include "keyer.h"
-#include "led.h"
-#include "types.h"
+#include "application/buzzer.h"
+#include "application/input.h"
+#include "application/keyer.h"
+#include "application/led.h"
+#include "drivers/gpio.h"
+#include "utility/debug.h"
+#include "utility/types.h"
 
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
 

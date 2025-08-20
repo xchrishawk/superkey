@@ -1,5 +1,5 @@
 /**
- * @file    constants.h
+ * @file    src/exakey/utility/constants.h
  * @brief   File containing generic global constants.
  *
  * @author  Chris Vig (chris@invictus.so)

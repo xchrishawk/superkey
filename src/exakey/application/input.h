@@ -1,5 +1,5 @@
 /**
- * @file    input.h
+ * @file    src/exakey/application/input.h
  * @brief   Header for the key input module.
  *
  * @author  Chris Vig (chris@invictus.so)
@@ -11,9 +11,10 @@
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
 
+#include <stdbool.h>
 #include <stdint.h>
 
-#include "types.h"
+#include "utility/types.h"
 
 /* ----------------------------------------------------- TYPES ------------------------------------------------------ */
 

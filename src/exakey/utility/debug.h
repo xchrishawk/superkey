@@ -1,5 +1,5 @@
 /**
- * @file    debug.h
+ * @file    src/exakey/utility/debug.h
  * @brief   Header for debug utilities.
  *
  * @author  Chris Vig (chris@invictus.so)

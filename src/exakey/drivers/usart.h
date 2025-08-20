@@ -1,5 +1,5 @@
 /**
- * @file    usart.h
+ * @file    src/exakey/drivers/usart.h
  * @brief   Header for the USART driver module.
  *
  * @author  Chris Vig (chris@invictus.so)
@@ -15,8 +15,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "types.h"
-#include "utility.h"
+#include "utility/types.h"
+#include "utility/utility.h"
 
 /* ----------------------------------------------------- TYPES ------------------------------------------------------ */
 
