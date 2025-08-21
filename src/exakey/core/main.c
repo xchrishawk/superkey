@@ -16,6 +16,7 @@
 #include <util/delay.h>
 
 #include "application/buzzer.h"
+#include "application/debug_port.h"
 #include "application/input.h"
 #include "application/keyer.h"
 #include "application/led.h"
@@ -152,7 +153,13 @@ static void handle_tick( void )
 
 static void handle_usart_rx_complete( usart_t usart )
 {
-    ( void )usart;
+    // Notify correct module
+    switch( usart )
+    {
+    case DEBUG_PORT_USART:
+        debug_port_usart_rx();
+        break;
+    }
 
 }   /* handle_usart_rx_complete() */
 
@@ -172,6 +179,7 @@ static void init( void )
     led_init();
     input_init();
     buzzer_init();
+    debug_port_init();
     keyer_init();
 
 }   /* init() */
@@ -220,8 +228,8 @@ static void periodic_50ms( tick_t tick )
 
 static void periodic_1s( tick_t tick )
 {
-    // Periodic processing for modules with 1 Hz tick rates... TBD?
-    ( void )tick;
+    // Periodic processing for modules with 1 Hz tick rates
+    debug_port_tick( tick );
 
     // Toggle the status LED. We're still alive!
     led_toggle_on( LED_STATUS );

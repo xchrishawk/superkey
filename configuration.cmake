@@ -13,7 +13,7 @@ set(EXAKEY_DEVICE_MCU                   atmega1284p
     CACHE STRING                        "The MCU model to compile for.")
 set(EXAKEY_DEVICE_F_CPU                 8000000
     CACHE STRING                        "The device's CPU frequency, in Hz.")
-set(EXAKEY_DEVICE_BAUD                  250000
+set(EXAKEY_DEVICE_BAUD                  19200
     CACHE STRING                        "The default USART baud rate, in bits per second.")
 
 # Set defines

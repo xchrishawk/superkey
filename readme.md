@@ -25,7 +25,7 @@ the embedded AVR compiler:
                 "${workspaceFolder}/src/exakey"
             ],
             "defines": [
-                "BAUD=250000",
+                "BAUD=19200",
                 "F_CPU=8000000",
                 "EXAKEY_DFLT_BUZZER_ENABLED=true",
                 "EXAKEY_DFLT_BUZZER_FREQ=700",
@@ -46,6 +46,6 @@ the embedded AVR compiler:
             "cppStandard": "gnu++14",
             "intelliSenseMode": "linux-gcc-x64"
         }
-    ]
+    ],
 }
 ```

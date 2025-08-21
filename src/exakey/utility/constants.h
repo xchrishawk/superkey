@@ -17,4 +17,28 @@
  */
 #define BITS_PER_BYTE           8
 
+/**
+ * @def     NULL_CHAR
+ * @brief   The null character (ASCII value 0).
+ */
+#define NULL_CHAR               ( char )0
+
+/**
+ * @def     LINE_FEED_CHAR
+ * @brief   The line feed character (ASCII value 10).
+ */
+#define LINE_FEED_CHAR          ( char )10
+
+/**
+ * @def     CARRIAGE_RETURN_CHAR
+ * @brief   The carriage return character (ASCII value 13).
+ */
+#define CARRIAGE_RETURN_CHAR    ( char )13
+
+/**
+ * @def     NEWLINE_STR
+ * @brief   String resulting in a newline on Windows.
+ */
+#define NEWLINE_STR             "\r\n"
+
 #endif /* !defined( EXAKEY_CONSTANTS_H ) */
