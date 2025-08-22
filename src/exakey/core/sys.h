@@ -87,6 +87,12 @@ _Static_assert( EVENT_COUNT < sizeof( event_field_t ) * BITS_PER_BYTE, "Not enou
 void sys_enqueue_event( event_t event );
 
 /**
+ * @fn      sys_get_tick( void )
+ * @brief   Returns the current system tick count.
+ */
+tick_t sys_get_tick( void );
+
+/**
  * @fn      sys_init( void )
  * @brief   Initializes the system module.
  */
@@ -103,12 +109,6 @@ bool sys_intrpt_enabled( void );
  * @brief   Globally enables or disables interrupts.
  */
 void sys_set_intrpt_enabled( bool enabled );
-
-/**
- * @fn      sys_tick( void )
- * @brief   Returns the current system tick count.
- */
-tick_t sys_tick( void );
 
 /**
  * @fn      sys_wait( void )

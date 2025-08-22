@@ -52,6 +52,15 @@
     ( sizeof( _a ) / sizeof( _a[ 0 ] ) )
 
 /**
+ * @def     clamp( _x, _min, _max )
+ * @brief   Returns `_x` clamped into the range `_min` to `_max`, inclusive.
+ */
+#define clamp( _x, _min, _max )                                                         \
+    ( ( _x ) < ( _min ) ?                                                               \
+        ( _min ) :                                                                      \
+        ( ( _x ) > ( _max ) ? ( _max ) : ( _x ) ) )
+
+/**
  * @def     increment_rollover
  * @brief   Increments `_value` by one. If the result is greater than or equal to `_max`, resets `_value` to 0.
  */

@@ -11,6 +11,8 @@
 set(EXECUTABLE_NAME     exakey)
 set(EXECUTABLE_SOURCE   application/buzzer.c
                         application/buzzer.h
+                        application/config.c
+                        application/config.h
                         application/debug_port.c
                         application/debug_port.h
                         application/input.c
@@ -19,8 +21,6 @@ set(EXECUTABLE_SOURCE   application/buzzer.c
                         application/keyer.h
                         application/led.c
                         application/led.h
-                        core/config.c
-                        core/config.h
                         core/main.c
                         core/sys.c
                         core/sys.h

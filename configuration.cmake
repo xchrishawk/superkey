@@ -26,7 +26,7 @@ add_compile_definitions(
 
 set(EXAKEY_DFLT_BUZZER_ENABLED          true
     CACHE STRING                        "Should the buzzer be enabled by default? (true / false)")
-set(EXAKEY_DFLT_BUZZER_FREQ             700
+set(EXAKEY_DFLT_BUZZER_FREQUENCY        700
     CACHE STRING                        "The default buzzer frequency, in Hz.")
 set(EXAKEY_DFLT_LED_STATUS_ENABLED      true
     CACHE STRING                        "Is the status LED enabled? (true / false)")
@@ -40,7 +40,7 @@ set(EXAKEY_DFLT_LED_KEY_ACTIVE_LO       false
 # Set defines
 add_compile_definitions(
     EXAKEY_DFLT_BUZZER_ENABLED=${EXAKEY_DFLT_BUZZER_ENABLED}
-    EXAKEY_DFLT_BUZZER_FREQ=${EXAKEY_DFLT_BUZZER_FREQ}
+    EXAKEY_DFLT_BUZZER_FREQUENCY=${EXAKEY_DFLT_BUZZER_FREQUENCY}
     EXAKEY_DFLT_LED_STATUS_ENABLED=${EXAKEY_DFLT_LED_STATUS_ENABLED}
     EXAKEY_DFLT_LED_STATUS_ACTIVE_LO=${EXAKEY_DFLT_LED_STATUS_ACTIVE_LO}
     EXAKEY_DFLT_LED_KEY_ENABLED=${EXAKEY_DFLT_LED_KEY_ENABLED}

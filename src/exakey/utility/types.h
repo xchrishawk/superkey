@@ -1,6 +1,7 @@
 /**
  * @file    src/exakey/utility/types.h
  * @brief   Header defining generic types.
+ * @note    This header provides a "safe" place to declare types in order to prevent circular references.
  *
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-16
@@ -14,6 +15,12 @@
 #include <stdint.h>
 
 /* ----------------------------------------------------- TYPES ------------------------------------------------------ */
+
+/**
+ * @typedef buzzer_freq_t
+ * @brief   Typedef representing a buzzer frequency.
+ */
+typedef uint16_t freq_t;
 
 /**
  * @typedef byte_t

@@ -16,11 +16,11 @@
 #include <util/delay.h>
 
 #include "application/buzzer.h"
+#include "application/config.h"
 #include "application/debug_port.h"
 #include "application/input.h"
 #include "application/keyer.h"
 #include "application/led.h"
-#include "core/config.h"
 #include "core/sys.h"
 #include "drivers/gpio.h"
 #include "drivers/usart.h"
@@ -111,7 +111,7 @@ int main( void )
 static void handle_input_state( void )
 {
     // An input state changed - immediately update the keyer
-    keyer_tick( sys_tick() );
+    keyer_tick( sys_get_tick() );
 
 }   /* handle_input_state() */
 
@@ -119,7 +119,7 @@ static void handle_input_state( void )
 static void handle_tick( void )
 {
     // Get system tick count
-    tick_t tick = sys_tick();
+    tick_t tick = sys_get_tick();
 
     // Handle 1 millisecond (1000 Hz) events
     _Static_assert( TICKS_1_MS < UINT8_MAX, "Tick counter too small!" );

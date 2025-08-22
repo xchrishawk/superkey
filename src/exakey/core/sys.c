@@ -52,6 +52,18 @@ void sys_enqueue_event( event_t event )
 }   /* sys_enqueue_event() */
 
 
+tick_t sys_get_tick( void )
+{
+    bool int_en = sys_intrpt_enabled();
+    sys_cli();
+    tick_t ret = s_tick;
+    sys_set_intrpt_enabled( int_en );
+
+    return( ret );
+
+}   /* sys_get_tick() */
+
+
 void sys_init( void )
 {
     // Clear interrupts
@@ -96,18 +108,6 @@ void sys_set_intrpt_enabled( bool enabled )
     else            cli();
 
 }   /* sys_set_intrpt_enabled() */
-
-
-tick_t sys_tick( void )
-{
-    bool int_en = sys_intrpt_enabled();
-    sys_cli();
-    tick_t ret = s_tick;
-    sys_set_intrpt_enabled( int_en );
-
-    return( ret );
-
-}   /* sys_tick() */
 
 
 event_field_t sys_wait( void )

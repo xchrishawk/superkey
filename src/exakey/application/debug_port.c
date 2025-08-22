@@ -14,8 +14,8 @@
 #include <string.h>
 
 #include "application/buzzer.h"
+#include "application/config.h"
 #include "application/debug_port.h"
-#include "core/config.h"
 #include "core/sys.h"
 #include "drivers/usart.h"
 #include "utility/constants.h"
@@ -35,12 +35,6 @@
  * @brief   Size of the command receive buffer, in bytes.
  */
 #define RX_BUF_SIZE             64
-
-/**
- * @def     INVALID_COMMAND_PREFIX
- * @brief   Prefix for replies indicating an invalid command.
- */
-#define INVALID_COMMAND_PREFIX  "Invalid command: "
 
 /**
  * @def     TERMINATOR_CHAR
@@ -77,6 +71,18 @@ static void evaluate_rx_buf( void );
 static void exec_command( char const * command );
 
 /**
+ * @fn      exec_command_buzzer( char const * command )
+ * @brief   Executes the `buzzer` command.
+ */
+static void exec_command_buzzer( char const * command );
+
+/**
+ * @fn      exec_command_config( char const * command )
+ * @brief   Executes the `config` command.
+ */
+static void exec_command_config( char const * command );
+
+/**
  * @fn      exec_command_help( char const * command )
  * @brief   Executes the `help` command.
  */
@@ -93,6 +99,26 @@ static void exec_command_tick( char const * command );
  * @brief   Executes the `version` command.
  */
 static void exec_command_version( char const * command );
+
+/**
+ * @fn      print_invalid_command( char const * )
+ * @brief   Sends an "Invalid command" message for the specified command.
+ */
+static void print_invalid_command( char const * command );
+
+/**
+ * @fn      read_long( char const *, long * )
+ * @brief   Attempts to read a signed long integer from the specified buffer.
+ * @returns `true` if reading the value succeeded and all data was consumed.
+ */
+static bool read_long( char const * buf, long * value ) FUNC_MAY_BE_UNUSED;
+
+/**
+ * @fn      read_ulong( char const *, unsigned long * )
+ * @brief   Attempts to read an unsigned long integer from the specified buffer.
+ * @returns `true` if reading the value succeeded and all data was consumed.
+ */
+static bool read_ulong( char const * buf, unsigned long * value ) FUNC_MAY_BE_UNUSED;
 
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
 
@@ -170,7 +196,7 @@ static void evaluate_rx_buf( void )
         // Ensure we actually received some data
         if( s_rx_count == 1 )
         {
-            debug_port_print( INVALID_COMMAND_PREFIX "No data." NEWLINE_STR );
+            print_invalid_command( "No data." );
             s_rx_count = 0;
             return;
         }
@@ -184,7 +210,7 @@ static void evaluate_rx_buf( void )
     // Have we run out of space?
     else if( rx_buf_avail() == 0 )
     {
-        debug_port_print( INVALID_COMMAND_PREFIX "Too long." NEWLINE_STR );
+        print_invalid_command( "Too long." );
         s_rx_count = 0;
     }
 
@@ -196,7 +222,11 @@ static void evaluate_rx_buf( void )
 static void exec_command( char const * command )
 {
     // Handle known commands
-    if( ! strncasecmp( command, "help", 4 ) )
+    if( ! strncasecmp( command, "buzzer", 6 ) )
+        exec_command_buzzer( command );
+    else if( ! strncasecmp( command, "config", 6 ) )
+        exec_command_config( command );
+    else if( ! strncasecmp( command, "help", 4 ) )
         exec_command_help( command );
     else if( ! strncasecmp( command, "tick", 4 ) )
         exec_command_tick( command );
@@ -205,13 +235,82 @@ static void exec_command( char const * command )
 
     // Handle unrecognized commands
     else
-    {
-        debug_port_print( INVALID_COMMAND_PREFIX );
-        debug_port_print( command );
-        debug_port_print( NEWLINE_STR );
-    }
+        print_invalid_command( command );
 
 }   /* exec_command() */
+
+
+static void exec_command_buzzer( char const * command )
+{
+#define PREFIX_LEN 6
+#define FREQUENCY_LEN 11
+
+    if( command[ PREFIX_LEN ] == NULL_CHAR )
+    {
+        // No subcommand - interpret as a status request. no action required
+    }
+    else if( ! strcasecmp( command + PREFIX_LEN, " enable" ) )
+    {
+        // Turn buzzer on
+        buzzer_set_enabled( true );
+    }
+    else if( ! strcasecmp( command + PREFIX_LEN, " disable" ) )
+    {
+        // Turn buzzer oiff
+        buzzer_set_enabled( false );
+    }
+    else if( ! strncasecmp( command + PREFIX_LEN, " frequency ", FREQUENCY_LEN ) )
+    {
+        unsigned long freq;
+        if( read_ulong( command + PREFIX_LEN + FREQUENCY_LEN, & freq ) &&
+            freq >= BUZZER_MINIMUM_FREQUENCY &&
+            freq <= BUZZER_MAXIMUM_FREQUENCY )
+        {
+            buzzer_set_frequency( ( buzzer_freq_t )freq );
+        }
+        else
+        {
+            debug_port_print( "Invalid frequency: " );
+            debug_port_print( command + PREFIX_LEN + 11 );
+            debug_port_print( ". Must be between " stringize_value( BUZZER_MINIMUM_FREQUENCY )
+                              " and " stringize_value( BUZZER_MAXIMUM_FREQUENCY ) " Hz." NEWLINE_STR );
+            return;
+        }
+    }
+    else
+    {
+        // Unrecognized subcommand?
+        print_invalid_command( command );
+        return;
+    }
+
+    // Send buzzer status
+    debug_port_printf( "Buzzer: %s (%u Hz)" NEWLINE_STR,
+                       buzzer_get_enabled() ? "Enabled" : "Disabled",
+                       buzzer_get_frequency() );
+
+#undef PREFIX_LEN
+#undef FREQUENCY_LEN
+
+}   /* exec_command_buzzer() */
+
+
+static void exec_command_config( char const * command )
+{
+    if( ! strcasecmp( command + 6, " default" ) )
+    {
+        // Restore default configuration
+        config_t config;
+        config_default( & config );
+        config_set( & config );
+
+        // Send response
+        debug_port_print( "Default configuration restored." NEWLINE_STR );
+    }
+    else
+        print_invalid_command( command );
+
+}   /* exec_command_config() */
 
 
 static void exec_command_help( char const * command )
@@ -225,7 +324,7 @@ static void exec_command_help( char const * command )
 static void exec_command_tick( char const * command )
 {
     ( void )command;
-    debug_port_printf( "Tick: %lu" NEWLINE_STR, sys_tick() );
+    debug_port_printf( "Tick: %lu" NEWLINE_STR, sys_get_tick() );
 
 }   /* exec_command_tick() */
 
@@ -236,3 +335,38 @@ static void exec_command_version( char const * command )
     debug_port_print( "Not implemented yet." NEWLINE_STR );
 
 }   /* exec_command_version() */
+
+
+static void print_invalid_command( char const * command )
+{
+    debug_port_print( "Invalid command: " );
+    debug_port_print( command );
+    debug_port_print( NEWLINE_STR );
+
+}   /* print_invalid_command() */
+
+
+static bool read_long( char const * buf, long * value )
+{
+    char * end;
+    long parsed_value = strtol( buf, & end, 10 );
+    if( end == buf || * end != NULL_CHAR )
+        return( false );
+
+    *value = parsed_value;
+    return( true );
+
+}   /* read_long() */
+
+
+static bool read_ulong( char const * buf, unsigned long * value )
+{
+    char * end;
+    unsigned long parsed_value = strtoul( buf, & end, 10 );
+    if( end == buf || * end != NULL_CHAR )
+        return( false );
+
+    *value = parsed_value;
+    return( true );
+
+}   /* read_ulong() */

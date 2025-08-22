@@ -11,8 +11,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "application/config.h"
 #include "application/led.h"
-#include "core/config.h"
 #include "drivers/gpio.h"
 #include "utility/debug.h"
 #include "utility/types.h"

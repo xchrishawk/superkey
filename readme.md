@@ -28,7 +28,7 @@ the embedded AVR compiler:
                 "BAUD=19200",
                 "F_CPU=8000000",
                 "EXAKEY_DFLT_BUZZER_ENABLED=true",
-                "EXAKEY_DFLT_BUZZER_FREQ=700",
+                "EXAKEY_DFLT_BUZZER_FREQUENCY=700",
                 "EXAKEY_DFLT_LED_STATUS_ENABLED=true",
                 "EXAKEY_DFLT_LED_STATUS_ACTIVE_LO=false",
                 "EXAKEY_DFLT_LED_KEY_ENABLED=true",

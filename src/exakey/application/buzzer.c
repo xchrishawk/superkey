@@ -14,8 +14,8 @@
 #include <avr/io.h>
 
 #include "application/buzzer.h"
+#include "application/config.h"
 #include "application/led.h"
-#include "core/config.h"
 #include "drivers/gpio.h"
 #include "utility/utility.h"
 
@@ -41,6 +41,27 @@ static void update_hardware( void );
 
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
 
+bool buzzer_get_enabled( void )
+{
+    return( config()->buzzer_enabled );
+
+}   /* buzzer_get_enabled() */
+
+
+buzzer_freq_t buzzer_get_frequency( void )
+{
+    return( config()->buzzer_frequency );
+
+}   /* buzzer_get_frequency() */
+
+
+bool buzzer_get_on( void )
+{
+    return( s_on );
+
+}   /* buzzer_get_on() */
+
+
 void buzzer_init( void )
 {
     // Update local state
@@ -59,9 +80,36 @@ void buzzer_init( void )
 }   /* buzzer_init() */
 
 
+void buzzer_set_enabled( bool enabled )
+{
+    config_t config;
+    config_get( & config );
+    config.buzzer_enabled = enabled;
+    config_set( & config );
+
+    update_hardware();
+
+}   /* buzzer_set_enabled() */
+
+
+void buzzer_set_frequency( buzzer_freq_t freq )
+{
+    freq = clamp( freq, BUZZER_MINIMUM_FREQUENCY, BUZZER_MAXIMUM_FREQUENCY );
+
+    config_t config;
+    config_get( & config );
+    config.buzzer_frequency = freq;
+    config_set( & config );
+
+    update_hardware();
+
+}   /* buzzer_set_frequency() */
+
+
 void buzzer_set_on( bool on )
 {
     s_on = on;
+
     update_hardware();
 
 }   /* buzzer_set_on() */
@@ -78,7 +126,7 @@ void buzzer_tick( tick_t tick )
 static void update_hardware( void )
 {
     bool enabled = config()->buzzer_enabled;
-    uint16_t freq = config()->buzzer_freq;
+    uint16_t freq = config()->buzzer_frequency;
 
     // Update OCR1A register to set frequency
     OCR1A = ( F_CPU / ( 2UL * 8 /* prescaler */ * freq ) ) - 1;

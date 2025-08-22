@@ -1,6 +1,6 @@
 /**
- * @file    src/exakey/core/config.h
- * @brief   Header for the system configuration module.
+ * @file    src/exakey/application/config.h
+ * @brief   Header for the application configuration module.
  *
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-20
@@ -14,34 +14,30 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-/* ----------------------------------------------------- TYPES ------------------------------------------------------ */
+#include "application/buzzer.h"
+#include "application/led.h"
 
-// These array counts are defined as local constants to avoid having to include application-specific headers.
-// They are checked against the actual value using static asserts in config.c.
-#define CONFIG_LED_COUNT        ( 2 )
+/* ----------------------------------------------------- TYPES ------------------------------------------------------ */
 
 /**
  * @typedef config_t
- * @brief   Struct containing the current system configuration information.
+ * @brief   Struct containing the current application configuration information.
  */
 typedef struct
 {
     /** If set to `false`, the buzzer will be disabled and will not sound. */
-    bool        buzzer_enabled;
+    bool            buzzer_enabled;
 
     /** The buzzer frequency, in Hz. */
-    uint16_t    buzzer_freq;
+    buzzer_freq_t   buzzer_frequency;
 
     /** If set to `false`, the LED will be disabled and will not illuminate. */
-    bool        led_enabled[ CONFIG_LED_COUNT ];
+    bool            led_enabled[ LED_COUNT ];
 
     /** If set to `true`, the LED is illuminated by making the GPIO pin low (not high). */
-    bool        led_active_lo[ CONFIG_LED_COUNT ];
+    bool            led_active_lo[ LED_COUNT ];
 
 } config_t;
-
-// Undefine utility macros that we don't want anyone else accidentally using
-#undef CONFIG_LED_COUNT
 
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
@@ -55,8 +51,14 @@ typedef struct
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
 
 /**
+ * @fn      config_default( config_t * )
+ * @brief   Populates the specified configuration struct with valid defaults.
+ */
+void config_default( config_t * config );
+
+/**
  * @fn      config_get( config_t * )
- * @brief   Copies the current system configuration into the specified struct.
+ * @brief   Copies the current application configuration into the specified struct.
  */
 void config_get( config_t * config );
 
@@ -68,13 +70,13 @@ void config_init( void );
 
 /**
  * @fn      config_read_only( void )
- * @brief   Returns a read-only pointer to the current system configuration.
+ * @brief   Returns a read-only pointer to the current application configuration.
  */
 config_t const * config_read_only( void );
 
 /**
  * @fn      config_set( config_t const * )
- * @brief   Updates the current system configuration with the specified struct.
+ * @brief   Updates the current application configuration with the specified struct.
  * @returns `true` if the configuration was successfully saved, and `false` if saving the configuration failed for any
  *          reason (for example, if any of the configuration parameters are invalid).
  */
