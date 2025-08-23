@@ -19,9 +19,11 @@
 
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
-_Static_assert( EXAKEY_DFLT_WPM >= WPM_MINIMUM && EXAKEY_DFLT_WPM <= WPM_MAXIMUM,
+_Static_assert( CONFIG_DFLT_WPM >= WPM_MINIMUM &&
+                CONFIG_DFLT_WPM <= WPM_MAXIMUM,
                 "Invalid default WPM!" );
-_Static_assert( EXAKEY_DFLT_BUZZER_FREQUENCY >= BUZZER_MINIMUM_FREQUENCY && EXAKEY_DFLT_BUZZER_FREQUENCY <= BUZZER_MAXIMUM_FREQUENCY,
+_Static_assert( CONFIG_DFLT_BUZZER_FREQUENCY >= BUZZER_MINIMUM_FREQUENCY &&
+                CONFIG_DFLT_BUZZER_FREQUENCY <= BUZZER_MAXIMUM_FREQUENCY,
                 "Invalid default buzzer frequency!" );
 
 /* --------------------------------------------------- VARIABLES ---------------------------------------------------- */
@@ -44,17 +46,17 @@ void config_default( config_t * config )
     memset( config, 0, sizeof( config_t ) );
 
     // Global settings
-    config->wpm                             = EXAKEY_DFLT_WPM;
+    config->wpm                             = CONFIG_DFLT_WPM;
 
     // Buzzer configuration
-    config->buzzer_enabled                  = EXAKEY_DFLT_BUZZER_ENABLED;
-    config->buzzer_frequency                = EXAKEY_DFLT_BUZZER_FREQUENCY;
+    config->buzzer_enabled                  = CONFIG_DFLT_BUZZER_ENABLED;
+    config->buzzer_frequency                = CONFIG_DFLT_BUZZER_FREQUENCY;
 
     // LED configuration
-    config->led_enabled[ LED_STATUS ]       = EXAKEY_DFLT_LED_STATUS_ENABLED;
-    config->led_active_lo[ LED_STATUS ]     = EXAKEY_DFLT_LED_STATUS_ACTIVE_LO;
-    config->led_enabled[ LED_KEY ]          = EXAKEY_DFLT_LED_KEY_ENABLED;
-    config->led_active_lo[ LED_KEY ]        = EXAKEY_DFLT_LED_KEY_ACTIVE_LO;
+    config->led_enabled[ LED_STATUS ]       = CONFIG_DFLT_LED_STATUS_ENABLED;
+    config->led_active_lo[ LED_STATUS ]     = CONFIG_DFLT_LED_STATUS_ACTIVE_LO;
+    config->led_enabled[ LED_KEY ]          = CONFIG_DFLT_LED_KEY_ENABLED;
+    config->led_active_lo[ LED_KEY ]        = CONFIG_DFLT_LED_KEY_ACTIVE_LO;
 
     // Ensure we generated a valid configuration
     assert_always( validate_config( config ) );
