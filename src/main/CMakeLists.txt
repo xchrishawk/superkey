@@ -1,0 +1,44 @@
+#
+# @file     CMakeLists.txt
+# @brief    CMake configuration for the main project executable.
+#
+# @author   Chris Vig (chris@invictus.so)
+# @date     2025-08-16
+#
+
+# -- Executable Configuration --
+
+# Note that for the main executable, we use the project forced to lowercase
+string(TOLOWER "${CMAKE_PROJECT_NAME}" EXECUTABLE_NAME)
+set(EXECUTABLE_SOURCE   application/buzzer.c
+                        application/buzzer.h
+                        application/config.c
+                        application/config.h
+                        application/debug_port.c
+                        application/debug_port.h
+                        application/input.c
+                        application/input.h
+                        application/keyer.c
+                        application/keyer.h
+                        application/led.c
+                        application/led.h
+                        application/wpm.c
+                        application/wpm.h
+                        core/main.c
+                        core/sys.c
+                        core/sys.h
+                        core/version.c
+                        core/version.h
+                        drivers/gpio.c
+                        drivers/gpio.h
+                        drivers/usart.c
+                        drivers/usart.h
+                        utility/constants.h
+                        utility/debug.c
+                        utility/debug.h
+                        utility/types.h
+                        utility/utility.h)
+
+# -- Set Up Project --
+
+include(${PROJECT_EXECUTABLE_DIR}/executable.cmake)

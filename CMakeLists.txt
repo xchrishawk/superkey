@@ -57,4 +57,4 @@ set(CMAKE_C_FLAGS           "${PROJECT_COMMON_FLAGS} ${PROJECT_DEBUG_FLAGS} ${PR
 
 # -- Subdirectories --
 
-add_subdirectory(${PROJECT_EXECUTABLE_DIR}/exakey)
+add_subdirectory(${PROJECT_EXECUTABLE_DIR}/main)

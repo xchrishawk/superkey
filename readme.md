@@ -23,7 +23,7 @@ the embedded AVR compiler:
             "includePath": [
                 "${workspaceFolder}/build/autogen/exakey",
                 "${workspaceFolder}/lib",
-                "${workspaceFolder}/src/exakey"
+                "${workspaceFolder}/src/main"
             ],
             "defines": [
                 "BAUD=19200",
