@@ -399,6 +399,8 @@ static void exec_command_wpm( char const * command )
 
     debug_port_printf( "WPM: %u (%u.%u wpm)" NEWLINE_STR, wpm_get(), wpm_get() / 10, wpm_get() % 10 );
 
+#undef PREFIX_LEN
+
 }   /* exec_command_wpm() */
 
 
