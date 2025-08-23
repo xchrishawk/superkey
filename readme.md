@@ -1,13 +1,15 @@
-# `EXAKEY`
+# `SUPERKEY`
 
-This will be a readme someday.
+**SuperKey** - the greatest CW keyer that the world has ever seen.
+
+This will be a README someday.
 
 ## Notes
 
 ### `avrdude` Upload Command
 
 ```
-avrdude -c avrispmkii -P usb -p m1284p -U flash:w:exakey.ihex -D
+avrdude -c avrispmkii -P usb -p m1284p -U flash:w:superkey.ihex -D
 ```
 
 ### VS Code Setup
@@ -21,7 +23,7 @@ the embedded AVR compiler:
         {
             "name": "AVR (ATMega1284P)",
             "includePath": [
-                "${workspaceFolder}/build/autogen/exakey",
+                "${workspaceFolder}/build/autogen/superkey",
                 "${workspaceFolder}/lib",
                 "${workspaceFolder}/src/main"
             ],
