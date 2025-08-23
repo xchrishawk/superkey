@@ -17,10 +17,13 @@
 #include "application/keyer.h"
 #include "application/led.h"
 #include "application/wpm.h"
+#include "core/sys.h"
 #include "drivers/gpio.h"
 #include "utility/debug.h"
 #include "utility/types.h"
 #include "utility/utility.h"
+
+#include "application/debug_port.h"
 
 /* ----------------------------------------------------- TYPES ------------------------------------------------------ */
 
@@ -50,8 +53,9 @@ static bool s_keyed = false;                /**< Is the keyer hardware currently
 static bool s_panicked = false;             /**< Was the keyer panic activated?         */
 
 static state_t s_state = STATE_OFF;         /**< Currently active keyer state.          */
-static tick_t s_element_end = 0;            /**< Tick current element should end.       */
-static tick_t s_element_start_allowed = 0;  /**< Tick next element can start.           */
+static tick_t s_element_start = 0;          /**< Tick at which current element started. */
+static tick_t s_element_duration = 0;       /**< Duration of current element.           */
+static tick_t s_element_lockout = 0;        /**< Lockout until next element.            */
 
 static wpm_t s_ticks_wpm = 0;               /**< WPM at which ticks were evaluated.     */
 static tick_t s_dot_ticks = 0;              /**< Number of ticks per dot.               */
@@ -95,6 +99,18 @@ static void update_ticks( void );
 
 void keyer_init( void )
 {
+    // Initialize local state
+    s_keyed = false;
+    s_panicked = false;
+    s_state = STATE_OFF;
+    s_element_start = 0;
+    s_element_duration = 0;
+    s_element_lockout = 0;
+    s_ticks_wpm = 0;
+    s_dot_ticks = 0;
+    s_dash_ticks = 0;
+    s_space_ticks = 0;
+
     // Initialize GPIO
     gpio_set_dir( KEYER_OUT_PIN, GPIO_DIR_OUT );
 
@@ -114,6 +130,10 @@ void keyer_panic( void )
 
 void keyer_tick( tick_t tick )
 {
+    // Utility macro
+    #define is_timeout_elapsed( _duration )                                             \
+        ( sys_elapsed( tick, s_element_start ) > ( _duration ) )
+
     // Update element tick counts if required
     update_ticks();
 
@@ -133,7 +153,7 @@ void keyer_tick( tick_t tick )
         case STATE_OFF:
         {
             // Deactivate keyer hardware, once allowed
-            if( tick >= s_element_end )
+            if( is_timeout_elapsed( s_element_duration ) )
                 set_keyed( false );
             break;
         }
@@ -148,42 +168,52 @@ void keyer_tick( tick_t tick )
 
         case STATE_DASHES:
         {
-            if( ( new_state && tick >= s_element_start_allowed ) ||
-                ( ! s_panicked && ! new_state && ! get_keyed() && tick >= s_element_end && tick >= s_element_start_allowed ) )
+            if( ( new_state &&
+                  is_timeout_elapsed( s_element_lockout ) ) ||
+                ( ! new_state &&
+                  ! s_panicked &&
+                  ! get_keyed() &&
+                  is_timeout_elapsed( s_element_lockout ) ) )
             {
                 // Activate keyer hardware
                 set_keyed( true );
-                s_element_end = tick + s_dash_ticks;
-                s_element_start_allowed = tick + s_dash_ticks + s_space_ticks;
+                s_element_start = tick;
+                s_element_duration = s_dash_ticks;
+                s_element_lockout = s_dash_ticks + s_space_ticks;
             }
-            else if( get_keyed() && tick >= s_element_end )
+            else if( get_keyed() && is_timeout_elapsed( s_element_duration ) )
             {
                 // Deactivate keyer hardware
                 set_keyed( false );
-                s_element_end = tick + s_space_ticks;
             }
             break;
         }
 
         case STATE_DOTS:
         {
-            if( ( new_state && tick >= s_element_start_allowed ) ||
-                ( ! s_panicked && ! new_state && ! get_keyed() && tick >= s_element_end && tick >= s_element_start_allowed ) )
+            if( ( new_state &&
+                  is_timeout_elapsed( s_element_lockout ) ) ||
+                ( ! new_state &&
+                  ! s_panicked &&
+                  ! get_keyed() &&
+                  is_timeout_elapsed( s_element_lockout ) ) )
             {
                 // Activate keyer hardware
                 set_keyed( true );
-                s_element_end = tick + s_dot_ticks;
-                s_element_start_allowed = tick + s_dot_ticks + s_space_ticks;
+                s_element_start = tick;
+                s_element_duration = s_dot_ticks;
+                s_element_lockout = s_dot_ticks + s_space_ticks;
             }
-            else if( get_keyed() && tick >= s_element_end )
+            else if( get_keyed() && is_timeout_elapsed( s_element_duration ) )
             {
                 // Deactivate keyer hardware
                 set_keyed( false );
-                s_element_end = tick + s_space_ticks;
             }
             break;
         }
     }
+
+    #undef is_timeout_elapsed
 
 }   /* keyer_tick() */
 

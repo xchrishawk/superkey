@@ -45,6 +45,20 @@
     ( 0 )
 
 /**
+ * @def     ON
+ * @brief   Macro evaluating to true.
+ */
+#define ON                                                                              \
+    ( 1 )
+
+/**
+ * @def     OFF
+ * @brief   Macro evaluating to false.
+ */
+#define OFF                                                                             \
+    ( 0 )
+
+/**
  * @def     array_count( _a )
  * @brief   Returns the number of elements in the specified array.
  */

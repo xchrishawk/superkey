@@ -20,12 +20,18 @@
 #include "utility/types.h"
 #include "utility/utility.h"
 
+/* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
+
+/**
+ * @def     TEST_CLOCK_WRAPAROUND
+ * @brief   If set to `ON`, the system tick will be set to 15 seconds prior to a wraparound at startup.
+ */
+#define DEBUG_TEST_CLOCK_WRAPAROUND     ON
+
 /* --------------------------------------------------- VARIABLES ---------------------------------------------------- */
 
-// TODO: Make pending event into a queue or bitfield
-
-static event_field_t s_pending_events = 0;
-static tick_t s_tick = 0;
+static event_field_t s_pending_events = 0;  /**< Bitfield of currently pending events.  */
+static tick_t s_tick = 0;                   /**< Current system tick.                   */
 
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
@@ -42,6 +48,23 @@ static tick_t s_tick = 0;
 static void sleep_until_interrupt( void );
 
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
+
+tick_t sys_elapsed( tick_t now, tick_t then )
+{
+    if( now >= then )
+        return( now - then );
+    else
+        return( ( TICK_MAX - then + 1 ) + now );
+
+}   /* sys_elapsed() */
+
+
+tick_t sys_elapsed_now( tick_t then )
+{
+    return( sys_elapsed( sys_get_tick(), then ) );
+
+}   /* sys_elapsed_now() */
+
 
 void sys_enqueue_event( event_t event )
 {
@@ -68,6 +91,13 @@ void sys_init( void )
 {
     // Clear interrupts
     sys_cli();
+
+    // Initialize system tick count
+    #if DEBUG_TEST_CLOCK_WRAPAROUND
+        s_tick = ( TICK_MAX - ( 15 * TICKS_PER_SEC ) );
+    #else
+        s_tick = 0;
+    #endif
 
     //
     // Initialize timer 0 for main system tick at 1 millisecond period. Based on the following:

@@ -62,6 +62,13 @@ _Static_assert( EVENT_COUNT < sizeof( event_field_t ) * BITS_PER_BYTE, "Not enou
  */
 #define TICKS_PER_MSEC  ( 1 )
 
+/**
+ * @def     TICK_MAX
+ * @brief   The maximum value of the tick counter.
+ * @note    After reaching this value, the tick counter will roll over to zero on the next tick.
+ */
+#define TICK_MAX        UINT32_MAX
+
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
 /**
@@ -79,6 +86,23 @@ _Static_assert( EVENT_COUNT < sizeof( event_field_t ) * BITS_PER_BYTE, "Not enou
     sys_set_intrpt_enabled( true )
 
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
+
+/**
+ * @fn      sys_elapsed( tick_t, tick_t )
+ * @brief   Returns the number of system ticks which elapsed between `then` and `now`.
+ * @note    This function is wraparound-aware, and will return the correct value even if the tick counter has reached
+ *          its maximum value and rolled over.
+ */
+tick_t sys_elapsed( tick_t now, tick_t then );
+
+/**
+ * @fn      sys_elapsed_now( tick_t )
+ * @brief   Returns the number of system ticks which have elapsed since `then`.
+ * @note    This function is wraparound-aware, and will return the correct value even if the tick counter has reached
+ *          its maximum value and rolled over.
+ * @note    This is equivalent to calling `sys_elapsed( sys_get_tick(), then )`.
+ */
+tick_t sys_elapsed_now( tick_t then );
 
 /**
  * @fn      sys_enqueue_event( event_t )
