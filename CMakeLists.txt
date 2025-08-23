@@ -8,6 +8,10 @@
 
 cmake_minimum_required(VERSION 3.22)
 
+# -- Packages --
+
+find_package(Git REQUIRED)
+
 # -- Project Configuration --
 
 include(configuration.cmake)
@@ -28,13 +32,14 @@ set(CMAKE_C_COMPILER        ${AVR_GCC})
 # -- Project Setup --
 
 # Top-level project definition
-project(exakey LANGUAGES C CXX ASM)
+project(ExaKey LANGUAGES C CXX ASM)
 
 # Set up project directories
 set(PROJECT_BASE_DIR        ${CMAKE_CURRENT_SOURCE_DIR})
 set(PROJECT_LIBRARY_DIR     ${PROJECT_BASE_DIR}/lib)
 set(PROJECT_EXECUTABLE_DIR  ${PROJECT_BASE_DIR}/src)
 set(PROJECT_BUILD_DIR       ${CMAKE_CURRENT_BINARY_DIR})
+set(PROJECT_AUTOGEN_DIR     ${PROJECT_BUILD_DIR}/autogen)
 set(PROJECT_BIN_DIR         ${PROJECT_BUILD_DIR})
 
 # Configure output directory

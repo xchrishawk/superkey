@@ -26,6 +26,8 @@ set(EXECUTABLE_SOURCE   application/buzzer.c
                         core/main.c
                         core/sys.c
                         core/sys.h
+                        core/version.c
+                        core/version.h
                         drivers/gpio.c
                         drivers/gpio.h
                         drivers/usart.c

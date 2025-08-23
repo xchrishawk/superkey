@@ -18,6 +18,7 @@
 #include "application/debug_port.h"
 #include "application/keyer.h"
 #include "core/sys.h"
+#include "core/version.h"
 #include "drivers/usart.h"
 #include "utility/constants.h"
 #include "utility/types.h"
@@ -358,7 +359,17 @@ static void exec_command_tick( char const * command )
 static void exec_command_version( char const * command )
 {
     ( void )command;
-    debug_port_print( "Not implemented yet." NEWLINE_STR );
+
+    version_t version;
+    version_get( & version );
+
+    debug_port_printf( "%s v%s" NEWLINE_STR "%s %s (%s %s)" NEWLINE_STR,
+                       version.product_name,
+                       version.version,
+                       version.build_date,
+                       version.build_time,
+                       version.git_branch,
+                       version.git_hash_short );
 
 }   /* exec_command_version() */
 

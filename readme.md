@@ -21,6 +21,7 @@ the embedded AVR compiler:
         {
             "name": "AVR (ATMega1284P)",
             "includePath": [
+                "${workspaceFolder}/build/autogen/exakey",
                 "${workspaceFolder}/lib",
                 "${workspaceFolder}/src/exakey"
             ],
