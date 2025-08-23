@@ -121,35 +121,35 @@ add_custom_target(
             -E make_directory ${EXECUTABLE_AUTOGEN_DIR}
     # Print basic executable info
     COMMAND ${CMAKE_COMMAND}
-            -E echo "#define EXECUTABLE_NAME \"${EXECUTABLE_NAME}\""
+            -E echo "#define _EXECUTABLE_NAME \"${EXECUTABLE_NAME}\""
             >> ${EXECUTABLE_AUTOGEN_BUILD_FILE}
     COMMAND ${CMAKE_COMMAND}
-            -E echo "#define EXECUTABLE_PROJECT_NAME \"${CMAKE_PROJECT_NAME}\""
+            -E echo "#define _EXECUTABLE_PROJECT_NAME \"${CMAKE_PROJECT_NAME}\""
             >> ${EXECUTABLE_AUTOGEN_BUILD_FILE}
     COMMAND ${CMAKE_COMMAND}
-            -E echo "#define EXECUTABLE_PROJECT_BUILD_DIR \"${PROJECT_BUILD_DIR}\""
+            -E echo "#define _EXECUTABLE_PROJECT_BUILD_DIR \"${PROJECT_BUILD_DIR}\""
             >> ${EXECUTABLE_AUTOGEN_BUILD_FILE}
     # Print date / time
     COMMAND ${CMAKE_COMMAND}
-            -E echo "#define EXECUTABLE_BUILD_DATE __DATE__"
+            -E echo "#define _EXECUTABLE_BUILD_DATE __DATE__"
             >> ${EXECUTABLE_AUTOGEN_BUILD_FILE}
     COMMAND ${CMAKE_COMMAND}
-            -E echo "#define EXECUTABLE_BUILD_TIME __TIME__"
+            -E echo "#define _EXECUTABLE_BUILD_TIME __TIME__"
             >> ${EXECUTABLE_AUTOGEN_BUILD_FILE}
     # Print full Git hash
     COMMAND ${GIT_EXECUTABLE}
             rev-parse HEAD
-            | sed "s/.*/#define EXECUTABLE_BUILD_GIT_HASH \"&\"/"
+            | sed "s/.*/#define _EXECUTABLE_BUILD_GIT_HASH \"&\"/"
             >> ${EXECUTABLE_AUTOGEN_BUILD_FILE}
     # Print short Git hash
     COMMAND ${GIT_EXECUTABLE}
             rev-parse --short HEAD
-            | sed "s/.*/#define EXECUTABLE_BUILD_GIT_HASH_SHORT \"&\"/"
+            | sed "s/.*/#define _EXECUTABLE_BUILD_GIT_HASH_SHORT \"&\"/"
             >> ${EXECUTABLE_AUTOGEN_BUILD_FILE}
     # Print Git branch
     COMMAND ${GIT_EXECUTABLE}
             rev-parse --abbrev-ref HEAD
-            | sed "s/.*/#define EXECUTABLE_BUILD_GIT_BRANCH \"&\"/"
+            | sed "s/.*/#define _EXECUTABLE_BUILD_GIT_BRANCH \"&\"/"
             >> ${EXECUTABLE_AUTOGEN_BUILD_FILE}
     BYPRODUCTS ${EXECUTABLE_AUTOGEN_BUILD_FILE}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}

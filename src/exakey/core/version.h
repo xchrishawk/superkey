@@ -15,41 +15,14 @@
 
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
 
-/** The name of the executable file (i.e., `exakey`). */
-extern char const * const EXAKEY_NAME;
-
-/** The user-viewable product name (i.e., `ExaKey`). */
-extern char const * const EXAKEY_PRODUCT_NAME;
-
-/** The combined version string (i.e., `1.0.0`). */
-extern char const * const EXAKEY_VERSION;
-
 /** The major version number. */
-extern uint8_t const EXAKEY_VERSION_MAJOR;
+extern uint8_t const PRODUCT_VERSION_MAJOR;
 
 /** The minor version number. */
-extern uint8_t const EXAKEY_VERSION_MINOR;
+extern uint8_t const PRODUCT_VERSION_MINOR;
 
 /** The revision version number. */
-extern uint8_t const EXAKEY_VERSION_REVISION;
-
-/** The directory in which the application was built. */
-extern char const * const EXAKEY_BUILD_DIR;
-
-/** The date on which the application was built. */
-extern char const * const EXAKEY_BUILD_DATE;
-
-/** The time at which the application was built. */
-extern char const * const EXAKEY_BUILD_TIME;
-
-/** The full Git hash of the active commit at the time the application was built. */
-extern char const * const EXAKEY_BUILD_GIT_HASH;
-
-/** The short Git hash of the active commit at the time the application was built. */
-extern char const * const EXAKEY_BUILD_GIT_HASH_SHORT;
-
-/** The branch name of the active commit at the time the application was built. */
-extern char const * const EXAKEY_BUILD_GIT_BRANCH;
+extern uint8_t const PRODUCT_VERSION_REVISION;
 
 /* ----------------------------------------------------- TYPES ------------------------------------------------------ */
 
