@@ -30,6 +30,7 @@ static char const * const EXECUTABLE_NAME = _EXECUTABLE_NAME;
 static char const * const VERSION = stringize_value( VERSION_MAJOR ) "."
                                     stringize_value( VERSION_MINOR ) "."
                                     stringize_value( VERSION_REVISION );
+static char const * const BUILD_TYPE = _BUILD_TYPE;
 static char const * const BUILD_DIR = _EXECUTABLE_PROJECT_BUILD_DIR;
 static char const * const BUILD_DATE = _EXECUTABLE_BUILD_DATE;
 static char const * const BUILD_TIME = _EXECUTABLE_BUILD_TIME;
@@ -47,6 +48,7 @@ void version_get( version_t * version )
     version->version_major      = VERSION_MAJOR;
     version->version_minor      = VERSION_MINOR;
     version->version_revision   = VERSION_REVISION;
+    version->build_type         = BUILD_TYPE;
     version->build_dir          = BUILD_DIR;
     version->build_date         = BUILD_DATE;
     version->build_time         = BUILD_TIME;

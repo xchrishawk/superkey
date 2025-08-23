@@ -363,8 +363,9 @@ static void exec_command_version( char const * command )
     version_t version;
     version_get( & version );
 
-    debug_port_printf( "%s v%s" NEWLINE_STR "%s %s (%s %s)" NEWLINE_STR,
+    debug_port_printf( "%s %s v%s" NEWLINE_STR "%s %s (%s %s)" NEWLINE_STR,
                        version.product_name,
+                       version.build_type,
                        version.version,
                        version.build_date,
                        version.build_time,

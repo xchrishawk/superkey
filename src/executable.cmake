@@ -21,7 +21,7 @@
 # -- Project Setup --
 
 # Define new subproject for executable
-project(${CMAKE_PROJECT_NAME}::${EXECUTABLE_NAME})
+#project(${CMAKE_PROJECT_NAME}::${EXECUTABLE_NAME})
 
 # -- Validate Arguments --
 

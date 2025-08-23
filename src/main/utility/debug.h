@@ -21,8 +21,12 @@
  * @def     assert_debug
  * @brief   Checks an assertion in debug builds. Calls `fail()` if the assertion fails.
  */
+#if defined( DEBUG ) && DEBUG == ON
 #define assert_debug( _cond )                                                           \
     ( ( _cond ) ? ( void )0 : fail() )
+#else
+#define assert_debug( _cond )
+#endif
 
 /**
  * @def     assert_always

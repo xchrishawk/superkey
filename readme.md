@@ -1,6 +1,6 @@
 # `SUPERKEY`
 
-**SuperKey** - the greatest CW keyer that the world has ever seen.
+**SuperKey** - the greatest CW keyer the world has ever seen.
 
 This will be a README someday.
 
@@ -28,15 +28,18 @@ the embedded AVR compiler:
                 "${workspaceFolder}/src/main"
             ],
             "defines": [
+                "MCU=\"atmega1284p\"",
                 "BAUD=19200",
                 "F_CPU=8000000",
-                "CONFIG_DFLT_WPM=200",
-                "CONFIG_DFLT_BUZZER_ENABLED=true",
-                "CONFIG_DFLT_BUZZER_FREQUENCY=700",
-                "CONFIG_DFLT_LED_STATUS_ENABLED=true",
-                "CONFIG_DFLT_LED_STATUS_ACTIVE_LO=false",
-                "CONFIG_DFLT_LED_KEY_ENABLED=true",
-                "CONFIG_DFLT_LED_KEY_ACTIVE_LO=false"
+                "_DEBUG=1",
+                "_BUILD_TYPE=\"Debug\"",
+                "_CONFIG_DFLT_WPM=200",
+                "_CONFIG_DFLT_BUZZER_ENABLED=true",
+                "_CONFIG_DFLT_BUZZER_FREQUENCY=700",
+                "_CONFIG_DFLT_LED_STATUS_ENABLED=true",
+                "_CONFIG_DFLT_LED_STATUS_ACTIVE_LO=false",
+                "_CONFIG_DFLT_LED_KEY_ENABLED=true",
+                "_CONFIG_DFLT_LED_KEY_ACTIVE_LO=false"
             ],
             "compilerPath": "/usr/bin/avr-gcc",
             "compilerArgs": [

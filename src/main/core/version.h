@@ -38,6 +38,7 @@ typedef struct
     uint8_t         version_major;          /**< The major version number.              */
     uint8_t         version_minor;          /**< The minor version number.              */
     uint8_t         version_revision;       /**< The version revision.                  */
+    char const *    build_type;             /**< The build type.                        */
     char const *    build_dir;              /**< The build directory for this build.    */
     char const *    build_date;             /**< The date at which the SW was built.    */
     char const *    build_time;             /**< The time at which the SW was built.    */
