@@ -6,8 +6,8 @@
  * @date    2025-08-20
  */
 
-#if !defined( EXAKEY_DEBUG_PORT_H )
-#define EXAKEY_DEBUG_PORT_H
+#if !defined( APPLICATION_DEBUG_PORT_H )
+#define APPLICATION_DEBUG_PORT_H
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
 
@@ -56,4 +56,4 @@ void debug_port_tick( tick_t tick );
  */
 void debug_port_usart_rx( void );
 
-#endif /* !defined( EXAKEY_DEBUG_PORT_H ) */
+#endif /* !defined( APPLICATION_DEBUG_PORT_H ) */

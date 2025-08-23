@@ -6,8 +6,8 @@
  * @date    2025-08-19
  */
 
-#if !defined( EXAKEY_CONSTANTS_H )
-#define EXAKEY_CONSTANTS_H
+#if !defined( UTILITY_CONSTANTS_H )
+#define UTILITY_CONSTANTS_H
 
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
 
@@ -59,4 +59,4 @@
  */
 #define NEWLINE_STR             "\r\n"
 
-#endif /* !defined( EXAKEY_CONSTANTS_H ) */
+#endif /* !defined( UTILITY_CONSTANTS_H ) */

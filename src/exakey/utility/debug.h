@@ -6,8 +6,8 @@
  * @date    2025-08-17
  */
 
-#if !defined( EXAKEY_DEBUG_H )
-#define EXAKEY_DEBUG_H
+#if !defined( UTILITY_DEBUG_H )
+#define UTILITY_DEBUG_H
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
 
@@ -45,4 +45,4 @@ void fail( void ) FUNC_NEVER_RETURNS;
  */
 void fail_code( uint8_t code ) FUNC_NEVER_RETURNS;
 
-#endif /* !defined( EXAKEY_DEBUG_H ) */
+#endif /* !defined( UTILITY_DEBUG_H ) */

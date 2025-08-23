@@ -6,8 +6,8 @@
  * @date    2025-08-17
  */
 
-#if !defined( EXAKEY_INPUT_H )
-#define EXAKEY_INPUT_H
+#if !defined( APPLICATION_INPUT_H )
+#define APPLICATION_INPUT_H
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
 
@@ -52,4 +52,4 @@ void input_init( void );
  */
 void input_tick( tick_t tick );
 
-#endif /* !defined( EXAKEY_INPUT_H ) */
+#endif /* !defined( APPLICATION_INPUT_H ) */

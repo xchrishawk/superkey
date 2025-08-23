@@ -6,8 +6,8 @@
  * @date    2025-08-23
  */
 
-#if !defined( EXAKEY_VERSION_H )
-#define EXAKEY_VERSION_H
+#if !defined( CORE_VERSION_H )
+#define CORE_VERSION_H
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
 
@@ -82,4 +82,4 @@ typedef struct
  */
 void version_get( version_t * version );
 
-#endif /* !defined( EXAKEY_VERSION_H ) */
+#endif /* !defined( CORE_VERSION_H ) */

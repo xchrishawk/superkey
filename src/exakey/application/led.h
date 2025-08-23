@@ -6,8 +6,8 @@
  * @date    2025-08-17
  */
 
-#if !defined( EXAKEY_LED_H )
-#define EXAKEY_LED_H
+#if !defined( APPLICATION_LED_H )
+#define APPLICATION_LED_H
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
 
@@ -57,4 +57,4 @@ void led_tick( tick_t tick );
  */
 void led_toggle_on( led_t led );
 
-#endif /* !defined( EXAKEY_LED_H ) */
+#endif /* !defined( APPLICATION_LED_H ) */

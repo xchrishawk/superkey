@@ -6,8 +6,8 @@
  * @date    2025-08-17
  */
 
-#if !defined( EXAKEY_BUZZER_H )
-#define EXAKEY_BUZZER_H
+#if !defined( APPLICATION_BUZZER_H )
+#define APPLICATION_BUZZER_H
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
 
@@ -95,4 +95,4 @@ void buzzer_set_on( bool on );
  */
 void buzzer_tick( tick_t tick );
 
-#endif /* !defined( EXAKEY_BUZZER_H ) */
+#endif /* !defined( APPLICATION_BUZZER_H ) */

@@ -6,8 +6,8 @@
  * @date    2025-08-20
  */
 
-#if !defined( EXAKEY_CONFIG_H )
-#define EXAKEY_CONFIG_H
+#if !defined( APPLICATION_CONFIG_H )
+#define APPLICATION_CONFIG_H
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
 
@@ -86,4 +86,4 @@ config_t const * config_read_only( void );
  */
 bool config_set( config_t const * config );
 
-#endif /* !defined( EXAKEY_CONFIG_H ) */
+#endif /* !defined( APPLICATION_CONFIG_H ) */

@@ -6,8 +6,8 @@
  * @date    2025-08-17
  */
 
-#if !defined( EXAKEY_GPIO_H )
-#define EXAKEY_GPIO_H
+#if !defined( DRIVERS_GPIO_H )
+#define DRIVERS_GPIO_H
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
 
@@ -191,4 +191,4 @@ void gpio_set_state( gpio_pin_t pin, gpio_state_t state );
  */
 void gpio_toggle_state( gpio_pin_t pin );
 
-#endif /* !defined( EXAKEY_GPIO_H ) */
+#endif /* !defined( DRIVERS_GPIO_H ) */

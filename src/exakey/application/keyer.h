@@ -6,8 +6,8 @@
  * @date    2025-08-19
  */
 
-#if !defined( EXAKEY_KEYER_H )
-#define EXAKEY_KEYER_H
+#if !defined( APPLICATION_KEYER_H )
+#define APPLICATION_KEYER_H
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
 
@@ -36,4 +36,4 @@ void keyer_panic( void );
  */
 void keyer_tick( tick_t tick );
 
-#endif /* !defined( EXAKEY_KEYER_H ) */
+#endif /* !defined( APPLICATION_KEYER_H ) */

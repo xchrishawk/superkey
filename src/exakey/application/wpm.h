@@ -6,8 +6,8 @@
  * @date    2025-08-22
  */
 
-#if !defined( EXAKEY_WPM_H )
-#define EXAKEY_WPM_H
+#if !defined( APPLICATION_WPM_H )
+#define APPLICATION_WPM_H
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
 
@@ -72,4 +72,4 @@ void wpm_ticks( wpm_t wpm,
                 tick_t * letter_space,
                 tick_t * word_space );
 
-#endif /* !defined( EXAKEY_WPM_H ) */
+#endif /* !defined( APPLICATION_WPM_H ) */

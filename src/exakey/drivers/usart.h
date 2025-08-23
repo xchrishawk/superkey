@@ -6,8 +6,8 @@
  * @date    2025-08-17
  */
 
-#if !defined( EXAKEY_USART_H )
-#define EXAKEY_USART_H
+#if !defined( DRIVERS_USART_H )
+#define DRIVERS_USART_H
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
 
@@ -165,4 +165,4 @@ void usart_tx_sync( usart_t usart, byte_t const * data, size_t size );
  */
 void usart_tx_sync_str( usart_t usart, char const * str );
 
-#endif /* !defined( EXAKEY_USART_H ) */
+#endif /* !defined( DRIVERS_USART_H ) */

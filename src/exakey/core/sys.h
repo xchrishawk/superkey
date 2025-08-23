@@ -6,8 +6,8 @@
  * @date    2025-08-17
  */
 
-#if !defined( EXAKEY_SYS_H )
-#define EXAKEY_SYS_H
+#if !defined( CORE_SYS_H )
+#define CORE_SYS_H
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
 
@@ -140,4 +140,4 @@ void sys_set_intrpt_enabled( bool enabled );
  */
 event_field_t sys_wait( void );
 
-#endif /* !defined( EXAKEY_SYS_H ) */
+#endif /* !defined( CORE_SYS_H ) */

@@ -7,8 +7,8 @@
  * @date    2025-08-16
  */
 
-#if !defined( EXAKEY_TYPES_H )
-#define EXAKEY_TYPES_H
+#if !defined( UTILITY_TYPES_H )
+#define UTILITY_TYPES_H
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
 
@@ -43,4 +43,4 @@ typedef uint32_t tick_t;
 #define register_addr( _reg )                                                           \
     ( ( register_t )( & ( _reg ) ) )
 
-#endif /* !defined( EXAKEY_TYPES_H) */
+#endif /* !defined( UTILITY_TYPES_H ) */

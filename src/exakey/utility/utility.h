@@ -6,8 +6,8 @@
  * @date    2025-08-16
  */
 
-#if !defined( EXAKEY_UTILITY_H )
-#define EXAKEY_UTILITY_H
+#if !defined( UTILITY_UTILITY_H )
+#define UTILITY_UTILITY_H
 
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
@@ -285,4 +285,4 @@
 #define wait_bit_set( _tgt, _b )                                                        \
     do { } while( ! is_bit_set( _tgt, _b ) )
 
-#endif  /* !defined( EXAKEY_UTILITY_H ) */
+#endif  /* !defined( UTILITY_UTILITY_H ) */
