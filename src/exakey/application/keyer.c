@@ -144,8 +144,13 @@ void keyer_tick( tick_t tick )
 
     // Reset the panic flag if the state changed
     // (Note that in the logic below, this means that new_state==TRUE implies s_panicked==FALSE)
-    if( new_state )
+    if( new_state && s_panicked )
+    {
         s_panicked = false;
+        s_element_start = 0;
+        s_element_duration = 0;
+        s_element_lockout = 0;
+    }
 
     // Execute whatever state we evaluate to
     switch( s_state )
