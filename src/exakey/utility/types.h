@@ -17,12 +17,6 @@
 /* ----------------------------------------------------- TYPES ------------------------------------------------------ */
 
 /**
- * @typedef buzzer_freq_t
- * @brief   Typedef representing a buzzer frequency.
- */
-typedef uint16_t freq_t;
-
-/**
  * @typedef byte_t
  * @brief   Typedef for a single unsigned byte.
  */
