@@ -17,6 +17,13 @@
 #include "utility/debug.h"
 #include "utility/utility.h"
 
+/* ----------------------------------------------------- MACROS ----------------------------------------------------- */
+
+_Static_assert( EXAKEY_DFLT_WPM >= WPM_MINIMUM && EXAKEY_DFLT_WPM <= WPM_MAXIMUM,
+                "Invalid default WPM!" );
+_Static_assert( EXAKEY_DFLT_BUZZER_FREQUENCY >= BUZZER_MINIMUM_FREQUENCY && EXAKEY_DFLT_BUZZER_FREQUENCY <= BUZZER_MAXIMUM_FREQUENCY,
+                "Invalid default buzzer frequency!" );
+
 /* --------------------------------------------------- VARIABLES ---------------------------------------------------- */
 
 static config_t s_config;                   /**< Currently active app configuration.    */
@@ -35,6 +42,9 @@ void config_default( config_t * config )
 {
     // Default everything to zero
     memset( config, 0, sizeof( config_t ) );
+
+    // Global settings
+    config->wpm                             = EXAKEY_DFLT_WPM;
 
     // Buzzer configuration
     config->buzzer_enabled                  = EXAKEY_DFLT_BUZZER_ENABLED;
@@ -87,7 +97,9 @@ bool config_set( config_t const * config )
 
 static bool validate_config( config_t const * config )
 {
-    if( config->buzzer_frequency < BUZZER_MINIMUM_FREQUENCY ||
+    if( config->wpm < WPM_MINIMUM ||
+        config->wpm > WPM_MAXIMUM ||
+        config->buzzer_frequency < BUZZER_MINIMUM_FREQUENCY ||
         config->buzzer_frequency > BUZZER_MAXIMUM_FREQUENCY )
         return( false );
 

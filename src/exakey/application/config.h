@@ -16,6 +16,7 @@
 
 #include "application/buzzer.h"
 #include "application/led.h"
+#include "application/wpm.h"
 
 /* ----------------------------------------------------- TYPES ------------------------------------------------------ */
 
@@ -25,6 +26,9 @@
  */
 typedef struct
 {
+    /** Global words per minute setting. */
+    wpm_t           wpm;
+
     /** If set to `false`, the buzzer will be disabled and will not sound. */
     bool            buzzer_enabled;
 

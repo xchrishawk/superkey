@@ -24,6 +24,8 @@ add_compile_definitions(
 
 # -- Configuration Defaults --
 
+set(EXAKEY_DFLT_WPM                     200
+    CACHE STRING                        "Default words per minute (in tenths of a WPM).")
 set(EXAKEY_DFLT_BUZZER_ENABLED          true
     CACHE STRING                        "Should the buzzer be enabled by default? (true / false)")
 set(EXAKEY_DFLT_BUZZER_FREQUENCY        700
@@ -39,6 +41,7 @@ set(EXAKEY_DFLT_LED_KEY_ACTIVE_LO       false
 
 # Set defines
 add_compile_definitions(
+    EXAKEY_DFLT_WPM=${EXAKEY_DFLT_WPM}
     EXAKEY_DFLT_BUZZER_ENABLED=${EXAKEY_DFLT_BUZZER_ENABLED}
     EXAKEY_DFLT_BUZZER_FREQUENCY=${EXAKEY_DFLT_BUZZER_FREQUENCY}
     EXAKEY_DFLT_LED_STATUS_ENABLED=${EXAKEY_DFLT_LED_STATUS_ENABLED}

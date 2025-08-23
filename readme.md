@@ -27,6 +27,7 @@ the embedded AVR compiler:
             "defines": [
                 "BAUD=19200",
                 "F_CPU=8000000",
+                "EXAKEY_DFLT_WPM=200",
                 "EXAKEY_DFLT_BUZZER_ENABLED=true",
                 "EXAKEY_DFLT_BUZZER_FREQUENCY=700",
                 "EXAKEY_DFLT_LED_STATUS_ENABLED=true",
@@ -46,6 +47,6 @@ the embedded AVR compiler:
             "cppStandard": "gnu++14",
             "intelliSenseMode": "linux-gcc-x64"
         }
-    ],
+    ]
 }
 ```

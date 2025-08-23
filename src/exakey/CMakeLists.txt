@@ -21,6 +21,8 @@ set(EXECUTABLE_SOURCE   application/buzzer.c
                         application/keyer.h
                         application/led.c
                         application/led.h
+                        application/wpm.c
+                        application/wpm.h
                         core/main.c
                         core/sys.c
                         core/sys.h

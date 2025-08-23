@@ -16,6 +16,7 @@
 #include "application/buzzer.h"
 #include "application/config.h"
 #include "application/debug_port.h"
+#include "application/keyer.h"
 #include "core/sys.h"
 #include "drivers/usart.h"
 #include "utility/constants.h"
@@ -89,6 +90,12 @@ static void exec_command_config( char const * command );
 static void exec_command_help( char const * command );
 
 /**
+ * @fn      exec_command_panic( char const * command )
+ * @brief   Executes the `panic` command.
+ */
+static void exec_command_panic( char const * command );
+
+/**
  * @fn      exec_command_tick( char const * command )
  * @brief   Executes the `tick` command.
  */
@@ -99,6 +106,12 @@ static void exec_command_tick( char const * command );
  * @brief   Executes the `version` command.
  */
 static void exec_command_version( char const * command );
+
+/**
+ * @fn      exec_command_wpm( char const * command )
+ * @brief   Executes the `wpm` command.
+ */
+static void exec_command_wpm( char const * command );
 
 /**
  * @fn      print_invalid_command( char const * )
@@ -221,8 +234,10 @@ static void evaluate_rx_buf( void )
 
 static void exec_command( char const * command )
 {
-    // Handle known commands
-    if( ! strncasecmp( command, "buzzer", 6 ) )
+    // Handle known commands, starting with panic because I'm paranoid
+    if( ! strncasecmp( command, "stop", 4 ) || ! strncasecmp( command, "panic", 5 ) )
+        exec_command_panic( command );
+    else if( ! strncasecmp( command, "buzzer", 6 ) )
         exec_command_buzzer( command );
     else if( ! strncasecmp( command, "config", 6 ) )
         exec_command_config( command );
@@ -232,6 +247,8 @@ static void exec_command( char const * command )
         exec_command_tick( command );
     else if( ! strncasecmp( command, "version", 7 ) )
         exec_command_version( command );
+    else if( ! strncasecmp( command, "wpm", 3 ) )
+        exec_command_wpm( command );
 
     // Handle unrecognized commands
     else
@@ -271,7 +288,7 @@ static void exec_command_buzzer( char const * command )
         else
         {
             debug_port_print( "Invalid frequency: " );
-            debug_port_print( command + PREFIX_LEN + 11 );
+            debug_port_print( command + PREFIX_LEN + FREQUENCY_LEN );
             debug_port_print( ". Must be between " stringize_value( BUZZER_MINIMUM_FREQUENCY )
                               " and " stringize_value( BUZZER_MAXIMUM_FREQUENCY ) " Hz." NEWLINE_STR );
             return;
@@ -321,6 +338,15 @@ static void exec_command_help( char const * command )
 }   /* exec_command_help() */
 
 
+static void exec_command_panic( char const * command )
+{
+    ( void )command;
+    keyer_panic();
+    debug_port_print( "Stopped keyer." NEWLINE_STR );
+
+}   /* exec_command_panic() */
+
+
 static void exec_command_tick( char const * command )
 {
     ( void )command;
@@ -335,6 +361,45 @@ static void exec_command_version( char const * command )
     debug_port_print( "Not implemented yet." NEWLINE_STR );
 
 }   /* exec_command_version() */
+
+
+static void exec_command_wpm( char const * command )
+{
+#define PREFIX_LEN 3
+
+    unsigned long wpm;
+    if( command[ PREFIX_LEN ] == NULL_CHAR )
+    {
+        // No subcommand - interpret as a status request. no action required
+    }
+    else if( command[ PREFIX_LEN ] == ' ' &&
+             read_ulong( command + PREFIX_LEN + 1, & wpm ) )
+    {
+        unsigned long wpm;
+        if( read_ulong( command + PREFIX_LEN + 1, & wpm ) &&
+            wpm >= WPM_MINIMUM &&
+            wpm <= WPM_MAXIMUM )
+        {
+            wpm_set( ( wpm_t )wpm );
+        }
+        else
+        {
+            debug_port_print( "Invalid WPM: " );
+            debug_port_print( command + PREFIX_LEN + 1 );
+            debug_port_print( ". Must be between " stringize_value( WPM_MINIMUM )
+                              " and " stringize_value( WPM_MAXIMUM ) "." NEWLINE_STR );
+            return;
+        }
+    }
+    else
+    {
+        print_invalid_command( command );
+        return;
+    }
+
+    debug_port_printf( "WPM: %u (%u.%u wpm)" NEWLINE_STR, wpm_get(), wpm_get() / 10, wpm_get() % 10 );
+
+}   /* exec_command_wpm() */
 
 
 static void print_invalid_command( char const * command )
