@@ -38,9 +38,6 @@ typedef struct
     /** If set to `false`, the LED will be disabled and will not illuminate. */
     bool            led_enabled[ LED_COUNT ];
 
-    /** If set to `true`, the LED is illuminated by making the GPIO pin low (not high). */
-    bool            led_active_lo[ LED_COUNT ];
-
 } config_t;
 
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */

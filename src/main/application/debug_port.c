@@ -91,6 +91,12 @@ static void exec_command_config( char const * command );
 static void exec_command_help( char const * command );
 
 /**
+ * @fn      exec_command_led( char const * command )
+ * @brief   Executes the `led` command.
+ */
+static void exec_command_led( char const * command );
+
+/**
  * @fn      exec_command_panic( char const * command )
  * @brief   Executes the `panic` command.
  */
@@ -244,6 +250,8 @@ static void exec_command( char const * command )
         exec_command_config( command );
     else if( ! strncasecmp( command, "help", 4 ) )
         exec_command_help( command );
+    else if( ! strncasecmp( command, "led", 3 ) )
+        exec_command_led( command );
     else if( ! strncasecmp( command, "tick", 4 ) )
         exec_command_tick( command );
     else if( ! strncasecmp( command, "version", 7 ) )
@@ -337,6 +345,69 @@ static void exec_command_help( char const * command )
     debug_port_print( "Not implemented yet." NEWLINE_STR );
 
 }   /* exec_command_help() */
+
+
+static void exec_command_led( char const * command )
+{
+#define PREFIX_LEN 3
+#define STATUS_LEN 7
+#define KEY_LEN 4
+
+    // Get the specific LED
+    led_t led = LED_COUNT;
+    char const * led_name = NULL;
+    char const * remaining_command = NULL;
+    if( ! strncasecmp( command + PREFIX_LEN, " status", STATUS_LEN ) )
+    {
+        // Status LED
+        led = LED_STATUS;
+        led_name = "Status";
+        remaining_command = command + PREFIX_LEN + STATUS_LEN;
+    }
+    else if( ! strncasecmp( command + PREFIX_LEN, " key", KEY_LEN ) )
+    {
+        // Key LED
+        led = LED_KEY;
+        led_name = "Key";
+        remaining_command = command + PREFIX_LEN + KEY_LEN;
+    }
+    else
+    {
+        print_invalid_command( command );
+        return;
+    }
+
+    if( * remaining_command == NULL_CHAR )
+    {
+        // No subcommand - interpret as a status request. no action required
+    }
+    else if( ! strcasecmp( remaining_command, " enable" ) )
+    {
+        // Enable LED
+        led_set_enabled( led, true );
+    }
+    else if( ! strcasecmp( remaining_command, " disable" ) )
+    {
+        // Disable LED
+        led_set_enabled( led, false );
+    }
+    else
+    {
+        // Unknown subcommand
+        print_invalid_command( command );
+        return;
+    }
+
+    // Print LED status
+    debug_port_printf( "%s LED: %s." NEWLINE_STR,
+                       led_name,
+                       led_get_enabled( led ) ? "Enabled" : "Disabled" );
+
+#undef PREFIX_LEN
+#undef STATUS_LEN
+#undef KEY_LEN
+
+}   /* exec_command_led() */
 
 
 static void exec_command_panic( char const * command )

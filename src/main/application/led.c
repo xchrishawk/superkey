@@ -39,13 +39,6 @@ _Static_assert( array_count( s_gpio_tbl ) == LED_COUNT, "Invalid GPIO table!" );
     ( s_gpio_tbl[ ( _led ) ] )
 
 /**
- * @def     is_led_active_lo( _led )
- * @brief   Returns `true` if the specified LED is active low.
- */
-#define is_led_active_lo( _led )                                                        \
-    ( config()->led_active_lo[ ( _led ) ] )
-
-/**
  * @def     is_led_on_and_enabled( _led )
  * @brief   Returns `true` if the specified LED is enabled *and* requested on.
  */
@@ -68,6 +61,25 @@ static void update_hardware( void );
 
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
 
+
+bool led_get_enabled( led_t led )
+{
+    validate_led( led );
+
+    return( config()->led_enabled[ led ] );
+
+}   /* led_get_enabled() */
+
+
+bool led_get_on( led_t led )
+{
+    validate_led( led );
+
+    return( s_on[ led ] );
+
+}   /* led_get_on() */
+
+
 void led_init( void )
 {
     // Initialize local state
@@ -82,6 +94,20 @@ void led_init( void )
     update_hardware();
 
 }   /* led_init() */
+
+
+void led_set_enabled( led_t led, bool enabled )
+{
+    validate_led( led );
+
+    config_t config;
+    config_get( & config );
+    config.led_enabled[ led ] = enabled;
+    config_set( & config );
+
+    update_hardware();
+
+}   /* led_set_enabled() */
 
 
 void led_set_on( led_t led, bool on )
@@ -116,12 +142,8 @@ static void update_hardware( void )
 {
     for( led_t led = 0; led < LED_COUNT; led++ )
     {
-        gpio_set_state(
-            LED_PIN( led ),
-            is_led_active_lo( led ) ?
-                ( is_led_on_and_enabled( led ) ? GPIO_STATE_LOW : GPIO_STATE_HIGH ) :
-                ( is_led_on_and_enabled( led ) ? GPIO_STATE_HIGH : GPIO_STATE_LOW )
-        );
+        gpio_set_state( LED_PIN( led ),
+                        is_led_on_and_enabled( led ) ? GPIO_STATE_HIGH : GPIO_STATE_LOW );
     }
 
 }   /* update_hardware() */

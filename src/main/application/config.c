@@ -54,9 +54,7 @@ void config_default( config_t * config )
 
     // LED configuration
     config->led_enabled[ LED_STATUS ]       = _CONFIG_DFLT_LED_STATUS_ENABLED;
-    config->led_active_lo[ LED_STATUS ]     = _CONFIG_DFLT_LED_STATUS_ACTIVE_LO;
     config->led_enabled[ LED_KEY ]          = _CONFIG_DFLT_LED_KEY_ENABLED;
-    config->led_active_lo[ LED_KEY ]        = _CONFIG_DFLT_LED_KEY_ACTIVE_LO;
 
     // Ensure we generated a valid configuration
     assert_always( validate_config( config ) );

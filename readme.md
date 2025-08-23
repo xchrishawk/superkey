@@ -37,9 +37,7 @@ the embedded AVR compiler:
                 "_CONFIG_DFLT_BUZZER_ENABLED=true",
                 "_CONFIG_DFLT_BUZZER_FREQUENCY=700",
                 "_CONFIG_DFLT_LED_STATUS_ENABLED=true",
-                "_CONFIG_DFLT_LED_STATUS_ACTIVE_LO=false",
-                "_CONFIG_DFLT_LED_KEY_ENABLED=true",
-                "_CONFIG_DFLT_LED_KEY_ACTIVE_LO=false"
+                "_CONFIG_DFLT_LED_KEY_ENABLED=true"
             ],
             "compilerPath": "/usr/bin/avr-gcc",
             "compilerArgs": [

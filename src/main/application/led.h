@@ -34,10 +34,29 @@ enum
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
 
 /**
+ * @fn      led_get_enabled( led_t )
+ * @brief   Returns `true` if the specified LED is enabled.
+ */
+bool led_get_enabled( led_t led );
+
+/**
+ * @fn      led_get_on( led_t )
+ * @brief   Returns `true` if the specified LED is currently commanded on.
+ */
+bool led_get_on( led_t led );
+
+/**
  * @fn      led_init( void )
  * @brief   Initializes the LED driver module.
  */
 void led_init( void );
+
+/**
+ * @fn      led_set_enabled( led_t, bool )
+ * @brief   Enables or disables the specified LED.
+ * @note    This modifies the application configuration.
+ */
+void led_set_enabled( led_t led, bool enabled );
 
 /**
  * @fn      led_set_on( led_t, bool )

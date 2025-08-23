@@ -16,12 +16,8 @@ set(CONFIG_DFLT_BUZZER_FREQUENCY        700
     CACHE STRING                        "The default buzzer frequency, in Hz.")
 set(CONFIG_DFLT_LED_STATUS_ENABLED      true
     CACHE STRING                        "Is the status LED enabled? (true / false)")
-set(CONFIG_DFLT_LED_STATUS_ACTIVE_LO    false
-    CACHE STRING                        "Is the status LED active when the GPIO is low? (true / false)")
 set(CONFIG_DFLT_LED_KEY_ENABLED         true
     CACHE STRING                        "Is the key LED enabled? (true / false)")
-set(CONFIG_DFLT_LED_KEY_ACTIVE_LO       false
-    CACHE STRING                        "Is the key LED active when the GPIO is low? (true / false)")
 
 # Set defines
 add_compile_definitions(
