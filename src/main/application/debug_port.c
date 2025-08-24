@@ -91,6 +91,12 @@ static void exec_command_config( char const * command );
 static void exec_command_help( char const * command );
 
 /**
+ * @fn      exec_command_input( char const * command )
+ * @brief   Executes the `input` command.
+ */
+static void exec_command_input( char const * command );
+
+/**
  * @fn      exec_command_led( char const * command )
  * @brief   Executes the `led` command.
  */
@@ -250,6 +256,8 @@ static void exec_command( char const * command )
         exec_command_config( command );
     else if( ! strncasecmp( command, "help", 4 ) )
         exec_command_help( command );
+    else if( ! strncasecmp( command, "input", 5 ) )
+        exec_command_input( command );
     else if( ! strncasecmp( command, "led", 3 ) )
         exec_command_led( command );
     else if( ! strncasecmp( command, "tick", 4 ) )
@@ -345,6 +353,136 @@ static void exec_command_help( char const * command )
     debug_port_print( "Not implemented yet." NEWLINE_STR );
 
 }   /* exec_command_help() */
+
+
+static void exec_command_input( char const * command )
+{
+#define PREFIX_LEN 5
+#define TIP_LEN 10
+#define RING_LEN 11
+
+    // Get the relevant input we want to look at
+    char const * command_input_type = command + PREFIX_LEN;
+    input_pin_t input_pin = INPUT_PIN_COUNT;
+    char const * input_pin_str = NULL;
+    char const * remaining_command = NULL;
+    if( ! strncasecmp( command_input_type, " trs_0_tip", TIP_LEN ) )
+    {
+        input_pin = INPUT_PIN_TRS_0_TIP;
+        input_pin_str = "TRS 0 Tip";
+        remaining_command = command_input_type + TIP_LEN;
+    }
+    else if( ! strncasecmp( command_input_type, " trs_0_ring", RING_LEN ) )
+    {
+        input_pin = INPUT_PIN_TRS_0_RING;
+        input_pin_str = "TRS 0 Ring";
+        remaining_command = command_input_type + RING_LEN;
+    }
+    else if( ! strncasecmp( command_input_type, " trs_1_tip", TIP_LEN ) )
+    {
+        input_pin = INPUT_PIN_TRS_1_TIP;
+        input_pin_str = "TRS 1 Tip";
+        remaining_command = command_input_type + TIP_LEN;
+    }
+    else if( ! strncasecmp( command_input_type, " trs_1_ring", RING_LEN ) )
+    {
+        input_pin = INPUT_PIN_TRS_1_RING;
+        input_pin_str = "TRS 1 Ring";
+        remaining_command = command_input_type + RING_LEN;
+    }
+    else if( ! strncasecmp( command_input_type, " trs_2_tip", TIP_LEN ) )
+    {
+        input_pin = INPUT_PIN_TRS_2_TIP;
+        input_pin_str = "TRS 2 Tip";
+        remaining_command = command_input_type + TIP_LEN;
+    }
+    else if( ! strncasecmp( command_input_type, " trs_2_ring", RING_LEN ) )
+    {
+        input_pin = INPUT_PIN_TRS_2_RING;
+        input_pin_str = "TRS 2 Ring";
+        remaining_command = command_input_type + RING_LEN;
+    }
+    else
+    {
+        print_invalid_command( command );
+        return;
+    }
+
+    // Interpret command
+    if( * remaining_command == NULL_CHAR )
+    {
+        // No subcommand - interpret as a status request. no action required
+    }
+    else if( ! strcasecmp( remaining_command, " disable" ) )
+    {
+        // Disable input
+        input_set_type( input_pin, INPUT_TYPE_NONE );
+    }
+    else if( ! strcasecmp( remaining_command, " straight_key" ) )
+    {
+        // Set input as straight key
+        input_set_type( input_pin, INPUT_TYPE_STRAIGHT_KEY );
+    }
+    else if( ! strcasecmp( remaining_command, " paddle_left" ) )
+    {
+        // Set input as left paddle
+        input_set_type( input_pin, INPUT_TYPE_PADDLE_LEFT );
+    }
+    else if( ! strcasecmp( remaining_command, " paddle_right" ) )
+    {
+        // Set input as right paddle
+        input_set_type( input_pin, INPUT_TYPE_PADDLE_RIGHT );
+    }
+    else if( ! strcasecmp( remaining_command, " active_low" ) )
+    {
+        // Set input to active low
+        input_set_polarity( input_pin, INPUT_POLARITY_ACTIVE_LOW );
+    }
+    else if( ! strcasecmp( remaining_command, " active_high" ) )
+    {
+        // Set input to active high
+        input_set_polarity( input_pin, INPUT_POLARITY_ACTIVE_HIGH );
+    }
+    else
+    {
+        // Unknown subcommand
+        print_invalid_command( command );
+        return;
+    }
+
+    // Get string for the input type
+    char const * input_type_str = NULL;
+    switch( input_get_type( input_pin ) )
+    {
+    case INPUT_TYPE_STRAIGHT_KEY:
+        input_type_str = "Straight Key";
+        break;
+    case INPUT_TYPE_PADDLE_LEFT:
+        input_type_str = "Left Paddle";
+        break;
+    case INPUT_TYPE_PADDLE_RIGHT:
+        input_type_str = "Right Paddle";
+        break;
+    case INPUT_TYPE_NONE:
+        input_type_str = "Disabled";
+        break;
+    default:
+        input_type_str = "Unknown";
+        break;
+    }
+
+    // Print status info
+    debug_port_printf( "Input %s: %s (%s - %s)" NEWLINE_STR,
+                       input_pin_str,
+                       input_type_str,
+                       input_get_on( input_pin ) ? "On" : "Off",
+                       input_get_polarity( input_pin ) == INPUT_POLARITY_ACTIVE_LOW ? "Active Low" : "Active High" );
+
+#undef PREFIX_LEN
+#undef TIP_LEN
+#undef RING_LEN
+
+}   /* exec_command_input() */
 
 
 static void exec_command_led( char const * command )

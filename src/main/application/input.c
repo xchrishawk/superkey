@@ -107,7 +107,8 @@ void input_set_polarity( input_pin_t pin, input_polarity_t polarity )
 void input_set_type( input_pin_t pin, input_type_t type )
 {
     validate_pin( pin );
-    validate_type( type );
+    if( type != INPUT_TYPE_NONE )
+        validate_type( type );
 
     config_t config;
     config_get( & config );
@@ -126,6 +127,8 @@ void input_tick( tick_t tick )
 
 bool input_type_get_on( input_type_t type )
 {
+    validate_type( type );
+
     bool result = false;
     for( input_pin_t pin = 0; pin < INPUT_PIN_COUNT; pin++ )
     {
