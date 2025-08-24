@@ -42,8 +42,11 @@ typedef struct
     /** The configured input type for each input pin. */
     input_type_t        input_type[ INPUT_PIN_COUNT ];
 
-    /** THe configured input polarity for each input pin. */
+    /** The configured input polarity for each input pin. */
     input_polarity_t    input_polarity[ INPUT_PIN_COUNT ];
+
+    /** If set to `true`, the keyer will emit dashes from the left paddle and dots from the right paddle. */
+    bool                keyer_invert_paddles;
 
 } config_t;
 

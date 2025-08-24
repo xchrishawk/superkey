@@ -18,6 +18,13 @@
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
 
 /**
+ * @fn      keyer_get_invert_paddles( void )
+ * @brief   Returns `true` if the keyer is configured to invert the paddles. In this case, the right paddle will emit
+ *          dots and the left paddle will emit dashes.
+ */
+bool keyer_get_invert_paddles( void );
+
+/**
  * @fn      keyer_init( void )
  * @brief   Initializes the keyer module.
  */
@@ -28,6 +35,13 @@ void keyer_init( void );
  * @brief   Immediately and unconditionally stops the keyer.
  */
 void keyer_panic( void );
+
+/**
+ * @fn      keyer_set_invert_paddles( bool )
+ * @brief   Enables or disables the "invert paddles" setting.
+ * @note    This modifies the application configuration.
+ */
+void keyer_set_invert_paddles( bool invert );
 
 /**
  * @fn      keyer_tick( tick_t )

@@ -70,6 +70,9 @@ void config_default( config_t * config )
     config->input_type[     INPUT_PIN_TRS_2_RING ]  = _CONFIG_DFLT_INPUT_TYPE_TRS_2_RING;
     config->input_polarity[ INPUT_PIN_TRS_2_RING ]  = _CONFIG_DFLT_INPUT_POLARITY_TRS_2_RING;
 
+    // Keyer configuration
+    config->keyer_invert_paddles                    = _CONFIG_DFLT_KEYER_INVERT_PADDLES;
+
     // Ensure we generated a valid configuration
     assert_always( validate_config( config ) );
 

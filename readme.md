@@ -49,7 +49,8 @@ the embedded AVR compiler:
                 "_CONFIG_DFLT_INPUT_TYPE_TRS_2_TIP=INPUT_TYPE_NONE",
                 "_CONFIG_DFLT_INPUT_POLARITY_TRS_2_TIP=INPUT_POLARITY_ACTIVE_LOW",
                 "_CONFIG_DFLT_INPUT_TYPE_TRS_2_RING=INPUT_TYPE_NONE",
-                "_CONFIG_DFLT_INPUT_POLARITY_TRS_2_RING=INPUT_POLARITY_ACTIVE_LOW"
+                "_CONFIG_DFLT_INPUT_POLARITY_TRS_2_RING=INPUT_POLARITY_ACTIVE_LOW",
+                "_CONFIG_DFLT_KEYER_INVERT_PADDLES=false"
             ],
             "compilerPath": "/usr/bin/avr-gcc",
             "compilerArgs": [

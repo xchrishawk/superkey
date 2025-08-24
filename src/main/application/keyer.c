@@ -13,6 +13,7 @@
 #include <stdlib.h>
 
 #include "application/buzzer.h"
+#include "application/config.h"
 #include "application/input.h"
 #include "application/keyer.h"
 #include "application/led.h"
@@ -97,6 +98,13 @@ static void update_ticks( void );
 
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
 
+bool keyer_get_invert_paddles( void )
+{
+    return( config()->keyer_invert_paddles );
+
+}   /* keyer_get_invert_paddles() */
+
+
 void keyer_init( void )
 {
     // Initialize local state
@@ -126,6 +134,16 @@ void keyer_panic( void )
     set_keyed( false );
 
 }   /* keyer_panic() */
+
+
+void keyer_set_invert_paddles( bool invert )
+{
+    config_t config;
+    config_get( & config );
+    config.keyer_invert_paddles = invert;
+    config_set( & config );
+
+}   /* keyer_set_invert_paddles() */
 
 
 void keyer_tick( tick_t tick )
@@ -237,16 +255,16 @@ static state_t get_next_state( void )
     bool straight_key = is_bit_set( inputs, INPUT_TYPE_STRAIGHT_KEY );
     bool paddle_left = is_bit_set( inputs, INPUT_TYPE_PADDLE_LEFT );
     bool paddle_right = is_bit_set( inputs, INPUT_TYPE_PADDLE_RIGHT );
+    bool invert_paddles = keyer_get_invert_paddles();
 
     // Determine next state
-    // TODO: lots of things
     if( straight_key )
         return( STATE_ON );
     else if( paddle_left && paddle_right )
         return( s_state );
-    else if( paddle_left )
+    else if( ( ! invert_paddles && paddle_left ) || ( invert_paddles && paddle_right ) )
         return( STATE_DOTS );
-    else if( paddle_right )
+    else if( ( ! invert_paddles && paddle_right ) || ( invert_paddles && paddle_left ) )
         return( STATE_DASHES );
     else
         return( STATE_OFF );
