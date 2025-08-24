@@ -6,8 +6,9 @@
 # @date     2025-08-16
 #
 
-# Ignore tool directories
-.vscode/
+# Ignore .vscode directory, except for c_cpp_properties.json since it's required for intellisense
+.vscode/*
+!.vscode/c_cpp_properties.json
 
 # Ignore build directory
 build/
