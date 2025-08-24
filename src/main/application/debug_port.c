@@ -39,6 +39,48 @@
 #define RX_BUF_SIZE             64
 
 /**
+ * @def     ENABLE_STR
+ * @brief   The token to enable an option.
+ */
+#define ENABLE_STR              "enable"
+
+/**
+ * @def     ENABLED_STR
+ * @brief   The token which indicates that an option is enabled.
+ */
+#define ENABLED_STR             "enabled"
+
+/**
+ * @def     DISABLE_STR
+ * @brief   The token to disable an option.
+ */
+#define DISABLE_STR             "disable"
+
+/**
+ * @def     DISABLED_STR
+ * @brief   The token which indicates that an option is disabled.
+ */
+#define DISABLED_STR            "disabled"
+
+/**
+ * @define  OFF_STR
+ * @brief   The token which indicates that an input or output is off.
+ */
+#define OFF_STR                 "off"
+
+/**
+ * @def     ON_STR
+ * @brief   The token which indicates that an input or output is on.
+ */
+#define ON_STR                  "on"
+
+/**
+ * @def     INVALID_COMMAND_STR
+ * @brief   Prefix for invalid command messages.
+ */
+#define INVALID_COMMAND_STR     "Invalid command: "
+
+/**
  * @def     TERMINATOR_CHAR
  * @brief   Character which terminates a command from the client.
  */
@@ -95,6 +137,12 @@ static void exec_command_help( char const * command );
  * @brief   Executes the `input` command.
  */
 static void exec_command_input( char const * command );
+
+/**
+ * @fn      exec_command_keyer( char const * command )
+ * @brief   Executes the `keyer` command.
+ */
+static void exec_command_keyer( char const * command );
 
 /**
  * @fn      exec_command_led( char const * command )
@@ -222,7 +270,7 @@ static void evaluate_rx_buf( void )
         // Ensure we actually received some data
         if( s_rx_count == 1 )
         {
-            print_invalid_command( "No data." );
+            debug_port_print( INVALID_COMMAND_STR "No data." NEWLINE_STR );
             s_rx_count = 0;
             return;
         }
@@ -236,7 +284,7 @@ static void evaluate_rx_buf( void )
     // Have we run out of space?
     else if( rx_buf_avail() == 0 )
     {
-        print_invalid_command( "Too long." );
+        debug_port_print( INVALID_COMMAND_STR "Too long." NEWLINE_STR );
         s_rx_count = 0;
     }
 
@@ -258,6 +306,8 @@ static void exec_command( char const * command )
         exec_command_help( command );
     else if( ! strncasecmp( command, "input", 5 ) )
         exec_command_input( command );
+    else if( ! strncasecmp( command, "keyer", 5 ) )
+        exec_command_keyer( command );
     else if( ! strncasecmp( command, "led", 3 ) )
         exec_command_led( command );
     else if( ! strncasecmp( command, "tick", 4 ) )
@@ -283,12 +333,12 @@ static void exec_command_buzzer( char const * command )
     {
         // No subcommand - interpret as a status request. no action required
     }
-    else if( ! strcasecmp( command + PREFIX_LEN, " enable" ) )
+    else if( ! strcasecmp( command + PREFIX_LEN, " " ENABLE_STR ) )
     {
         // Turn buzzer on
         buzzer_set_enabled( true );
     }
-    else if( ! strcasecmp( command + PREFIX_LEN, " disable" ) )
+    else if( ! strcasecmp( command + PREFIX_LEN, " " DISABLE_STR ) )
     {
         // Turn buzzer oiff
         buzzer_set_enabled( false );
@@ -320,7 +370,7 @@ static void exec_command_buzzer( char const * command )
 
     // Send buzzer status
     debug_port_printf( "Buzzer: %s (%u Hz)" NEWLINE_STR,
-                       buzzer_get_enabled() ? "Enabled" : "Disabled",
+                       buzzer_get_enabled() ? ENABLED_STR : DISABLED_STR,
                        buzzer_get_frequency() );
 
 #undef PREFIX_LEN
@@ -369,37 +419,37 @@ static void exec_command_input( char const * command )
     if( ! strncasecmp( command_input_type, " trs_0_tip", TIP_LEN ) )
     {
         input_pin = INPUT_PIN_TRS_0_TIP;
-        input_pin_str = "TRS 0 Tip";
+        input_pin_str = "trs_0_tip";
         remaining_command = command_input_type + TIP_LEN;
     }
     else if( ! strncasecmp( command_input_type, " trs_0_ring", RING_LEN ) )
     {
         input_pin = INPUT_PIN_TRS_0_RING;
-        input_pin_str = "TRS 0 Ring";
+        input_pin_str = "trs_0_ring";
         remaining_command = command_input_type + RING_LEN;
     }
     else if( ! strncasecmp( command_input_type, " trs_1_tip", TIP_LEN ) )
     {
         input_pin = INPUT_PIN_TRS_1_TIP;
-        input_pin_str = "TRS 1 Tip";
+        input_pin_str = "trs_1_tip";
         remaining_command = command_input_type + TIP_LEN;
     }
     else if( ! strncasecmp( command_input_type, " trs_1_ring", RING_LEN ) )
     {
         input_pin = INPUT_PIN_TRS_1_RING;
-        input_pin_str = "TRS 1 Ring";
+        input_pin_str = "trs_1_ring";
         remaining_command = command_input_type + RING_LEN;
     }
     else if( ! strncasecmp( command_input_type, " trs_2_tip", TIP_LEN ) )
     {
         input_pin = INPUT_PIN_TRS_2_TIP;
-        input_pin_str = "TRS 2 Tip";
+        input_pin_str = "trs_2_tip";
         remaining_command = command_input_type + TIP_LEN;
     }
     else if( ! strncasecmp( command_input_type, " trs_2_ring", RING_LEN ) )
     {
         input_pin = INPUT_PIN_TRS_2_RING;
-        input_pin_str = "TRS 2 Ring";
+        input_pin_str = "trs_2_ring";
         remaining_command = command_input_type + RING_LEN;
     }
     else
@@ -413,7 +463,7 @@ static void exec_command_input( char const * command )
     {
         // No subcommand - interpret as a status request. no action required
     }
-    else if( ! strcasecmp( remaining_command, " disable" ) )
+    else if( ! strcasecmp( remaining_command, " " DISABLE_STR ) )
     {
         // Disable input
         input_set_type( input_pin, INPUT_TYPE_NONE );
@@ -455,34 +505,68 @@ static void exec_command_input( char const * command )
     switch( input_get_type( input_pin ) )
     {
     case INPUT_TYPE_STRAIGHT_KEY:
-        input_type_str = "Straight Key";
+        input_type_str = "straight_key";
         break;
     case INPUT_TYPE_PADDLE_LEFT:
-        input_type_str = "Left Paddle";
+        input_type_str = "paddle_left";
         break;
     case INPUT_TYPE_PADDLE_RIGHT:
-        input_type_str = "Right Paddle";
+        input_type_str = "paddle_right";
         break;
     case INPUT_TYPE_NONE:
-        input_type_str = "Disabled";
+        input_type_str = "none";
         break;
     default:
-        input_type_str = "Unknown";
+        input_type_str = "*** unknown ***";
         break;
     }
 
     // Print status info
     debug_port_printf( "Input %s: %s (%s - %s)" NEWLINE_STR,
                        input_pin_str,
+                       input_get_on( input_pin ) ? ON_STR : OFF_STR,
                        input_type_str,
-                       input_get_on( input_pin ) ? "On" : "Off",
-                       input_get_polarity( input_pin ) == INPUT_POLARITY_ACTIVE_LOW ? "Active Low" : "Active High" );
+                       input_get_polarity( input_pin ) == INPUT_POLARITY_ACTIVE_LOW ? "active_low" : "active_high" );
 
 #undef PREFIX_LEN
 #undef TIP_LEN
 #undef RING_LEN
 
 }   /* exec_command_input() */
+
+
+static void exec_command_keyer( char const * command )
+{
+#define PREFIX_LEN 5
+
+    if( command[ PREFIX_LEN ] == NULL_CHAR )
+    {
+        // No subcommand - interpret as a status request. no action required
+    }
+    else if( ! strcasecmp( command + PREFIX_LEN, " invert_paddles " ENABLE_STR ) )
+    {
+        // Set invert paddles to true
+        keyer_set_invert_paddles( true );
+    }
+    else if( ! strcasecmp( command + PREFIX_LEN, " invert_paddles " DISABLE_STR ) )
+    {
+        // Set invert paddles to false
+        keyer_set_invert_paddles( false );
+    }
+    else
+    {
+        // Unknown subcommand
+        print_invalid_command( command );
+        return;
+    }
+
+    // Print status info
+    debug_port_printf( "Keyer: Normal mode (invert paddles %s)" NEWLINE_STR,
+                       keyer_get_invert_paddles() ? ENABLED_STR : DISABLED_STR );
+
+#undef PREFIX_LEN
+
+}   /* exec_command_keyer() */
 
 
 static void exec_command_led( char const * command )
@@ -519,12 +603,12 @@ static void exec_command_led( char const * command )
     {
         // No subcommand - interpret as a status request. no action required
     }
-    else if( ! strcasecmp( remaining_command, " enable" ) )
+    else if( ! strcasecmp( remaining_command, " " ENABLE_STR ) )
     {
         // Enable LED
         led_set_enabled( led, true );
     }
-    else if( ! strcasecmp( remaining_command, " disable" ) )
+    else if( ! strcasecmp( remaining_command, " " DISABLE_STR ) )
     {
         // Disable LED
         led_set_enabled( led, false );
@@ -537,9 +621,10 @@ static void exec_command_led( char const * command )
     }
 
     // Print LED status
-    debug_port_printf( "%s LED: %s." NEWLINE_STR,
+    debug_port_printf( "%s LED: %s (%s)" NEWLINE_STR,
                        led_name,
-                       led_get_enabled( led ) ? "Enabled" : "Disabled" );
+                       led_get_on( led ) ? ON_STR : OFF_STR,
+                       led_get_enabled( led ) ? ENABLED_STR : DISABLED_STR );
 
 #undef PREFIX_LEN
 #undef STATUS_LEN
@@ -635,9 +720,9 @@ static void exec_command_wpm( char const * command )
 
 static void print_invalid_command( char const * command )
 {
-    debug_port_print( "Invalid command: " );
+    debug_port_print( INVALID_COMMAND_STR "\"" );
     debug_port_print( command );
-    debug_port_print( NEWLINE_STR );
+    debug_port_print( "\"" NEWLINE_STR );
 
 }   /* print_invalid_command() */
 
