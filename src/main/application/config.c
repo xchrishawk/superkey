@@ -46,15 +46,29 @@ void config_default( config_t * config )
     memset( config, 0, sizeof( config_t ) );
 
     // Global settings
-    config->wpm                             = _CONFIG_DFLT_WPM;
+    config->wpm                                     = _CONFIG_DFLT_WPM;
 
     // Buzzer configuration
-    config->buzzer_enabled                  = _CONFIG_DFLT_BUZZER_ENABLED;
-    config->buzzer_frequency                = _CONFIG_DFLT_BUZZER_FREQUENCY;
+    config->buzzer_enabled                          = _CONFIG_DFLT_BUZZER_ENABLED;
+    config->buzzer_frequency                        = _CONFIG_DFLT_BUZZER_FREQUENCY;
 
     // LED configuration
-    config->led_enabled[ LED_STATUS ]       = _CONFIG_DFLT_LED_STATUS_ENABLED;
-    config->led_enabled[ LED_KEY ]          = _CONFIG_DFLT_LED_KEY_ENABLED;
+    config->led_enabled[ LED_STATUS ]               = _CONFIG_DFLT_LED_STATUS_ENABLED;
+    config->led_enabled[ LED_KEY ]                  = _CONFIG_DFLT_LED_KEY_ENABLED;
+
+    // Input configuration
+    config->input_type[     INPUT_PIN_TRS_0_TIP  ]  = _CONFIG_DFLT_INPUT_TYPE_TRS_0_TIP;
+    config->input_polarity[ INPUT_PIN_TRS_0_TIP  ]  = _CONFIG_DFLT_INPUT_POLARITY_TRS_0_TIP;
+    config->input_type[     INPUT_PIN_TRS_0_RING ]  = _CONFIG_DFLT_INPUT_TYPE_TRS_0_RING;
+    config->input_polarity[ INPUT_PIN_TRS_0_RING ]  = _CONFIG_DFLT_INPUT_POLARITY_TRS_0_RING;
+    config->input_type[     INPUT_PIN_TRS_1_TIP  ]  = _CONFIG_DFLT_INPUT_TYPE_TRS_1_TIP;
+    config->input_polarity[ INPUT_PIN_TRS_1_TIP  ]  = _CONFIG_DFLT_INPUT_POLARITY_TRS_1_TIP;
+    config->input_type[     INPUT_PIN_TRS_1_RING ]  = _CONFIG_DFLT_INPUT_TYPE_TRS_1_RING;
+    config->input_polarity[ INPUT_PIN_TRS_1_RING ]  = _CONFIG_DFLT_INPUT_POLARITY_TRS_1_RING;
+    config->input_type[     INPUT_PIN_TRS_2_TIP  ]  = _CONFIG_DFLT_INPUT_TYPE_TRS_2_TIP;
+    config->input_polarity[ INPUT_PIN_TRS_2_TIP  ]  = _CONFIG_DFLT_INPUT_POLARITY_TRS_2_TIP;
+    config->input_type[     INPUT_PIN_TRS_2_RING ]  = _CONFIG_DFLT_INPUT_TYPE_TRS_2_RING;
+    config->input_polarity[ INPUT_PIN_TRS_2_RING ]  = _CONFIG_DFLT_INPUT_POLARITY_TRS_2_RING;
 
     // Ensure we generated a valid configuration
     assert_always( validate_config( config ) );

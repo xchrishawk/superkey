@@ -44,7 +44,7 @@ enum
 
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
 
-static gpio_pin_t const KEYER_OUT_PIN = GPIO_PIN_A3;
+static gpio_pin_t const KEYER_OUT_PIN = GPIO_PIN_A6;
 static bool const KEYER_OUT_ACTIVE_HIGH = false;
 
 /* --------------------------------------------------- VARIABLES ---------------------------------------------------- */
@@ -171,29 +171,6 @@ void keyer_tick( tick_t tick )
             break;
         }
 
-        case STATE_DASHES:
-        {
-            if( ( new_state &&
-                  is_timeout_elapsed( s_element_lockout ) ) ||
-                ( ! new_state &&
-                  ! s_panicked &&
-                  ! get_keyed() &&
-                  is_timeout_elapsed( s_element_lockout ) ) )
-            {
-                // Activate keyer hardware
-                set_keyed( true );
-                s_element_start = tick;
-                s_element_duration = s_dash_ticks;
-                s_element_lockout = s_dash_ticks + s_space_ticks;
-            }
-            else if( get_keyed() && is_timeout_elapsed( s_element_duration ) )
-            {
-                // Deactivate keyer hardware
-                set_keyed( false );
-            }
-            break;
-        }
-
         case STATE_DOTS:
         {
             if( ( new_state &&
@@ -208,6 +185,29 @@ void keyer_tick( tick_t tick )
                 s_element_start = tick;
                 s_element_duration = s_dot_ticks;
                 s_element_lockout = s_dot_ticks + s_space_ticks;
+            }
+            else if( get_keyed() && is_timeout_elapsed( s_element_duration ) )
+            {
+                // Deactivate keyer hardware
+                set_keyed( false );
+            }
+            break;
+        }
+
+        case STATE_DASHES:
+        {
+            if( ( new_state &&
+                  is_timeout_elapsed( s_element_lockout ) ) ||
+                ( ! new_state &&
+                  ! s_panicked &&
+                  ! get_keyed() &&
+                  is_timeout_elapsed( s_element_lockout ) ) )
+            {
+                // Activate keyer hardware
+                set_keyed( true );
+                s_element_start = tick;
+                s_element_duration = s_dash_ticks;
+                s_element_lockout = s_dash_ticks + s_space_ticks;
             }
             else if( get_keyed() && is_timeout_elapsed( s_element_duration ) )
             {
@@ -233,20 +233,21 @@ static bool get_keyed( void )
 static state_t get_next_state( void )
 {
     // Get all relevant inputs
-    bool straight_key = input_get( INPUT_STRAIGHT_KEY );
-    bool paddle_a = input_get( INPUT_PADDLE_A );
-    bool paddle_b = input_get( INPUT_PADDLE_B );
+    input_type_field_t inputs = input_types_get_on();
+    bool straight_key = is_bit_set( inputs, INPUT_TYPE_STRAIGHT_KEY );
+    bool paddle_left = is_bit_set( inputs, INPUT_TYPE_PADDLE_LEFT );
+    bool paddle_right = is_bit_set( inputs, INPUT_TYPE_PADDLE_RIGHT );
 
     // Determine next state
     // TODO: lots of things
     if( straight_key )
         return( STATE_ON );
-    else if( paddle_a && paddle_b )
+    else if( paddle_left && paddle_right )
         return( s_state );
-    else if( paddle_a )
-        return( STATE_DASHES );
-    else if( paddle_b )
+    else if( paddle_left )
         return( STATE_DOTS );
+    else if( paddle_right )
+        return( STATE_DASHES );
     else
         return( STATE_OFF );
 

@@ -9,6 +9,10 @@
 #if !defined( UTILITY_UTILITY_H )
 #define UTILITY_UTILITY_H
 
+/* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
+
+#include "utility/constants.h"
+
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
 /**
@@ -75,7 +79,7 @@
         ( ( _x ) > ( _max ) ? ( _max ) : ( _x ) ) )
 
 /**
- * @def     increment_rollover
+ * @def     increment_rollover( _value, _max )
  * @brief   Increments `_value` by one. If the result is greater than or equal to `_max`, resets `_value` to 0.
  */
 #define increment_rollover( _value, _max )                                              \
@@ -86,6 +90,13 @@
             ( _value ) = 0;                                                             \
     }                                                                                   \
     while( 0 )
+
+/**
+ * @def     sizeof_bits( _x )
+ * @brief   Returns the size of `_x`, in bits.
+ */
+#define sizeof_bits( _x )                                                               \
+    ( sizeof( _x ) * BITS_PER_BYTE )
 
 /**
  * @def     stringize( _x )

@@ -15,6 +15,7 @@
 #include <stdint.h>
 
 #include "application/buzzer.h"
+#include "application/input.h"
 #include "application/led.h"
 #include "application/wpm.h"
 
@@ -27,16 +28,22 @@
 typedef struct
 {
     /** Global words per minute setting. */
-    wpm_t           wpm;
+    wpm_t               wpm;
 
     /** If set to `false`, the buzzer will be disabled and will not sound. */
-    bool            buzzer_enabled;
+    bool                buzzer_enabled;
 
     /** The buzzer frequency, in Hz. */
-    buzzer_freq_t   buzzer_frequency;
+    buzzer_freq_t       buzzer_frequency;
 
     /** If set to `false`, the LED will be disabled and will not illuminate. */
-    bool            led_enabled[ LED_COUNT ];
+    bool                led_enabled[ LED_COUNT ];
+
+    /** The configured input type for each input pin. */
+    input_type_t        input_type[ INPUT_PIN_COUNT ];
+
+    /** THe configured input polarity for each input pin. */
+    input_polarity_t    input_polarity[ INPUT_PIN_COUNT ];
 
 } config_t;
 
