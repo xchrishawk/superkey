@@ -45,6 +45,9 @@ typedef struct
     /** The configured input polarity for each input pin. */
     input_polarity_t    input_polarity[ INPUT_PIN_COUNT ];
 
+    /** If set to `true`, the keyer's output is active low. */
+    bool                keyer_output_active_low;
+
     /** If set to `true`, the keyer will emit dashes from the left paddle and dots from the right paddle. */
     bool                keyer_invert_paddles;
 

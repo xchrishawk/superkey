@@ -112,73 +112,73 @@ static void evaluate_rx_buf( void );
  * @fn      exec_command( char const * command )
  * @brief   Executes the specified command, including sending any required response.
  */
-static void exec_command( char const * command );
+static void exec_command( char const * const command );
 
 /**
  * @fn      exec_command_buzzer( char const * command )
  * @brief   Executes the `buzzer` command.
  */
-static void exec_command_buzzer( char const * command );
+static void exec_command_buzzer( char const * const command );
 
 /**
  * @fn      exec_command_config( char const * command )
  * @brief   Executes the `config` command.
  */
-static void exec_command_config( char const * command );
+static void exec_command_config( char const * const command );
 
 /**
  * @fn      exec_command_help( char const * command )
  * @brief   Executes the `help` command.
  */
-static void exec_command_help( char const * command );
+static void exec_command_help( char const * const command );
 
 /**
  * @fn      exec_command_input( char const * command )
  * @brief   Executes the `input` command.
  */
-static void exec_command_input( char const * command );
+static void exec_command_input( char const * const command );
 
 /**
  * @fn      exec_command_keyer( char const * command )
  * @brief   Executes the `keyer` command.
  */
-static void exec_command_keyer( char const * command );
+static void exec_command_keyer( char const * const command );
 
 /**
  * @fn      exec_command_led( char const * command )
  * @brief   Executes the `led` command.
  */
-static void exec_command_led( char const * command );
+static void exec_command_led( char const * const command );
 
 /**
  * @fn      exec_command_panic( char const * command )
  * @brief   Executes the `panic` command.
  */
-static void exec_command_panic( char const * command );
+static void exec_command_panic( char const * const command );
 
 /**
  * @fn      exec_command_tick( char const * command )
  * @brief   Executes the `tick` command.
  */
-static void exec_command_tick( char const * command );
+static void exec_command_tick( char const * const command );
 
 /**
  * @fn      exec_command_version( char const * command )
  * @brief   Executes the `version` command.
  */
-static void exec_command_version( char const * command );
+static void exec_command_version( char const * const command );
 
 /**
  * @fn      exec_command_wpm( char const * command )
  * @brief   Executes the `wpm` command.
  */
-static void exec_command_wpm( char const * command );
+static void exec_command_wpm( char const * const command );
 
 /**
  * @fn      print_invalid_command( char const * )
  * @brief   Sends an "Invalid command" message for the specified command.
  */
-static void print_invalid_command( char const * command );
+static void print_invalid_command( char const * const command );
 
 /**
  * @fn      read_long( char const *, long * )
@@ -193,6 +193,24 @@ static bool read_long( char const * buf, long * value ) FUNC_MAY_BE_UNUSED;
  * @returns `true` if reading the value succeeded and all data was consumed.
  */
 static bool read_ulong( char const * buf, unsigned long * value ) FUNC_MAY_BE_UNUSED;
+
+/**
+ * @fn      string_begins_with( char const *, char const * )
+ * @brief   Returns `true` if `str` begins with `token`.
+ */
+static bool string_begins_with( char const * str, char const * token );
+
+/**
+ * @fn      string_equals( char const *, char const * )
+ * @brief   Returns `true` if the specified strings are equal.
+ */
+static bool string_equals( char const * str, char const * token );
+
+/**
+ * @fn      string_is_empty( char const * )
+ * @brief   Returns `true`
+ */
+static bool string_is_empty( char const * str );
 
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
 
@@ -293,28 +311,28 @@ static void evaluate_rx_buf( void )
 }   /* evaluate_rx_buf() */
 
 
-static void exec_command( char const * command )
+static void exec_command( char const * const command )
 {
     // Handle known commands, starting with panic because I'm paranoid
-    if( ! strncasecmp( command, "stop", 4 ) || ! strncasecmp( command, "panic", 5 ) )
+    if( string_equals( command, "stop" ) || string_equals( command, "panic" ) )
         exec_command_panic( command );
-    else if( ! strncasecmp( command, "buzzer", 6 ) )
+    else if( string_begins_with( command, "buzzer" ) )
         exec_command_buzzer( command );
-    else if( ! strncasecmp( command, "config", 6 ) )
+    else if( string_begins_with( command, "config" ) )
         exec_command_config( command );
-    else if( ! strncasecmp( command, "help", 4 ) )
+    else if( string_begins_with( command, "help" ) )
         exec_command_help( command );
-    else if( ! strncasecmp( command, "input", 5 ) )
+    else if( string_begins_with( command, "input" ) )
         exec_command_input( command );
-    else if( ! strncasecmp( command, "keyer", 5 ) )
+    else if( string_begins_with( command, "keyer" ) )
         exec_command_keyer( command );
-    else if( ! strncasecmp( command, "led", 3 ) )
+    else if( string_begins_with( command, "led" ) )
         exec_command_led( command );
-    else if( ! strncasecmp( command, "tick", 4 ) )
+    else if( string_begins_with( command, "tick" ) )
         exec_command_tick( command );
-    else if( ! strncasecmp( command, "version", 7 ) )
+    else if( string_begins_with( command, "version" ) )
         exec_command_version( command );
-    else if( ! strncasecmp( command, "wpm", 3 ) )
+    else if( string_begins_with( command, "wpm" ) )
         exec_command_wpm( command );
 
     // Handle unrecognized commands
@@ -324,29 +342,31 @@ static void exec_command( char const * command )
 }   /* exec_command() */
 
 
-static void exec_command_buzzer( char const * command )
+static void exec_command_buzzer( char const * const command )
 {
-#define PREFIX_LEN 6
-#define FREQUENCY_LEN 11
+    // Drop "buzzer" token
+    char const * c = command + 6;
 
-    if( command[ PREFIX_LEN ] == NULL_CHAR )
+    if( string_is_empty( c ) )
     {
         // No subcommand - interpret as a status request. no action required
     }
-    else if( ! strcasecmp( command + PREFIX_LEN, " " ENABLE_STR ) )
+    else if( string_equals( c, " " ENABLE_STR ) )
     {
         // Turn buzzer on
         buzzer_set_enabled( true );
     }
-    else if( ! strcasecmp( command + PREFIX_LEN, " " DISABLE_STR ) )
+    else if( string_equals( c, " " DISABLE_STR ) )
     {
         // Turn buzzer oiff
         buzzer_set_enabled( false );
     }
-    else if( ! strncasecmp( command + PREFIX_LEN, " frequency ", FREQUENCY_LEN ) )
+    else if( string_begins_with( c, " frequency " ) )
     {
+        // Drop " frequency "
+        c += 11;
         unsigned long freq;
-        if( read_ulong( command + PREFIX_LEN + FREQUENCY_LEN, & freq ) &&
+        if( read_ulong( c, & freq ) &&
             freq >= BUZZER_MINIMUM_FREQUENCY &&
             freq <= BUZZER_MAXIMUM_FREQUENCY )
         {
@@ -354,9 +374,9 @@ static void exec_command_buzzer( char const * command )
         }
         else
         {
-            debug_port_print( "Invalid frequency: " );
-            debug_port_print( command + PREFIX_LEN + FREQUENCY_LEN );
-            debug_port_print( ". Must be between " stringize_value( BUZZER_MINIMUM_FREQUENCY )
+            debug_port_print( "Invalid frequency: \"" );
+            debug_port_print( c );
+            debug_port_print( "\". Must be between " stringize_value( BUZZER_MINIMUM_FREQUENCY )
                               " and " stringize_value( BUZZER_MAXIMUM_FREQUENCY ) " Hz." NEWLINE_STR );
             return;
         }
@@ -373,15 +393,15 @@ static void exec_command_buzzer( char const * command )
                        buzzer_get_enabled() ? ENABLED_STR : DISABLED_STR,
                        buzzer_get_frequency() );
 
-#undef PREFIX_LEN
-#undef FREQUENCY_LEN
-
 }   /* exec_command_buzzer() */
 
 
-static void exec_command_config( char const * command )
+static void exec_command_config( char const * const command )
 {
-    if( ! strcasecmp( command + 6, " default" ) )
+    // Drop "config" token
+    char const * c = command + 6;
+
+    if( string_equals( c, " default" ) )
     {
         // Restore default configuration
         config_t config;
@@ -397,7 +417,7 @@ static void exec_command_config( char const * command )
 }   /* exec_command_config() */
 
 
-static void exec_command_help( char const * command )
+static void exec_command_help( char const * const command )
 {
     ( void )command;
     debug_port_print( "Not implemented yet." NEWLINE_STR );
@@ -405,153 +425,141 @@ static void exec_command_help( char const * command )
 }   /* exec_command_help() */
 
 
-static void exec_command_input( char const * command )
+static void exec_command_input( char const * const command )
 {
-#define PREFIX_LEN 5
-#define TIP_LEN 10
-#define RING_LEN 11
+    // Local constants
+    static char const * const s_pin_tbl[] =
+    {
+        stringize( INPUT_PIN_TRS_0_TIP ),
+        stringize( INPUT_PIN_TRS_0_RING ),
+        stringize( INPUT_PIN_TRS_1_TIP ),
+        stringize( INPUT_PIN_TRS_1_RING ),
+        stringize( INPUT_PIN_TRS_2_TIP ),
+        stringize( INPUT_PIN_TRS_2_RING ),
+    };
+    _Static_assert( array_count( s_pin_tbl ) == INPUT_PIN_COUNT, "Invalid string table!" );
+    static char const * const s_type_tbl[] =
+    {
+        stringize( INPUT_TYPE_STRAIGHT_KEY ),
+        stringize( INPUT_TYPE_PADDLE_LEFT ),
+        stringize( INPUT_TYPE_PADDLE_RIGHT ),
+        stringize( INPUT_TYPE_PADDLE_NONE ),
+    };
+    _Static_assert( array_count( s_type_tbl ) == INPUT_TYPE_COUNT + 1, "Invalid string table!" );
+    static char const * const s_polarity_tbl[] =
+    {
+        stringize( INPUT_POLARITY_ACTIVE_LOW ),
+        stringize( INPUT_POLARITY_ACTIVE_HIGH ),
+    };
+    _Static_assert( array_count( s_polarity_tbl ) == INPUT_POLARITY_COUNT, "Invalid string table!" );
 
-    // Get the relevant input we want to look at
-    char const * command_input_type = command + PREFIX_LEN;
-    input_pin_t input_pin = INPUT_PIN_COUNT;
-    char const * input_pin_str = NULL;
-    char const * remaining_command = NULL;
-    if( ! strncasecmp( command_input_type, " trs_0_tip", TIP_LEN ) )
-    {
-        input_pin = INPUT_PIN_TRS_0_TIP;
-        input_pin_str = "trs_0_tip";
-        remaining_command = command_input_type + TIP_LEN;
-    }
-    else if( ! strncasecmp( command_input_type, " trs_0_ring", RING_LEN ) )
-    {
-        input_pin = INPUT_PIN_TRS_0_RING;
-        input_pin_str = "trs_0_ring";
-        remaining_command = command_input_type + RING_LEN;
-    }
-    else if( ! strncasecmp( command_input_type, " trs_1_tip", TIP_LEN ) )
-    {
-        input_pin = INPUT_PIN_TRS_1_TIP;
-        input_pin_str = "trs_1_tip";
-        remaining_command = command_input_type + TIP_LEN;
-    }
-    else if( ! strncasecmp( command_input_type, " trs_1_ring", RING_LEN ) )
-    {
-        input_pin = INPUT_PIN_TRS_1_RING;
-        input_pin_str = "trs_1_ring";
-        remaining_command = command_input_type + RING_LEN;
-    }
-    else if( ! strncasecmp( command_input_type, " trs_2_tip", TIP_LEN ) )
-    {
-        input_pin = INPUT_PIN_TRS_2_TIP;
-        input_pin_str = "trs_2_tip";
-        remaining_command = command_input_type + TIP_LEN;
-    }
-    else if( ! strncasecmp( command_input_type, " trs_2_ring", RING_LEN ) )
-    {
-        input_pin = INPUT_PIN_TRS_2_RING;
-        input_pin_str = "trs_2_ring";
-        remaining_command = command_input_type + RING_LEN;
-    }
-    else
+    // Drop "input" prefix
+    char const * c = command + 5;
+
+    // Ensure we have data remaining (input pin is a mandatory argument)
+    if( string_is_empty( c++ ) )
     {
         print_invalid_command( command );
+        return;
+    }
+
+    // Find the relevant input pin
+    input_pin_t pin = INPUT_PIN_COUNT;
+    for( input_pin_t search_pin = 0; search_pin < INPUT_PIN_COUNT; search_pin++ )
+    {
+        if( ! string_begins_with( c, s_pin_tbl[ search_pin ] ) )
+            continue;
+        pin = search_pin;
+        c += strlen( s_pin_tbl[ search_pin ] );
+        break;
+    }
+    if( pin == INPUT_PIN_COUNT )
+    {
+        print_invalid_command( c );
         return;
     }
 
     // Interpret command
-    if( * remaining_command == NULL_CHAR )
+    if( string_is_empty( c ) )
     {
         // No subcommand - interpret as a status request. no action required
     }
-    else if( ! strcasecmp( remaining_command, " " DISABLE_STR ) )
+    else if( string_equals( c, " " DISABLE_STR ) ||
+             string_equals( c, " " stringize( INPUT_TYPE_NONE ) ) )
     {
         // Disable input
-        input_set_type( input_pin, INPUT_TYPE_NONE );
+        input_set_type( pin, INPUT_TYPE_NONE );
     }
-    else if( ! strcasecmp( remaining_command, " straight_key" ) )
+    else if( string_equals( c, " " stringize( INPUT_TYPE_STRAIGHT_KEY ) ) )
     {
         // Set input as straight key
-        input_set_type( input_pin, INPUT_TYPE_STRAIGHT_KEY );
+        input_set_type( pin, INPUT_TYPE_STRAIGHT_KEY );
     }
-    else if( ! strcasecmp( remaining_command, " paddle_left" ) )
+    else if( string_equals( c, " " stringize( INPUT_TYPE_PADDLE_LEFT ) ) )
     {
         // Set input as left paddle
-        input_set_type( input_pin, INPUT_TYPE_PADDLE_LEFT );
+        input_set_type( pin, INPUT_TYPE_PADDLE_LEFT );
     }
-    else if( ! strcasecmp( remaining_command, " paddle_right" ) )
+    else if( string_equals( c, " " stringize( INPUT_TYPE_PADDLE_RIGHT ) ) )
     {
         // Set input as right paddle
-        input_set_type( input_pin, INPUT_TYPE_PADDLE_RIGHT );
+        input_set_type( pin, INPUT_TYPE_PADDLE_RIGHT );
     }
-    else if( ! strcasecmp( remaining_command, " active_low" ) )
+    else if( string_equals( c, " " stringize( INPUT_POLARITY_ACTIVE_LOW ) ) )
     {
         // Set input to active low
-        input_set_polarity( input_pin, INPUT_POLARITY_ACTIVE_LOW );
+        input_set_polarity( pin, INPUT_POLARITY_ACTIVE_LOW );
     }
-    else if( ! strcasecmp( remaining_command, " active_high" ) )
+    else if( string_equals( c, " " stringize( INPUT_POLARITY_ACTIVE_HIGH ) ) )
     {
         // Set input to active high
-        input_set_polarity( input_pin, INPUT_POLARITY_ACTIVE_HIGH );
+        input_set_polarity( pin, INPUT_POLARITY_ACTIVE_HIGH );
     }
     else
     {
         // Unknown subcommand
-        print_invalid_command( command );
+        print_invalid_command( c );
         return;
     }
 
-    // Get string for the input type
-    char const * input_type_str = NULL;
-    switch( input_get_type( input_pin ) )
-    {
-    case INPUT_TYPE_STRAIGHT_KEY:
-        input_type_str = "straight_key";
-        break;
-    case INPUT_TYPE_PADDLE_LEFT:
-        input_type_str = "paddle_left";
-        break;
-    case INPUT_TYPE_PADDLE_RIGHT:
-        input_type_str = "paddle_right";
-        break;
-    case INPUT_TYPE_NONE:
-        input_type_str = "none";
-        break;
-    default:
-        input_type_str = "*** unknown ***";
-        break;
-    }
-
     // Print status info
-    debug_port_printf( "Input %s: %s (%s - %s)" NEWLINE_STR,
-                       input_pin_str,
-                       input_get_on( input_pin ) ? ON_STR : OFF_STR,
-                       input_type_str,
-                       input_get_polarity( input_pin ) == INPUT_POLARITY_ACTIVE_LOW ? "active_low" : "active_high" );
-
-#undef PREFIX_LEN
-#undef TIP_LEN
-#undef RING_LEN
+    debug_port_printf( "%s: %s (%s - %s)" NEWLINE_STR,
+                       s_pin_tbl[ pin ],
+                       input_get_on( pin ) ? ON_STR : OFF_STR,
+                       s_type_tbl[ input_get_type( pin ) ],
+                       s_polarity_tbl[ input_get_polarity( pin ) ] );
 
 }   /* exec_command_input() */
 
 
-static void exec_command_keyer( char const * command )
+static void exec_command_keyer( char const * const command )
 {
-#define PREFIX_LEN 5
+    // Drop "keyer" prefix
+    char const * c = command + 5;
 
-    if( command[ PREFIX_LEN ] == NULL_CHAR )
+    if( string_is_empty( c ) )
     {
         // No subcommand - interpret as a status request. no action required
     }
-    else if( ! strcasecmp( command + PREFIX_LEN, " invert_paddles " ENABLE_STR ) )
+    else if( string_equals( c, " invert_paddles " ENABLE_STR ) )
     {
         // Set invert paddles to true
         keyer_set_invert_paddles( true );
     }
-    else if( ! strcasecmp( command + PREFIX_LEN, " invert_paddles " DISABLE_STR ) )
+    else if( string_equals( c, " invert_paddles " DISABLE_STR ) )
     {
         // Set invert paddles to false
         keyer_set_invert_paddles( false );
+    }
+    else if( string_equals( c, " output_active_low " ENABLE_STR ) )
+    {
+        // Set output to active low
+        keyer_set_output_active_low( true );
+    }
+    else if( string_equals( c, " output_active_low " DISABLE_STR ) )
+    {
+        // Set output to active high
+        keyer_set_output_active_low( false );
     }
     else
     {
@@ -561,54 +569,59 @@ static void exec_command_keyer( char const * command )
     }
 
     // Print status info
-    debug_port_printf( "Keyer: Normal mode (invert paddles %s)" NEWLINE_STR,
+    debug_port_printf( "Keyer: Normal mode (active low %s, invert paddles %s)" NEWLINE_STR,
+                       keyer_get_output_active_low() ? ENABLED_STR : DISABLED_STR,
                        keyer_get_invert_paddles() ? ENABLED_STR : DISABLED_STR );
-
-#undef PREFIX_LEN
 
 }   /* exec_command_keyer() */
 
 
-static void exec_command_led( char const * command )
+static void exec_command_led( char const * const command )
 {
-#define PREFIX_LEN 3
-#define STATUS_LEN 7
-#define KEY_LEN 4
+    // Local constants
+    static char const * s_led_tbl[] =
+    {
+        stringize( LED_STATUS ),
+        stringize( LED_KEY ),
+    };
+    _Static_assert( array_count( s_led_tbl ) == LED_COUNT, "Invalid string table!" );
 
-    // Get the specific LED
-    led_t led = LED_COUNT;
-    char const * led_name = NULL;
-    char const * remaining_command = NULL;
-    if( ! strncasecmp( command + PREFIX_LEN, " status", STATUS_LEN ) )
-    {
-        // Status LED
-        led = LED_STATUS;
-        led_name = "Status";
-        remaining_command = command + PREFIX_LEN + STATUS_LEN;
-    }
-    else if( ! strncasecmp( command + PREFIX_LEN, " key", KEY_LEN ) )
-    {
-        // Key LED
-        led = LED_KEY;
-        led_name = "Key";
-        remaining_command = command + PREFIX_LEN + KEY_LEN;
-    }
-    else
+    // Drop "led" prefix
+    char const * c = command + 3;
+
+    // Ensure we have data remaining (input pin is a mandatory argument)
+    if( string_is_empty( c++ ) )
     {
         print_invalid_command( command );
         return;
     }
 
-    if( * remaining_command == NULL_CHAR )
+    // Find the relevant LED
+    led_t led = LED_COUNT;
+    for( led_t search_led = 0; search_led < LED_COUNT; search_led++ )
+    {
+        if( ! string_begins_with( c, s_led_tbl[ search_led ] ) )
+            continue;
+        led = search_led;
+        c += strlen( s_led_tbl[ search_led ] );
+        break;
+    }
+    if( led == LED_COUNT )
+    {
+        print_invalid_command( c );
+        return;
+    }
+
+    if( string_is_empty( c ) )
     {
         // No subcommand - interpret as a status request. no action required
     }
-    else if( ! strcasecmp( remaining_command, " " ENABLE_STR ) )
+    else if( string_equals( c, " " ENABLE_STR ) )
     {
         // Enable LED
         led_set_enabled( led, true );
     }
-    else if( ! strcasecmp( remaining_command, " " DISABLE_STR ) )
+    else if( string_equals( c, " " DISABLE_STR ) )
     {
         // Disable LED
         led_set_enabled( led, false );
@@ -621,19 +634,15 @@ static void exec_command_led( char const * command )
     }
 
     // Print LED status
-    debug_port_printf( "%s LED: %s (%s)" NEWLINE_STR,
-                       led_name,
+    debug_port_printf( "%s: %s (%s)" NEWLINE_STR,
+                       s_led_tbl[ led ],
                        led_get_on( led ) ? ON_STR : OFF_STR,
                        led_get_enabled( led ) ? ENABLED_STR : DISABLED_STR );
-
-#undef PREFIX_LEN
-#undef STATUS_LEN
-#undef KEY_LEN
 
 }   /* exec_command_led() */
 
 
-static void exec_command_panic( char const * command )
+static void exec_command_panic( char const * const command )
 {
     ( void )command;
     keyer_panic();
@@ -642,7 +651,7 @@ static void exec_command_panic( char const * command )
 }   /* exec_command_panic() */
 
 
-static void exec_command_tick( char const * command )
+static void exec_command_tick( char const * const command )
 {
     ( void )command;
     debug_port_printf( "Tick: %lu" NEWLINE_STR, sys_get_tick() );
@@ -650,7 +659,7 @@ static void exec_command_tick( char const * command )
 }   /* exec_command_tick() */
 
 
-static void exec_command_version( char const * command )
+static void exec_command_version( char const * const command )
 {
     ( void )command;
 
@@ -669,30 +678,27 @@ static void exec_command_version( char const * command )
 }   /* exec_command_version() */
 
 
-static void exec_command_wpm( char const * command )
+static void exec_command_wpm( char const * const command )
 {
-#define PREFIX_LEN 3
+    // Drop "wpm" prefix
+    char const * c = command + 3;
 
     unsigned long wpm;
-    if( command[ PREFIX_LEN ] == NULL_CHAR )
+    if( string_is_empty( c ) )
     {
         // No subcommand - interpret as a status request. no action required
     }
-    else if( command[ PREFIX_LEN ] == ' ' &&
-             read_ulong( command + PREFIX_LEN + 1, & wpm ) )
+    else if( ( * c ) == ' ' && read_ulong( c + 1, & wpm ) )
     {
-        unsigned long wpm;
-        if( read_ulong( command + PREFIX_LEN + 1, & wpm ) &&
-            wpm >= WPM_MINIMUM &&
-            wpm <= WPM_MAXIMUM )
+        if( wpm >= WPM_MINIMUM && wpm <= WPM_MAXIMUM )
         {
             wpm_set( ( wpm_t )wpm );
         }
         else
         {
-            debug_port_print( "Invalid WPM: " );
-            debug_port_print( command + PREFIX_LEN + 1 );
-            debug_port_print( ". Must be between " stringize_value( WPM_MINIMUM )
+            debug_port_print( "Invalid WPM: \"" );
+            debug_port_print( c + 1 );
+            debug_port_print( "\". Must be between " stringize_value( WPM_MINIMUM )
                               " and " stringize_value( WPM_MAXIMUM ) "." NEWLINE_STR );
             return;
         }
@@ -713,12 +719,10 @@ static void exec_command_wpm( char const * command )
                        dot / TICKS_PER_MSEC,
                        dash / TICKS_PER_MSEC );
 
-#undef PREFIX_LEN
-
 }   /* exec_command_wpm() */
 
 
-static void print_invalid_command( char const * command )
+static void print_invalid_command( char const * const command )
 {
     debug_port_print( INVALID_COMMAND_STR "\"" );
     debug_port_print( command );
@@ -751,3 +755,24 @@ static bool read_ulong( char const * buf, unsigned long * value )
     return( true );
 
 }   /* read_ulong() */
+
+
+static bool string_begins_with( char const * str, char const * token )
+{
+    return( ! strncasecmp( str, token, strlen( token ) ) );
+
+}   /* string_begins_with() */
+
+
+static bool string_equals( char const * str, char const * token )
+{
+    return( ! strcasecmp( str, token ) );
+
+}   /* string_equals() */
+
+
+static bool string_is_empty( char const * str )
+{
+    return( ( * str ) == NULL_CHAR );
+
+}   /* string_is_empty() */

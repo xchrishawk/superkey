@@ -92,6 +92,13 @@
     while( 0 )
 
 /**
+ * @def     nop()
+ * @brief   Do nothing, stylishly.
+ */
+#define nop()                                                                           \
+    ( void )0
+
+/**
  * @def     sizeof_bits( _x )
  * @brief   Returns the size of `_x`, in bits.
  */

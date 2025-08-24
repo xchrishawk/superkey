@@ -46,7 +46,6 @@ enum
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
 
 static gpio_pin_t const KEYER_OUT_PIN = GPIO_PIN_A6;
-static bool const KEYER_OUT_ACTIVE_HIGH = false;
 
 /* --------------------------------------------------- VARIABLES ---------------------------------------------------- */
 
@@ -105,6 +104,13 @@ bool keyer_get_invert_paddles( void )
 }   /* keyer_get_invert_paddles() */
 
 
+bool keyer_get_output_active_low( void )
+{
+    return( config()->keyer_output_active_low );
+
+}   /* keyer_get_output_active_low() */
+
+
 void keyer_init( void )
 {
     // Initialize local state
@@ -144,6 +150,16 @@ void keyer_set_invert_paddles( bool invert )
     config_set( & config );
 
 }   /* keyer_set_invert_paddles() */
+
+
+void keyer_set_output_active_low( bool active_lo )
+{
+    config_t config;
+    config_get( & config );
+    config.keyer_output_active_low = active_lo;
+    config_set( & config );
+
+}   /* keyer_set_output_active_low() */
 
 
 void keyer_tick( tick_t tick )
@@ -283,10 +299,11 @@ static void set_keyed( bool keyed )
 static void update_hardware( void )
 {
     // Update GPIO
+    bool active_lo = keyer_get_output_active_low();
     gpio_set_state( KEYER_OUT_PIN,
                     s_keyed ?
-                        ( KEYER_OUT_ACTIVE_HIGH ? GPIO_STATE_HIGH : GPIO_STATE_LOW ) :
-                        ( KEYER_OUT_ACTIVE_HIGH ? GPIO_STATE_LOW : GPIO_STATE_HIGH ) );
+                        ( active_lo ? GPIO_STATE_LOW : GPIO_STATE_HIGH ) :
+                        ( active_lo ? GPIO_STATE_HIGH : GPIO_STATE_LOW ) );
 
     // Update LED
     led_set_on( LED_KEY, s_keyed );

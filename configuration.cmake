@@ -42,6 +42,8 @@ set(CONFIG_DFLT_INPUT_TYPE_TRS_2_RING       INPUT_TYPE_NONE
     CACHE STRING                            "Input type for the ring of TRS 0. (input_type_t)")
 set(CONFIG_DFLT_INPUT_POLARITY_TRS_2_RING   INPUT_POLARITY_ACTIVE_LOW
     CACHE STRING                            "Input polarity for the ring of TRS 0. (input_polarity_t)")
+set(CONFIG_DFLT_KEYER_OUTPUT_ACTIVE_LOW     true
+    CACHE STRING                            "Set to true for active low keyer output. (true / false)")
 set(CONFIG_DFLT_KEYER_INVERT_PADDLES        false
     CACHE STRING                            "Set to true to invert the paddles. (true / false)")
 
@@ -67,5 +69,6 @@ add_compile_definitions(
     _CONFIG_DFLT_INPUT_POLARITY_TRS_2_TIP=${CONFIG_DFLT_INPUT_POLARITY_TRS_2_TIP}
     _CONFIG_DFLT_INPUT_TYPE_TRS_2_RING=${CONFIG_DFLT_INPUT_TYPE_TRS_2_RING}
     _CONFIG_DFLT_INPUT_POLARITY_TRS_2_RING=${CONFIG_DFLT_INPUT_POLARITY_TRS_2_RING}
+    _CONFIG_DFLT_KEYER_OUTPUT_ACTIVE_LOW=${CONFIG_DFLT_KEYER_OUTPUT_ACTIVE_LOW}
     _CONFIG_DFLT_KEYER_INVERT_PADDLES=${CONFIG_DFLT_KEYER_INVERT_PADDLES}
 )

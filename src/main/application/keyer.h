@@ -25,6 +25,12 @@
 bool keyer_get_invert_paddles( void );
 
 /**
+ * @fn      keyer_get_active_low( void )
+ * @brief   Returns `true` if the keyer's output is active low.
+ */
+bool keyer_get_output_active_low( void );
+
+/**
  * @fn      keyer_init( void )
  * @brief   Initializes the keyer module.
  */
@@ -42,6 +48,13 @@ void keyer_panic( void );
  * @note    This modifies the application configuration.
  */
 void keyer_set_invert_paddles( bool invert );
+
+/**
+ * @fn      keyer_set_output_active_low( bool )
+ * @brief   Sets whether the keyer's output is active low or not.
+ * @note    This modifies the application configuration.
+ */
+void keyer_set_output_active_low( bool active_lo );
 
 /**
  * @fn      keyer_tick( tick_t )
