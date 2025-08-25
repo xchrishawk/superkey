@@ -23,7 +23,7 @@
 /* ----------------------------------------------------- TYPES ------------------------------------------------------ */
 
 /**
- * @typedef config_t
+ * @struct  config_t
  * @brief   Struct containing the current application configuration information.
  */
 typedef struct

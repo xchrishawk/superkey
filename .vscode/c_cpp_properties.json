@@ -4,7 +4,6 @@
             "name": "AVR (ATMega1284P)",
             "includePath": [
                 "${workspaceFolder}/build/autogen/superkey",
-                "${workspaceFolder}/lib",
                 "${workspaceFolder}/src/main"
             ],
             "defines": [

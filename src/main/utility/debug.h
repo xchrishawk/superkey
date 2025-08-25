@@ -44,7 +44,7 @@
 void fail( void ) FUNC_NEVER_RETURNS;
 
 /**
- * @fn      fail( uint8_t )
+ * @fn      fail_code( uint8_t )
  * @brief   Aborts the application. Enters an infinite loop which flashes the specified code on the status LED.
  */
 void fail_code( uint8_t code ) FUNC_NEVER_RETURNS;

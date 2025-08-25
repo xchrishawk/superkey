@@ -1,5 +1,5 @@
 /**
- * @file    src/main/core/config.c
+ * @file    src/main/application/config.c
  * @brief   Implementation for the application configuration module.
  *
  * @author  Chris Vig (chris@invictus.so)

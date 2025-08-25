@@ -64,7 +64,7 @@ bool keyer_get_invert_paddles( void );
 keyer_mode_t keyer_get_mode( void );
 
 /**
- * @fn      keyer_get_active_low( void )
+ * @fn      keyer_get_output_active_low( void )
  * @brief   Returns `true` if the keyer's output is active low.
  */
 bool keyer_get_output_active_low( void );

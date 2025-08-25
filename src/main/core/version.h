@@ -27,7 +27,7 @@ extern uint8_t const PRODUCT_VERSION_REVISION;
 /* ----------------------------------------------------- TYPES ------------------------------------------------------ */
 
 /**
- * @typedef version_t
+ * @struct  version_t
  * @brief   Struct containing version information for the application.
  */
 typedef struct

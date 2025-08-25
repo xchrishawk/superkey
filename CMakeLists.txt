@@ -10,6 +10,7 @@ cmake_minimum_required(VERSION 3.22)
 
 # -- Packages --
 
+find_package(Doxygen REQUIRED)
 find_package(Git REQUIRED)
 
 # -- Project Configuration --
@@ -102,6 +103,34 @@ add_compile_options(
 add_link_options(
     # Device MCU type
     -mmcu=${DEVICE_MCU}
+)
+
+# -- Documentation Setup --
+
+# CMake will automatically generate the Doxyfile in the build directory based on the Doxyfile.in template
+set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
+set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+
+# Set Doxygen options
+set(DOXYGEN_EXTRACT_ALL NO)
+set(DOXYGEN_WARN_IF_UNDOCUMENTED YES)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(DOXYGEN_EXTRACT_ALL YES)
+    set(DOXYGEN_WARN_IF_UNDOCUMENTED NO)
+endif()
+
+# Configure the Doxyfile
+configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+
+# Add custom target for Doxygen
+# (Running `make doxygen` will build the documents in the build directory)
+add_custom_target(
+    doxygen
+    ALL
+    COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT "Generating documentation with Doxygen"
+    VERBATIM
 )
 
 # -- Subdirectories --

@@ -1,0 +1,24 @@
+#
+# @file     Doxyfile
+# @brief    Doxyfile for generating Doxygen documentation.
+#
+# @author   Chris Vig (chris@invictus.so)
+# @date     2025-08-25
+#
+# NOTE:
+# CMake processes Doxyfile.in in the root directory, and saves it to build/Doxyfile, which is then used to generate the
+# documentation with Doxygen by running `make doxygen`.
+#
+
+PROJECT_NAME            = @PROJECT_NAME@
+OUTPUT_DIRECTORY        = @CMAKE_CURRENT_BINARY_DIR@/docs
+INPUT                   = @CMAKE_SOURCE_DIR@/readme.md \
+                          @CMAKE_SOURCE_DIR@/src
+RECURSIVE               = YES
+EXTRACT_ALL             = @DOXYGEN_EXTRACT_ALL@
+WARN_IF_UNDOCUMENTED    = @DOXYGEN_WARN_IF_UNDOCUMENTED@
+GENERATE_LATEX          = NO
+GENERATE_HTML           = YES
+EXCLUDE_SYMBOLS         = _Static_assert ISR
+USE_MDFILE_AS_MAINPAGE  = @CMAKE_SOURCE_DIR@/readme.md
+MARKDOWN_SUPPORT        = YES
