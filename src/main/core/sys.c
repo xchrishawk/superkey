@@ -26,7 +26,7 @@
  * @def     DEBUG_TEST_CLOCK_WRAPAROUND
  * @brief   If set to `ON`, the system tick will be set to 15 seconds prior to a wraparound at startup.
  */
-#define DEBUG_TEST_CLOCK_WRAPAROUND     ON
+#define DEBUG_TEST_CLOCK_WRAPAROUND     OFF
 
 /* --------------------------------------------------- VARIABLES ---------------------------------------------------- */
 
@@ -105,22 +105,22 @@ void sys_init( void )
     //
     // Initialize timer 0 for main system tick at 1 millisecond period. Based on the following:
     //
-    // - F_CPU      = 8 MHz
-    // - P_CPU      = 1 / 8 MHz         = 0.125 us
+    // - F_CPU      = 16 MHz
+    // - P_CPU      = 1 / 16 MHz        = 62.5 ns
     // - Prescaler  = F_CPU / 64
-    // - P_TIMER    = 0.125 us * 64     = 8 us
-    // - Clocks     = 1 ms / 8 us       = 125
-    // - OCRA       = Clocks - 1        = 124
+    // - P_TIMER    = 0.05 us * 64      = 4 us
+    // - Clocks     = 1 ms / 4 us       = 250
+    // - OCRA       = Clocks - 1        = 249
     //
     // Therefore we have:
     //
     // - Waveform generation mode set to CTC
-    // - Clock prescaler set to F_CPU / 64 (F_CPU = 8 MHz)
-    // - Compare value set to 124
+    // - Clock prescaler set to F_CPU / 64 (F_CPU = 16 MHz)
+    // - Compare value set to 249
     //
     TCCR0A = bitmask1( WGM01 );
     TCCR0B = bitmask2( CS00, CS01 );
-    OCR0A = 124;
+    OCR0A = 249;
 
     // Enable interrupt for timer 0
     TIMSK0 = bitmask1( OCIE0A );
