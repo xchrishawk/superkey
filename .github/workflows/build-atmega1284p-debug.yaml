@@ -1,0 +1,70 @@
+name: Build - AVR ATmega1284P (Debug)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Debug
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    
+    - name: Install
+      # Install AVR GCC toolchain
+      run : |
+        sudo apt-get update
+        sudo apt-get install -y gcc-avr binutils-avr avr-libc cmake make
+        
+    - name: Check Out
+      # Check out latest code
+      uses: actions/checkout@v4
+      
+    - name: Configure
+      # Configure build environment in build/ directory
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      
+    - name: Build
+      # Execute the build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - name: Upload Artifact (superkey.elf)
+      # Upload ELF file
+      uses: actions/upload-artifact@v4
+      with:
+        name: superkey.elf
+        path: build/superkey.elf
+        
+    - name: Upload Artifact (superkey.elf.stripped)
+      # Upload stripped ELF file
+      uses: actions/upload-artifact@v4
+      with:
+        name: superkey.elf.stripped
+        path: build/superkey.elf.stripped
+
+    - name: Upload Artifact (superkey.ihex)
+      # Upload IHEX file
+      uses: actions/upload-artifact@v4
+      with:
+        name: superkey.ihex
+        path: build/superkey.ihex
+        
+    - name: Upload Artifact (superkey.map)
+      # Upload memory map file
+      uses: actions/upload-artifact@v4
+      with:
+        name: superkey.map
+        path: build/superkey.map
+        
+    - name: Upload Artifact (superkey.txt)
+      # Upload executable text dump
+      uses: actions/upload-artifact@v4
+      with:
+        name: superkey.txt
+        path: build/superkey.txt
+        
