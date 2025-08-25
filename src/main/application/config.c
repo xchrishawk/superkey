@@ -13,6 +13,8 @@
 #include <string.h>
 
 #include "application/config.h"
+#include "application/input.h"
+#include "application/keyer.h"
 #include "application/led.h"
 #include "utility/debug.h"
 #include "utility/utility.h"
@@ -71,6 +73,7 @@ void config_default( config_t * config )
     config->input_polarity[ INPUT_PIN_TRS_2_RING ]  = _CONFIG_DFLT_INPUT_POLARITY_TRS_2_RING;
 
     // Keyer configuration
+    config->keyer_mode                              = _CONFIG_DFLT_KEYER_MODE;
     config->keyer_output_active_low                 = _CONFIG_DFLT_KEYER_OUTPUT_ACTIVE_LOW;
     config->keyer_invert_paddles                    = _CONFIG_DFLT_KEYER_INVERT_PADDLES;
 

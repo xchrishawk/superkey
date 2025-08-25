@@ -15,6 +15,39 @@
 
 #include "utility/types.h"
 
+/* ----------------------------------------------------- TYPES ------------------------------------------------------ */
+
+/**
+ * @typedef keyer_mode_t
+ * @brief   Enumeration of the supported keyer modes.
+ */
+typedef uint8_t keyer_mode_t;
+enum
+{
+    /**
+     * In the `KEYER_MODE_IAMBIC` mode, pressing both paddles simultaneously will emit a stream of dashes and dots,
+     * starting with whichever one was pressed first.
+     */
+    KEYER_MODE_IAMBIC,
+
+    /**
+     * In the `KEYER_MODE_ULTIMATIC` mode, pressing both paddles simultaneously will emit a stream of either dots or
+     * dashes, depending on which paddle was pressed *most recently*. For example, if the left paddle is held down, and
+     * the right paddle is then held down (while the left is still held down), the keyer will emit dashes.
+     */
+    KEYER_MODE_ULTIMATIC,
+
+    /**
+     * In the `KEYER_MODE_ULTIMATIC_ALTERNATE` mode, pressing both paddles simultaneously will emit a stream of either
+     * dots or dashes, depending on which paddle was pressed *first*. For example, if the left paddle is held down, and
+     * the right paddle is then held down (while the left is still held down), the keyer will emit dots.
+     */
+    KEYER_MODE_ULTIMATIC_ALTERNATE,
+
+    /** Number of valid keyer modes. */
+    KEYER_MODE_COUNT,
+};
+
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
 
 /**
@@ -23,6 +56,12 @@
  *          dots and the left paddle will emit dashes.
  */
 bool keyer_get_invert_paddles( void );
+
+/**
+ * @fn      keyer_get_mode( void )
+ * @brief   Returns the currently active keyer mode.
+ */
+keyer_mode_t keyer_get_mode( void );
 
 /**
  * @fn      keyer_get_active_low( void )
@@ -48,6 +87,13 @@ void keyer_panic( void );
  * @note    This modifies the application configuration.
  */
 void keyer_set_invert_paddles( bool invert );
+
+/**
+ * @fn      keyer_set_mode( keyer_mode_t )
+ * @brief   Sets the currently active keyer mode.
+ * @note    This modifies the application configuration.
+ */
+void keyer_set_mode( keyer_mode_t mode );
 
 /**
  * @fn      keyer_set_output_active_low( bool )

@@ -534,6 +534,14 @@ static void exec_command_input( char const * const command )
 
 static void exec_command_keyer( char const * const command )
 {
+    static char const * s_mode_tbl[] =
+    {
+        stringize( KEYER_MODE_IAMBIC ),
+        stringize( KEYER_MODE_ULTIMATIC ),
+        stringize( KEYER_MODE_ULTIMATIC_ALTERNATE ),
+    };
+    _Static_assert( array_count( s_mode_tbl ) == KEYER_MODE_COUNT, "Invalid string table!" );
+
     // Drop "keyer" prefix
     char const * c = command + 5;
 
@@ -561,6 +569,21 @@ static void exec_command_keyer( char const * const command )
         // Set output to active high
         keyer_set_output_active_low( false );
     }
+    else if( string_equals( c, " " stringize( KEYER_MODE_IAMBIC ) ) )
+    {
+        // Set to iambic mode
+        keyer_set_mode( KEYER_MODE_IAMBIC );
+    }
+    else if( string_equals( c, " " stringize( KEYER_MODE_ULTIMATIC ) ) )
+    {
+        // Set to ultimatic mode
+        keyer_set_mode( KEYER_MODE_ULTIMATIC );
+    }
+    else if( string_equals( c, " " stringize( KEYER_MODE_ULTIMATIC_ALTERNATE ) ) )
+    {
+        // Set to ultimatic alternate mode
+        keyer_set_mode( KEYER_MODE_ULTIMATIC_ALTERNATE );
+    }
     else
     {
         // Unknown subcommand
@@ -569,7 +592,8 @@ static void exec_command_keyer( char const * const command )
     }
 
     // Print status info
-    debug_port_printf( "Keyer: Normal mode (active low %s, invert paddles %s)" NEWLINE_STR,
+    debug_port_printf( "Keyer: %s (active low %s, invert paddles %s)" NEWLINE_STR,
+                       s_mode_tbl[ keyer_get_mode() ],
                        keyer_get_output_active_low() ? ENABLED_STR : DISABLED_STR,
                        keyer_get_invert_paddles() ? ENABLED_STR : DISABLED_STR );
 

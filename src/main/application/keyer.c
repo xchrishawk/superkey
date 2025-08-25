@@ -169,6 +169,13 @@ bool keyer_get_invert_paddles( void )
 }   /* keyer_get_invert_paddles() */
 
 
+keyer_mode_t keyer_get_mode( void )
+{
+    return( config()->keyer_mode );
+
+}   /* keyer_get_mode() */
+
+
 bool keyer_get_output_active_low( void )
 {
     return( config()->keyer_output_active_low );
@@ -216,6 +223,16 @@ void keyer_set_invert_paddles( bool invert )
     config_set( & config );
 
 }   /* keyer_set_invert_paddles() */
+
+
+void keyer_set_mode( keyer_mode_t mode )
+{
+    config_t config;
+    config_get( & config );
+    config.keyer_mode = mode;
+    config_set( & config );
+
+}   /* keyer_set_mode() */
 
 
 void keyer_set_output_active_low( bool active_lo )
@@ -378,23 +395,73 @@ static bool get_keyed( void )
 static state_t get_next_state( void )
 {
     // Get all relevant inputs
-    input_type_field_t inputs = input_types_get_on();
-    bool straight_key = is_bit_set( inputs, INPUT_TYPE_STRAIGHT_KEY );
-    bool paddle_left = is_bit_set( inputs, INPUT_TYPE_PADDLE_LEFT );
-    bool paddle_right = is_bit_set( inputs, INPUT_TYPE_PADDLE_RIGHT );
+    static input_type_field_t inputs = 0;
+    input_type_field_t prev_inputs = inputs;
+    inputs = input_types_get_on();
     bool invert_paddles = keyer_get_invert_paddles();
 
     // Determine next state
-    if( straight_key )
+    if( is_bit_set( inputs, INPUT_TYPE_STRAIGHT_KEY ) )
+    {
+        // Straight key supersedes all others
         return( STATE_ON );
-    else if( paddle_left && paddle_right )
-        return( STATE_INTERLEAVED );
-    else if( ( ! invert_paddles && paddle_left ) || ( invert_paddles && paddle_right ) )
+    }
+    else if( is_bit_set( inputs, INPUT_TYPE_PADDLE_LEFT ) &&
+             is_bit_set( inputs, INPUT_TYPE_PADDLE_RIGHT ) )
+    {
+        switch( keyer_get_mode() )
+        {
+        case KEYER_MODE_IAMBIC:
+            // Always do interleaved in iambic mode
+            return( STATE_INTERLEAVED );
+
+        case KEYER_MODE_ULTIMATIC:
+            // The most recently activated paddle wins
+            if( is_bit_set( inputs, INPUT_TYPE_PADDLE_LEFT ) &&
+                is_bit_clear( prev_inputs, INPUT_TYPE_PADDLE_LEFT ) )
+            {
+                // Left paddle was more recently activated
+                return( invert_paddles ? STATE_DASHES : STATE_DOTS );
+            }
+            else if( is_bit_set( inputs, INPUT_TYPE_PADDLE_RIGHT ) &&
+                     is_bit_clear( prev_inputs, INPUT_TYPE_PADDLE_RIGHT ) )
+            {
+                // Right paddle was more recently activated
+                return( invert_paddles ? STATE_DOTS : STATE_DASHES );
+            }
+            else
+            {
+                // No change in state
+                return( s_state );
+            }
+
+        case KEYER_MODE_ULTIMATIC_ALTERNATE:
+            // The first activated paddle wins
+            return( s_state );
+
+        default:
+            // This should not be possible
+            fail();
+        }
+    }
+    else if( ( ! invert_paddles && is_bit_set( inputs, INPUT_TYPE_PADDLE_LEFT ) ) ||
+             (   invert_paddles && is_bit_set( inputs, INPUT_TYPE_PADDLE_RIGHT ) ) )
+    {
+        // The left paddle traditionally emits dots
         return( STATE_DOTS );
-    else if( ( ! invert_paddles && paddle_right ) || ( invert_paddles && paddle_left ) )
+    }
+    else if( ( ! invert_paddles && is_bit_set( inputs, INPUT_TYPE_PADDLE_RIGHT ) ) ||
+             (   invert_paddles && is_bit_set( inputs, INPUT_TYPE_PADDLE_LEFT ) ) )
+    {
+        // The right paddle traditionally emits dashes
         return( STATE_DASHES );
+    }
     else
+    {
+        // This should not be hit unless there are no inputs active
+        assert_debug( inputs == 0 );
         return( STATE_OFF );
+    }
 
 }   /* get_next_state() */
 

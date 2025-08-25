@@ -16,6 +16,7 @@
 
 #include "application/buzzer.h"
 #include "application/input.h"
+#include "application/keyer.h"
 #include "application/led.h"
 #include "application/wpm.h"
 
@@ -44,6 +45,9 @@ typedef struct
 
     /** The configured input polarity for each input pin. */
     input_polarity_t    input_polarity[ INPUT_PIN_COUNT ];
+
+    /** The keyer mode. */
+    keyer_mode_t        keyer_mode;
 
     /** If set to `true`, the keyer's output is active low. */
     bool                keyer_output_active_low;
