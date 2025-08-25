@@ -6,8 +6,26 @@
 # @date     2025-08-19
 #
 
+# -- Versioning --
+
+# Define values
+set(VERSION_MAJOR                           0
+    CACHE STRING                            "The major version number.")
+set(VERSION_MINOR                           1
+    CACHE STRING                            "The minor version number.")
+set(VERSION_REVISION                        0
+    CACHE STRING                            "The revision version number.")
+
+# Set compile definitions
+add_compile_definitions(
+    _VERSION_MAJOR=${VERSION_MAJOR}
+    _VERSION_MINOR=${VERSION_MINOR}
+    _VERSION_REVISION=${VERSION_REVISION}
+)
+
 # -- Configuration Defaults --
 
+# Define values
 set(CONFIG_DFLT_WPM                         200
     CACHE STRING                            "Default words per minute, in tenths of a WPM. (10 - 1000)")
 set(CONFIG_DFLT_BUZZER_ENABLED              true
@@ -49,7 +67,7 @@ set(CONFIG_DFLT_KEYER_OUTPUT_ACTIVE_LOW     true
 set(CONFIG_DFLT_KEYER_INVERT_PADDLES        false
     CACHE STRING                            "Set to true to invert the paddles. (true / false)")
 
-# Set defines
+# Set compile definitions
 add_compile_definitions(
     _CONFIG_DFLT_WPM=${CONFIG_DFLT_WPM}
     _CONFIG_DFLT_BUZZER_ENABLED=${CONFIG_DFLT_BUZZER_ENABLED}
