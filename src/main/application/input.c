@@ -35,11 +35,24 @@ _Static_assert( array_count( s_pin_tbl ) == INPUT_PIN_COUNT, "Invalid pin table!
 
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
-// Validation macros
+/**
+ * @def     validate_pin( _pin )
+ * @brief   Validates that the specified `input_pin_t` is valid.
+ */
 #define validate_pin( _pin )                                                            \
     assert_always( ( _pin ) < INPUT_PIN_COUNT )
+
+/**
+ * @def     validate_polarity( _polarity )
+ * @brief   Validates that the specified `input_polarity_t` is valid.
+ */
 #define validate_polarity( _polarity )                                                  \
     assert_always( ( _polarity ) < INPUT_POLARITY_COUNT )
+
+/**
+ * @def     validate_type( _type )
+ * @brief   Validates that the specified `input_type_t` is valid.
+ */
 #define validate_type( _input )                                                         \
     assert_always( ( _input ) < INPUT_TYPE_COUNT )
 

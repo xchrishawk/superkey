@@ -50,6 +50,7 @@ void wpm_set( wpm_t wpm )
 
 }   /* wpm_set() */
 
+
 void wpm_ticks( wpm_t wpm,
                 tick_t * dot,
                 tick_t * dash,

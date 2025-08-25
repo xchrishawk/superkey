@@ -61,7 +61,7 @@ wpm_t wpm_get( void );
 void wpm_set( wpm_t wpm );
 
 /**
- * @fn      wpm_ticks( wpm, tick_t *, tick_t *, tick_t *, tick_t *, tick_t * )
+ * @fn      wpm_ticks( wpm_t, tick_t *, tick_t *, tick_t *, tick_t *, tick_t * )
  * @brief   Calculates the duration (in ticks) of various Morse code elements.
  * @note    This function does floating-point math and should not be called frequently.
  */
