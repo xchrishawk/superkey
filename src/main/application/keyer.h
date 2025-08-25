@@ -18,56 +18,63 @@
 /* ----------------------------------------------------- TYPES ------------------------------------------------------ */
 
 /**
- * @typedef keyer_mode_t
- * @brief   Enumeration of the supported keyer modes.
+ * @typedef keyer_paddle_mode_t
+ * @brief   Enumeration of the paddle modes that the keyer supports.
  */
-typedef uint8_t keyer_mode_t;
+typedef uint8_t keyer_paddle_mode_t;
 enum
 {
     /**
-     * In the `KEYER_MODE_IAMBIC` mode, pressing both paddles simultaneously will emit a stream of dashes and dots,
-     * starting with whichever one was pressed first.
+     * In the `KEYER_PADDLE_MODE_IAMBIC` mode, pressing both paddles simultaneously will emit a stream of dashes and
+     * dots, starting with whichever one was pressed first.
      */
-    KEYER_MODE_IAMBIC,
+    KEYER_PADDLE_MODE_IAMBIC,
 
     /**
-     * In the `KEYER_MODE_ULTIMATIC` mode, pressing both paddles simultaneously will emit a stream of either dots or
-     * dashes, depending on which paddle was pressed *most recently*. For example, if the left paddle is held down, and
-     * the right paddle is then held down (while the left is still held down), the keyer will emit dashes.
+     * In the `KEYER_PADDLE_MODE_ULTIMATIC` mode, pressing both paddles simultaneously will emit a stream of either dots
+     * or dashes, depending on which paddle was pressed *first*. For example, if the left paddle is held down, and the
+     * right paddle is then held down (while the left is still held down), the keyer will emit dots.
      */
-    KEYER_MODE_ULTIMATIC,
+    KEYER_PADDLE_MODE_ULTIMATIC,
 
     /**
-     * In the `KEYER_MODE_ULTIMATIC_ALTERNATE` mode, pressing both paddles simultaneously will emit a stream of either
-     * dots or dashes, depending on which paddle was pressed *first*. For example, if the left paddle is held down, and
-     * the right paddle is then held down (while the left is still held down), the keyer will emit dots.
+     * In the `KEYER_PADDLE_MODE_ULTIMATIC_ALTERNATE` mode, pressing both paddles simultaneously will emit a stream of
+     * either dots or dashes, depending on which paddle was pressed *most recently*. For example, if the left paddle is
+     * held down, and the right paddle is then held down (while the left is still held down), the keyer will emit
+     * dashes.
      */
-    KEYER_MODE_ULTIMATIC_ALTERNATE,
+    KEYER_PADDLE_MODE_ULTIMATIC_ALTERNATE,
 
-    /** Number of valid keyer modes. */
-    KEYER_MODE_COUNT,
+    /** Number of valid keyer paddle modes. */
+    KEYER_PADDLE_MODE_COUNT,
 };
 
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
 
 /**
- * @fn      keyer_get_invert_paddles( void )
- * @brief   Returns `true` if the keyer is configured to invert the paddles. In this case, the right paddle will emit
- *          dots and the left paddle will emit dashes.
+ * @fn      keyer_get_on( void )
+ * @brief   Returns `true` if the keyer is currently commanding the radio to transmit.
  */
-bool keyer_get_invert_paddles( void );
-
-/**
- * @fn      keyer_get_mode( void )
- * @brief   Returns the currently active keyer mode.
- */
-keyer_mode_t keyer_get_mode( void );
+bool keyer_get_on( void );
 
 /**
  * @fn      keyer_get_output_active_low( void )
  * @brief   Returns `true` if the keyer's output is active low.
  */
 bool keyer_get_output_active_low( void );
+
+/**
+ * @fn      keyer_get_paddle_invert( void )
+ * @brief   Returns `true` if the keyer is configured to invert the paddles. In this case, the right paddle will emit
+ *          dots and the left paddle will emit dashes.
+ */
+bool keyer_get_paddle_invert( void );
+
+/**
+ * @fn      keyer_get_paddle_mode( void )
+ * @brief   Returns the keyer's currently active mode.
+ */
+keyer_paddle_mode_t keyer_get_paddle_mode( void );
 
 /**
  * @fn      keyer_init( void )
@@ -82,25 +89,26 @@ void keyer_init( void );
 void keyer_panic( void );
 
 /**
- * @fn      keyer_set_invert_paddles( bool )
- * @brief   Enables or disables the "invert paddles" setting.
- * @note    This modifies the application configuration.
- */
-void keyer_set_invert_paddles( bool invert );
-
-/**
- * @fn      keyer_set_mode( keyer_mode_t )
- * @brief   Sets the currently active keyer mode.
- * @note    This modifies the application configuration.
- */
-void keyer_set_mode( keyer_mode_t mode );
-
-/**
  * @fn      keyer_set_output_active_low( bool )
  * @brief   Sets whether the keyer's output is active low or not.
  * @note    This modifies the application configuration.
  */
-void keyer_set_output_active_low( bool active_lo );
+void keyer_set_output_active_low( bool active_low );
+
+/**
+ * @fn      keyer_set_paddle_invert( bool )
+ * @brief   Enables or disables the "invert paddles" setting. If set to `true`, the right paddle will emit dots and the
+ *          left paddle will emit dashes.
+ * @note    This modifies the application configuration.
+ */
+void keyer_set_paddle_invert( bool invert );
+
+/**
+ * @fn      keyer_set_paddle_mode( keyer_paddle_mode_t )
+ * @brief   Sets the keyer's currently active paddle mode.
+ * @note    This modifies the application configuration.
+ */
+void keyer_set_paddle_mode( keyer_paddle_mode_t mode );
 
 /**
  * @fn      keyer_tick( tick_t )
