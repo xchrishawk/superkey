@@ -126,7 +126,6 @@ configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
 # (Running `make doxygen` will build the documents in the build directory)
 add_custom_target(
     doxygen
-    ALL
     COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Generating documentation with Doxygen"
