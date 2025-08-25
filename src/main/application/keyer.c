@@ -429,6 +429,10 @@ static state_t get_next_state( void )
             return( STATE_INTERLEAVED );
 
         case KEYER_MODE_ULTIMATIC:
+            // The first activated paddle wins
+            return( s_state );
+
+        case KEYER_MODE_ULTIMATIC_ALTERNATE:
             // The most recently activated paddle wins
             if( is_bit_set( inputs, INPUT_TYPE_PADDLE_LEFT ) &&
                 is_bit_clear( prev_inputs, INPUT_TYPE_PADDLE_LEFT ) )
@@ -447,10 +451,6 @@ static state_t get_next_state( void )
                 // No change in state
                 return( s_state );
             }
-
-        case KEYER_MODE_ULTIMATIC_ALTERNATE:
-            // The first activated paddle wins
-            return( s_state );
 
         default:
             // This should not be possible
