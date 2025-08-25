@@ -534,13 +534,13 @@ static void exec_command_input( char const * const command )
 
 static void exec_command_keyer( char const * const command )
 {
-    static char const * s_mode_tbl[] =
+    static char const * s_paddle_mode_tbl[] =
     {
-        stringize( KEYER_MODE_IAMBIC ),
-        stringize( KEYER_MODE_ULTIMATIC ),
-        stringize( KEYER_MODE_ULTIMATIC_ALTERNATE ),
+        stringize( KEYER_PADDLE_MODE_IAMBIC ),
+        stringize( KEYER_PADDLE_MODE_ULTIMATIC ),
+        stringize( KEYER_PADDLE_MODE_ULTIMATIC_ALTERNATE ),
     };
-    _Static_assert( array_count( s_mode_tbl ) == KEYER_MODE_COUNT, "Invalid string table!" );
+    _Static_assert( array_count( s_paddle_mode_tbl ) == KEYER_PADDLE_MODE_COUNT, "Invalid string table!" );
 
     // Drop "keyer" prefix
     char const * c = command + 5;
@@ -548,16 +548,6 @@ static void exec_command_keyer( char const * const command )
     if( string_is_empty( c ) )
     {
         // No subcommand - interpret as a status request. no action required
-    }
-    else if( string_equals( c, " invert_paddles " ENABLE_STR ) )
-    {
-        // Set invert paddles to true
-        keyer_set_invert_paddles( true );
-    }
-    else if( string_equals( c, " invert_paddles " DISABLE_STR ) )
-    {
-        // Set invert paddles to false
-        keyer_set_invert_paddles( false );
     }
     else if( string_equals( c, " output_active_low " ENABLE_STR ) )
     {
@@ -569,20 +559,30 @@ static void exec_command_keyer( char const * const command )
         // Set output to active high
         keyer_set_output_active_low( false );
     }
-    else if( string_equals( c, " " stringize( KEYER_MODE_IAMBIC ) ) )
+    else if( string_equals( c, " " stringize( KEYER_PADDLE_MODE_IAMBIC ) ) )
     {
         // Set to iambic mode
-        keyer_set_mode( KEYER_MODE_IAMBIC );
+        keyer_set_paddle_mode( KEYER_PADDLE_MODE_IAMBIC );
     }
-    else if( string_equals( c, " " stringize( KEYER_MODE_ULTIMATIC ) ) )
+    else if( string_equals( c, " " stringize( KEYER_PADDLE_MODE_ULTIMATIC ) ) )
     {
         // Set to ultimatic mode
-        keyer_set_mode( KEYER_MODE_ULTIMATIC );
+        keyer_set_paddle_mode( KEYER_PADDLE_MODE_ULTIMATIC );
     }
-    else if( string_equals( c, " " stringize( KEYER_MODE_ULTIMATIC_ALTERNATE ) ) )
+    else if( string_equals( c, " " stringize( KEYER_PADDLE_MODE_ULTIMATIC_ALTERNATE ) ) )
     {
         // Set to ultimatic alternate mode
-        keyer_set_mode( KEYER_MODE_ULTIMATIC_ALTERNATE );
+        keyer_set_paddle_mode( KEYER_PADDLE_MODE_ULTIMATIC_ALTERNATE );
+    }
+    else if( string_equals( c, " paddle_invert " ENABLE_STR ) )
+    {
+        // Set invert paddles to true
+        keyer_set_paddle_invert( true );
+    }
+    else if( string_equals( c, " paddle_invert " DISABLE_STR ) )
+    {
+        // Set invert paddles to false
+        keyer_set_paddle_invert( false );
     }
     else
     {
@@ -592,10 +592,10 @@ static void exec_command_keyer( char const * const command )
     }
 
     // Print status info
-    debug_port_printf( "Keyer: %s (active low %s, invert paddles %s)" NEWLINE_STR,
-                       s_mode_tbl[ keyer_get_mode() ],
-                       keyer_get_output_active_low() ? ENABLED_STR : DISABLED_STR,
-                       keyer_get_invert_paddles() ? ENABLED_STR : DISABLED_STR );
+    debug_port_printf( "Keyer: %s (%s - %s)" NEWLINE_STR,
+                       keyer_get_on() ? ON_STR : OFF_STR,
+                       s_paddle_mode_tbl[ keyer_get_paddle_mode() ],
+                       keyer_get_paddle_invert() ? "inverted" : "normal" );
 
 }   /* exec_command_keyer() */
 

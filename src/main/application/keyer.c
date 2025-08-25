@@ -175,18 +175,11 @@ static void update_ticks( void );
 
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
 
-bool keyer_get_invert_paddles( void )
+bool keyer_get_on( void )
 {
-    return( config()->keyer_invert_paddles );
+    return( get_keyed() );
 
-}   /* keyer_get_invert_paddles() */
-
-
-keyer_mode_t keyer_get_mode( void )
-{
-    return( config()->keyer_mode );
-
-}   /* keyer_get_mode() */
+}   /* keyer_get_on() */
 
 
 bool keyer_get_output_active_low( void )
@@ -194,6 +187,20 @@ bool keyer_get_output_active_low( void )
     return( config()->keyer_output_active_low );
 
 }   /* keyer_get_output_active_low() */
+
+
+bool keyer_get_paddle_invert( void )
+{
+    return( config()->keyer_paddle_invert );
+
+}   /* keyer_get_paddle_invert() */
+
+
+keyer_paddle_mode_t keyer_get_paddle_mode( void )
+{
+    return( config()->keyer_paddle_mode );
+
+}   /* keyer_get_paddle_mode() */
 
 
 void keyer_init( void )
@@ -228,34 +235,34 @@ void keyer_panic( void )
 }   /* keyer_panic() */
 
 
-void keyer_set_invert_paddles( bool invert )
+void keyer_set_output_active_low( bool active_low )
 {
     config_t config;
     config_get( & config );
-    config.keyer_invert_paddles = invert;
-    config_set( & config );
-
-}   /* keyer_set_invert_paddles() */
-
-
-void keyer_set_mode( keyer_mode_t mode )
-{
-    config_t config;
-    config_get( & config );
-    config.keyer_mode = mode;
-    config_set( & config );
-
-}   /* keyer_set_mode() */
-
-
-void keyer_set_output_active_low( bool active_lo )
-{
-    config_t config;
-    config_get( & config );
-    config.keyer_output_active_low = active_lo;
+    config.keyer_output_active_low = active_low;
     config_set( & config );
 
 }   /* keyer_set_output_active_low() */
+
+
+void keyer_set_paddle_invert( bool invert )
+{
+    config_t config;
+    config_get( & config );
+    config.keyer_paddle_invert = invert;
+    config_set( & config );
+
+}   /* keyer_set_paddle_invert() */
+
+
+void keyer_set_paddle_mode( keyer_paddle_mode_t mode )
+{
+    config_t config;
+    config_get( & config );
+    config.keyer_paddle_mode = mode;
+    config_set( & config );
+
+}   /* keyer_set_paddle_mode() */
 
 
 void keyer_tick( tick_t tick )
@@ -411,7 +418,7 @@ static state_t get_next_state( void )
     static input_type_field_t inputs = 0;
     input_type_field_t prev_inputs = inputs;
     inputs = input_types_get_on();
-    bool invert_paddles = keyer_get_invert_paddles();
+    bool paddle_invert = keyer_get_paddle_invert();
 
     // Determine next state
     if( is_bit_set( inputs, INPUT_TYPE_STRAIGHT_KEY ) )
@@ -422,29 +429,29 @@ static state_t get_next_state( void )
     else if( is_bit_set( inputs, INPUT_TYPE_PADDLE_LEFT ) &&
              is_bit_set( inputs, INPUT_TYPE_PADDLE_RIGHT ) )
     {
-        switch( keyer_get_mode() )
+        switch( keyer_get_paddle_mode() )
         {
-        case KEYER_MODE_IAMBIC:
+        case KEYER_PADDLE_MODE_IAMBIC:
             // Always do interleaved in iambic mode
             return( STATE_INTERLEAVED );
 
-        case KEYER_MODE_ULTIMATIC:
+        case KEYER_PADDLE_MODE_ULTIMATIC:
             // The first activated paddle wins
             return( s_state );
 
-        case KEYER_MODE_ULTIMATIC_ALTERNATE:
+        case KEYER_PADDLE_MODE_ULTIMATIC_ALTERNATE:
             // The most recently activated paddle wins
             if( is_bit_set( inputs, INPUT_TYPE_PADDLE_LEFT ) &&
                 is_bit_clear( prev_inputs, INPUT_TYPE_PADDLE_LEFT ) )
             {
                 // Left paddle was more recently activated
-                return( invert_paddles ? STATE_DASHES : STATE_DOTS );
+                return( paddle_invert ? STATE_DASHES : STATE_DOTS );
             }
             else if( is_bit_set( inputs, INPUT_TYPE_PADDLE_RIGHT ) &&
                      is_bit_clear( prev_inputs, INPUT_TYPE_PADDLE_RIGHT ) )
             {
                 // Right paddle was more recently activated
-                return( invert_paddles ? STATE_DOTS : STATE_DASHES );
+                return( paddle_invert ? STATE_DOTS : STATE_DASHES );
             }
             else
             {
@@ -457,14 +464,14 @@ static state_t get_next_state( void )
             fail();
         }
     }
-    else if( ( ! invert_paddles && is_bit_set( inputs, INPUT_TYPE_PADDLE_LEFT ) ) ||
-             (   invert_paddles && is_bit_set( inputs, INPUT_TYPE_PADDLE_RIGHT ) ) )
+    else if( ( ! paddle_invert && is_bit_set( inputs, INPUT_TYPE_PADDLE_LEFT ) ) ||
+             (   paddle_invert && is_bit_set( inputs, INPUT_TYPE_PADDLE_RIGHT ) ) )
     {
         // The left paddle traditionally emits dots
         return( STATE_DOTS );
     }
-    else if( ( ! invert_paddles && is_bit_set( inputs, INPUT_TYPE_PADDLE_RIGHT ) ) ||
-             (   invert_paddles && is_bit_set( inputs, INPUT_TYPE_PADDLE_LEFT ) ) )
+    else if( ( ! paddle_invert && is_bit_set( inputs, INPUT_TYPE_PADDLE_RIGHT ) ) ||
+             (   paddle_invert && is_bit_set( inputs, INPUT_TYPE_PADDLE_LEFT ) ) )
     {
         // The right paddle traditionally emits dashes
         return( STATE_DASHES );
