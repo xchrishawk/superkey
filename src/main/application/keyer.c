@@ -29,6 +29,23 @@
 /* ----------------------------------------------------- TYPES ------------------------------------------------------ */
 
 /**
+ * @typedef element_t
+ * @brief   Enumeration of Morse code elements.
+ */
+typedef uint8_t element_t;
+enum
+{
+    ELEMENT_UNKNOWN,                        /**< Element type is unknown (manual).      */
+    ELEMENT_DOT,                            /**< Element is a dot.                      */
+    ELEMENT_DASH,                           /**< Element is a dash.                     */
+
+    ELEMENT_COUNT,                          /**< Number of valid elements.              */
+
+    ELEMENT_NONE                            /**< No element is active.                  */
+        = ELEMENT_COUNT,
+};
+
+/**
  * @typedef state_t
  * @brief   Enumeration of states that the keyer module may be in.
  */
@@ -39,11 +56,18 @@ enum
     STATE_ON,                               /**< Keyer is on continuously.              */
     STATE_DOTS,                             /**< Keyer emits continuous dots.           */
     STATE_DASHES,                           /**< Keyer emits continuous dashes.         */
+    STATE_INTERLEAVED,                      /**< Keyer emits continuous dots and dashes.*/
 
     STATE_COUNT,                            /**< Number of valid states.                */
 };
 
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
+
+/**
+ * @def     NO_TIMEOUT
+ * @brief   May be assigned to `s_element_duration` or `s_element_lockout` to indicate that these values don't apply.
+ */
+#define NO_TIMEOUT 0
 
 static gpio_pin_t const KEYER_OUT_PIN = GPIO_PIN_A6;
 
@@ -53,16 +77,57 @@ static bool s_keyed = false;                /**< Is the keyer hardware currently
 static bool s_panicked = false;             /**< Was the keyer panic activated?         */
 
 static state_t s_state = STATE_OFF;         /**< Currently active keyer state.          */
+static element_t s_element = ELEMENT_NONE;  /**< Element which started current lockout. */
 static tick_t s_element_start = 0;          /**< Tick at which current element started. */
-static tick_t s_element_duration = 0;       /**< Duration of current element.           */
-static tick_t s_element_lockout = 0;        /**< Lockout until next element.            */
+static tick_t s_element_duration = NO_TIMEOUT;/**< Duration of current element.         */
+static tick_t s_element_lockout = NO_TIMEOUT;/**< Lockout until next element.           */
 
 static wpm_t s_ticks_wpm = 0;               /**< WPM at which ticks were evaluated.     */
 static tick_t s_dot_ticks = 0;              /**< Number of ticks per dot.               */
 static tick_t s_dash_ticks = 0;             /**< Number of ticks per dash.              */
 static tick_t s_space_ticks = 0;            /**< Number of ticks per element space.     */
 
+/* ----------------------------------------------------- MACROS ----------------------------------------------------- */
+
+// Utility macros
+#define is_timeout_elapsed( _tick, _duration )                                      \
+    ( sys_elapsed( ( _tick ), s_element_start ) > ( _duration ) )
+#define is_duration_elapsed( _tick )                                                \
+    is_timeout_elapsed( _tick, s_element_duration )
+#define is_lockout_elapsed( _tick )                                                 \
+    is_timeout_elapsed( _tick, s_element_lockout )
+
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
+
+/**
+ * @fn      do_state_dashes( tick_t, bool )
+ * @brief   Executes the `STATE_DASHES` state.
+ */
+static void do_state_dashes( tick_t tick, bool new_state );
+
+/**
+ * @fn      do_state_dots( tick_t, bool )
+ * @brief   Executes the `STATE_DOTS` state.
+ */
+static void do_state_dots( tick_t tick, bool new_state );
+
+/**
+ * @fn      do_state_interleaved( tick_t, bool )
+ * @brief   Executes the `STATE_INTERLEAVED` state.
+ */
+static void do_state_interleaved( tick_t tick, bool new_state );
+
+/**
+ * @fn      do_state_off( tick_t, bool )
+ * @brief   Executes the `STATE_OFF` state.
+ */
+static void do_state_off( tick_t tick, bool new_state );
+
+/**
+ * @fn      do_state_on( tick_t, bool )
+ * @brief   Executes the `STATE_ON` state.
+ */
+static void do_state_on( tick_t tick, bool new_state );
 
 /**
  * @fn      get_keyed( void )
@@ -117,9 +182,10 @@ void keyer_init( void )
     s_keyed = false;
     s_panicked = false;
     s_state = STATE_OFF;
+    s_element = ELEMENT_NONE;
     s_element_start = 0;
-    s_element_duration = 0;
-    s_element_lockout = 0;
+    s_element_duration = NO_TIMEOUT;
+    s_element_lockout = NO_TIMEOUT;
     s_ticks_wpm = 0;
     s_dot_ticks = 0;
     s_dash_ticks = 0;
@@ -164,10 +230,6 @@ void keyer_set_output_active_low( bool active_lo )
 
 void keyer_tick( tick_t tick )
 {
-    // Utility macro
-    #define is_timeout_elapsed( _duration )                                             \
-        ( sys_elapsed( tick, s_element_start ) > ( _duration ) )
-
     // Update element tick counts if required
     update_ticks();
 
@@ -179,82 +241,131 @@ void keyer_tick( tick_t tick )
     // Reset the panic flag if the state changed
     // (Note that in the logic below, this means that new_state==TRUE implies s_panicked==FALSE)
     if( new_state && s_panicked )
-    {
         s_panicked = false;
-        s_element_start = 0;
-        s_element_duration = 0;
-        s_element_lockout = 0;
-    }
 
     // Execute whatever state we evaluate to
     switch( s_state )
     {
         case STATE_OFF:
-        {
-            // Deactivate keyer hardware, once allowed
-            if( is_timeout_elapsed( s_element_duration ) )
-                set_keyed( false );
+            do_state_off( tick, new_state );
             break;
-        }
-
         case STATE_ON:
-        {
-            // Activate unconditionally, unless panicked
-            if( ! s_panicked )
-                set_keyed( true );
+            do_state_on( tick, new_state );
             break;
-        }
-
         case STATE_DOTS:
-        {
-            if( ( new_state &&
-                  is_timeout_elapsed( s_element_lockout ) ) ||
-                ( ! new_state &&
-                  ! s_panicked &&
-                  ! get_keyed() &&
-                  is_timeout_elapsed( s_element_lockout ) ) )
-            {
-                // Activate keyer hardware
-                set_keyed( true );
-                s_element_start = tick;
-                s_element_duration = s_dot_ticks;
-                s_element_lockout = s_dot_ticks + s_space_ticks;
-            }
-            else if( get_keyed() && is_timeout_elapsed( s_element_duration ) )
-            {
-                // Deactivate keyer hardware
-                set_keyed( false );
-            }
+            do_state_dots( tick, new_state );
             break;
-        }
-
         case STATE_DASHES:
-        {
-            if( ( new_state &&
-                  is_timeout_elapsed( s_element_lockout ) ) ||
-                ( ! new_state &&
-                  ! s_panicked &&
-                  ! get_keyed() &&
-                  is_timeout_elapsed( s_element_lockout ) ) )
-            {
-                // Activate keyer hardware
-                set_keyed( true );
-                s_element_start = tick;
-                s_element_duration = s_dash_ticks;
-                s_element_lockout = s_dash_ticks + s_space_ticks;
-            }
-            else if( get_keyed() && is_timeout_elapsed( s_element_duration ) )
-            {
-                // Deactivate keyer hardware
-                set_keyed( false );
-            }
+            do_state_dashes( tick, new_state );
             break;
-        }
+        case STATE_INTERLEAVED:
+            do_state_interleaved( tick, new_state );
+            break;
     }
 
-    #undef is_timeout_elapsed
-
 }   /* keyer_tick() */
+
+
+static void do_state_dashes( tick_t tick, bool new_state )
+{
+    ( void )new_state;
+
+    if( ! s_panicked && is_lockout_elapsed( tick ) && ! get_keyed() )
+    {
+        // Activate keyer hardware
+        set_keyed( true );
+        s_element = ELEMENT_DASH;
+        s_element_start = tick;
+        s_element_duration = s_dash_ticks;
+        s_element_lockout = s_dash_ticks + s_space_ticks;
+    }
+    else if( is_duration_elapsed( tick ) && get_keyed() )
+    {
+        // Deactivate keyer hardware
+        set_keyed( false );
+    }
+
+}   /* do_state_dashes() */
+
+
+static void do_state_dots( tick_t tick, bool new_state )
+{
+    ( void )new_state;
+
+    if( ! s_panicked && is_lockout_elapsed( tick ) && ! get_keyed() )
+    {
+        // Activate keyer hardware
+        set_keyed( true );
+        s_element = ELEMENT_DOT;
+        s_element_start = tick;
+        s_element_duration = s_dot_ticks;
+        s_element_lockout = s_dot_ticks + s_space_ticks;
+    }
+    else if( is_duration_elapsed( tick ) && get_keyed() )
+    {
+        // Deactivate keyer hardware
+        set_keyed( false );
+    }
+
+}   /* do_state_dots() */
+
+
+static void do_state_interleaved( tick_t tick, bool new_state )
+{
+    ( void )new_state;
+
+    if( ! s_panicked && is_lockout_elapsed( tick ) && ! get_keyed() )
+    {
+        set_keyed( true );
+        s_element = ( s_element == ELEMENT_DOT ? ELEMENT_DASH : ELEMENT_DOT );
+        s_element_start = tick;
+        s_element_duration = ( s_element == ELEMENT_DOT ? s_dot_ticks : s_dash_ticks );
+        s_element_lockout = s_element_duration + s_space_ticks;
+    }
+    else if( is_duration_elapsed( tick ) && get_keyed() )
+    {
+        // Deactivate keyer hardware
+        set_keyed( false );
+    }
+
+}   /* do_state_interleaved() */
+
+
+static void do_state_off( tick_t tick, bool new_state )
+{
+    ( void )new_state;
+
+    // Deactivate keyer hardware, once allowed
+    if( get_keyed() && ( s_element_duration == NO_TIMEOUT || is_duration_elapsed( tick ) ) )
+    {
+        set_keyed( false );
+    }
+
+    // Reset state, once allowed
+    if( s_element_start != 0 && ( s_element_lockout == NO_TIMEOUT || is_lockout_elapsed( tick ) ) )
+    {
+        s_element = ELEMENT_NONE;
+        s_element_start = 0;
+        s_element_duration = NO_TIMEOUT;
+        s_element_lockout = NO_TIMEOUT;
+    }
+
+}   /* do_state_off() */
+
+
+static void do_state_on( tick_t tick, bool new_state )
+{
+    // Activate unconditionally, unless panicked
+    if( ! s_panicked && ( new_state || ! get_keyed() ) )
+    {
+        set_keyed( true );
+        s_element = ELEMENT_UNKNOWN;
+        s_element_start = tick;
+        s_element_duration = NO_TIMEOUT;
+        s_element_lockout = NO_TIMEOUT;
+    }
+
+}   /* do_state_on() */
 
 
 static bool get_keyed( void )
@@ -277,7 +388,7 @@ static state_t get_next_state( void )
     if( straight_key )
         return( STATE_ON );
     else if( paddle_left && paddle_right )
-        return( s_state );
+        return( STATE_INTERLEAVED );
     else if( ( ! invert_paddles && paddle_left ) || ( invert_paddles && paddle_right ) )
         return( STATE_DOTS );
     else if( ( ! invert_paddles && paddle_right ) || ( invert_paddles && paddle_left ) )
