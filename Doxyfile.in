@@ -12,7 +12,8 @@
 
 PROJECT_NAME            = @PROJECT_NAME@
 OUTPUT_DIRECTORY        = @CMAKE_CURRENT_BINARY_DIR@/docs
-INPUT                   = @CMAKE_SOURCE_DIR@/readme.md \
+INPUT                   = @CMAKE_SOURCE_DIR@/readme.md                                  \
+                          @CMAKE_SOURCE_DIR@/doc                                        \
                           @CMAKE_SOURCE_DIR@/src
 RECURSIVE               = YES
 EXTRACT_ALL             = @DOXYGEN_EXTRACT_ALL@
