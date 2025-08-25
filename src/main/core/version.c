@@ -14,9 +14,22 @@
 
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
 
-// Manually maintained
+/**
+ * @def     VERSION_MAJOR
+ * @brief   The application's current major version number.
+ */
 #define VERSION_MAJOR    0
+
+/**
+ * @def     VERSION_MINOR
+ * @brief   The application's current minor version number.
+ */
 #define VERSION_MINOR    1
+
+/**
+ * @def     VERSION_REVISION
+ * @brief   The application's current revision version number.
+ */
 #define VERSION_REVISION 0
 
 // Public variables

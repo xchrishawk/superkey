@@ -30,12 +30,31 @@
 
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
 
-// Periodic processing periods in ticks
+/**
+ * @def     TICKS_1_MS
+ * @brief   Number of ticks for 1 millisecond tasks.
+ */
 #define TICKS_1_MS      ( 1 * TICKS_PER_MSEC )
+
+/**
+ * @def     TICKS_50_MS
+ * @brief   Number of ticks for 50 millisecond tasks.
+ */
 #define TICKS_50_MS     ( 50 * TICKS_PER_MSEC )
+
+/**
+ * @def     TICKS_1_S
+ * @brief   Number of ticks for 1 second tasks.
+ */
 #define TICKS_1_S       ( 1 * TICKS_PER_SEC )
 
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
+
+/**
+ * @fn      main( void )
+ * @brief   Main entry point for the application.
+ */
+int main( void );
 
 /**
  * @fn      handle_input_state( void )
@@ -71,7 +90,7 @@ static void init( void );
  * @fn      main_loop( void )
  * @brief   Runs the main loop of the application.
  */
-static void main_loop( void ) FUNC_NEVER_RETURNS;
+static void main_loop( void );
 
 /**
  * @fn      periodic_1ms( tick_t )

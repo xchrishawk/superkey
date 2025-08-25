@@ -157,14 +157,14 @@ gpio_state_t gpio_get_state( gpio_pin_t pin );
 void gpio_set_dir( gpio_pin_t pin, gpio_dir_t dir );
 
 /**
- * @fn      gpio_set_pcint_enabled_pin( gpio_pin_t )
+ * @fn      gpio_set_pcint_enabled_pin( gpio_pin_t, bool )
  * @brief   Enables or disables the pin change interrupt for the specified GPIO pin.
  * @note    The interrupt must also be enabled on the corresponding GPIO port - see `gpio_set_pcint_enabled_port()`.
  */
 void gpio_set_pcint_enabled_pin( gpio_pin_t pin, bool enabled );
 
 /**
- * @fn      gpio_set_pcint_enabled_port( gpio_port_t )
+ * @fn      gpio_set_pcint_enabled_port( gpio_port_t, bool )
  * @brief   Enables or disables the pin change interrupt for the specified GPIO port.
  * @note    The interrupt must also be enabled on the corresponding GPIO pin - see `gpio_set_pcint_enabled_pin()`.
  */

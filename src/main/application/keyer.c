@@ -89,11 +89,24 @@ static tick_t s_space_ticks = 0;            /**< Number of ticks per element spa
 
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
-// Utility macros
+/**
+ * @def     is_timeout_elapsed( _tick, _duration )
+ * @brief   Returns `true` if the specified timeout has elapsed at the specified tick.
+ */
 #define is_timeout_elapsed( _tick, _duration )                                      \
     ( sys_elapsed( ( _tick ), s_element_start ) > ( _duration ) )
+
+/**
+ * @def     is_duration_elapsed( _tick )
+ * @brief   Returns `true` if the `s_element_duration` timeout has elapsed at the specified tick.
+ */
 #define is_duration_elapsed( _tick )                                                \
     is_timeout_elapsed( _tick, s_element_duration )
+
+/**
+ * @def     is_lockout_elapsed( _tick )
+ * @brief   Returns `true` if the `s_element_lockout` timeout has elapsed at the specified tick.
+ */
 #define is_lockout_elapsed( _tick )                                                 \
     is_timeout_elapsed( _tick, s_element_lockout )
 
@@ -136,7 +149,7 @@ static void do_state_on( tick_t tick, bool new_state );
 static bool get_keyed( void );
 
 /**
- * @fn      next_state( void )
+ * @fn      get_next_state( void )
  * @brief   Returns the next keyer state, based on current inputs.
  */
 static state_t get_next_state( void );

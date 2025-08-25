@@ -49,7 +49,6 @@ set(CONFIG_DFLT_KEYER_OUTPUT_ACTIVE_LOW     true
 set(CONFIG_DFLT_KEYER_INVERT_PADDLES        false
     CACHE STRING                            "Set to true to invert the paddles. (true / false)")
 
-
 # Set defines
 add_compile_definitions(
     _CONFIG_DFLT_WPM=${CONFIG_DFLT_WPM}

@@ -54,7 +54,7 @@ enum
 };
 
 /**
- * @typedef input_type_tt
+ * @typedef input_type_t
  * @brief   Enumeration of the supported input types.
  */
 typedef uint8_t input_type_t;

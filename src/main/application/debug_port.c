@@ -63,7 +63,7 @@
 #define DISABLED_STR            "disabled"
 
 /**
- * @define  OFF_STR
+ * @def     OFF_STR
  * @brief   The token which indicates that an input or output is off.
  */
 #define OFF_STR                 "off"

@@ -23,7 +23,7 @@
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
 
 /**
- * @def     TEST_CLOCK_WRAPAROUND
+ * @def     DEBUG_TEST_CLOCK_WRAPAROUND
  * @brief   If set to `ON`, the system tick will be set to 15 seconds prior to a wraparound at startup.
  */
 #define DEBUG_TEST_CLOCK_WRAPAROUND     ON
@@ -35,7 +35,10 @@ static tick_t s_tick = 0;                   /**< Current system tick.           
 
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
-// Validation macros
+/**
+ * @def     validate_event( _event )
+ * @brief   Ensures that the specified `event_t` is valid.
+ */
 #define validate_event( _event )                                                        \
     assert_always( ( _event ) < EVENT_COUNT )
 
