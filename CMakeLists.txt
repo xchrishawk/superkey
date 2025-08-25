@@ -34,7 +34,7 @@ set(CMAKE_C_COMPILER                ${AVR_GCC})
 
 set(DEVICE_MCU                      atmega1284p
     CACHE STRING                    "The MCU model to compile for.")
-set(DEVICE_F_CPU                    8000000
+set(DEVICE_F_CPU                    16000000
     CACHE STRING                    "The device's CPU frequency, in Hz.")
 set(DEVICE_BAUD                     19200
     CACHE STRING                    "The default USART baud rate, in bits per second.")
