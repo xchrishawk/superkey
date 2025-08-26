@@ -383,21 +383,25 @@ bool usart_tx( usart_t usart, byte_t const * data, size_t size )
     // Validate size
     if( size == 0 )
         return( true );
-    if( size >= TX_BUF_SIZE )
-        return( false );
 
-    // Block until there's enough room in the buffer, allowing interrupts
+    // Get interrupt flag
     bool intrpt_en = sys_intrpt_enabled();
-    while( tx_buf_avail( usart ) < size )
-        sys_sei();
-    sys_set_intrpt_enabled( intrpt_en );
 
-    // Copy data into TX buffer
-    for( size_t idx = 0; idx < size; idx++ )
+    // Loop as long as there's data available
+    while( size-- )
     {
-        TX_BUF( usart, TX_HEAD( usart ) ) = data[ idx ];
+        // Block until there's room in the buffer, allowing interrupts
+        while( tx_buf_avail( usart ) == 0 )
+            sys_sei();
+
+        // Clear interrupt flag and write next byte
+        sys_cli();
+        TX_BUF( usart, TX_HEAD( usart ) ) = *( data++ );
         increment_rollover( TX_HEAD( usart ), TX_BUF_SIZE );
     }
+
+    // Restore original state of interrupt flag
+    sys_set_intrpt_enabled( intrpt_en );
 
     // Enable interrupt to start transfer
     set_data_empty_intrpt_enabled( usart, true );
