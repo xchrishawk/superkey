@@ -21,7 +21,9 @@
 #include "application/input.h"
 #include "application/keyer.h"
 #include "application/led.h"
+#include "application/storage.h"
 #include "core/sys.h"
+#include "drivers/eeprom.h"
 #include "drivers/gpio.h"
 #include "drivers/usart.h"
 #include "utility/debug.h"
@@ -193,8 +195,9 @@ static void handle_usart_tx_complete( usart_t usart )
 static void init( void )
 {
     // Initialize all system modules
-    config_init();
     sys_init();
+    storage_init();
+    config_init();
     led_init();
     input_init();
     buzzer_init();
@@ -248,6 +251,7 @@ static void periodic_50ms( tick_t tick )
 static void periodic_1s( tick_t tick )
 {
     // Periodic processing for modules with 1 Hz tick rates
+    config_tick( tick );
     debug_port_tick( tick );
 
     // Toggle the status LED. We're still alive!

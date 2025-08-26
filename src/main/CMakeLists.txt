@@ -8,7 +8,7 @@
 
 # -- Executable Configuration --
 
-# Note that for the main executable, we use the project forced to lowercase
+# Note that for the main executable, we use the project name forced to lowercase
 string(TOLOWER "${CMAKE_PROJECT_NAME}" EXECUTABLE_NAME)
 set(EXECUTABLE_SOURCE   application/buzzer.c
                         application/buzzer.h
@@ -22,6 +22,8 @@ set(EXECUTABLE_SOURCE   application/buzzer.c
                         application/keyer.h
                         application/led.c
                         application/led.h
+                        application/storage.c
+                        application/storage.h
                         application/wpm.c
                         application/wpm.h
                         core/main.c
@@ -29,11 +31,15 @@ set(EXECUTABLE_SOURCE   application/buzzer.c
                         core/sys.h
                         core/version.c
                         core/version.h
+                        drivers/eeprom.c
+                        drivers/eeprom.h
                         drivers/gpio.c
                         drivers/gpio.h
                         drivers/usart.c
                         drivers/usart.h
                         utility/constants.h
+                        utility/crc.c
+                        utility/crc.h
                         utility/debug.c
                         utility/debug.h
                         utility/types.h
