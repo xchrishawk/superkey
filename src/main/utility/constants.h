@@ -18,22 +18,28 @@
 #define BITS_PER_BYTE           8
 
 /**
+ * @def     USEC_PER_MSEC
+ * @brief   The number of microseconds per millisecond.
+ */
+#define USEC_PER_MSEC           1000UL
+
+/**
  * @def     MSEC_PER_SEC
  * @brief   The number of milliseconds per second.
  */
-#define MSEC_PER_SEC            1000
+#define MSEC_PER_SEC            1000UL
 
 /**
  * @def     SEC_PER_MIN
  * @brief   The number of seconds per minute.
  */
-#define SEC_PER_MIN             60
+#define SEC_PER_MIN             60UL
 
 /**
  * @def     MIN_PER_HOUR
  * @brief   The number of minutes per hour.
  */
-#define MIN_PER_HOUR            60
+#define MIN_PER_HOUR            60UL
 
 /**
  * @def     NULL_CHAR

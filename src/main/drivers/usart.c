@@ -16,6 +16,7 @@
 
 #include <avr/interrupt.h>
 #include <avr/io.h>
+#include <util/delay.h>
 #include <util/setbaud.h>
 
 #include "core/sys.h"
@@ -68,6 +69,12 @@ _Static_assert( array_count( s_reg_tbl ) == USART_COUNT, "Invalid register table
  */
 #define TX_BUF_SIZE     256
 
+/**
+ * @def     TX_DELAY_US
+ * @brief   The time to wait before trying again if the TX buffer is full, in microseconds.
+ */
+#define TX_DELAY_US     ( ( ( USEC_PER_MSEC * MSEC_PER_SEC ) / ( unsigned int )BAUD ) * 2 )
+
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
 // Validation macros
@@ -79,6 +86,8 @@ _Static_assert( array_count( s_reg_tbl ) == USART_COUNT, "Invalid register table
     assert_always( ( _parity ) < USART_PARITY_COUNT )
 #define validate_stop_bits( _stop_bits )                                                \
     assert_always( ( _stop_bits ) < USART_STOP_BITS_COUNT )
+#define validate_wait_mode( _wait_mode )                                                \
+    assert_always( ( _wait_mode ) < USART_WAIT_MODE_COUNT )
 
 // Get USART registers
 #define UDR( _usart )                                                                   \
@@ -249,7 +258,7 @@ static byte_t read( usart_t usart );
  * @fn      wait_data_register_empty( usart_t )
  * @brief   Waits for the UDREn bit to be set for the specified USART.
  */
-static void wait_data_register_empty( usart_t usart );
+static void wait_data_register_empty( usart_t usart ) FUNC_MAY_BE_UNUSED;
 
 /**
  * @fn      wait_rx_complete( usart_t )
@@ -363,6 +372,10 @@ size_t usart_rx( usart_t usart, byte_t * data, size_t max_size )
     if( max_size == 0 )
         return( 0 );
 
+    // Clear interrupt flag, if required
+    bool intrpt_en = sys_intrpt_enabled();
+    sys_cli();
+
     // Copy bytes as long as possible
     size_t count = 0;
     while( rx_buf_count( usart ) > 0 && ( max_size-- ) > 0 )
@@ -371,75 +384,76 @@ size_t usart_rx( usart_t usart, byte_t * data, size_t max_size )
         increment_rollover( RX_TAIL( usart ), RX_BUF_SIZE );
     }
 
+    // Restore interrupt flag
+    sys_set_intrpt_enabled( intrpt_en );
+
     return( count );
 
 }   /* usart_rx() */
 
 
-bool usart_tx( usart_t usart, byte_t const * data, size_t size )
+size_t usart_tx( usart_t usart, byte_t const * data, size_t size, usart_wait_mode_t wait_mode )
 {
     validate_usart( usart );
+    validate_wait_mode( wait_mode );
 
     // Validate size
     if( size == 0 )
         return( true );
-    if( size >= TX_BUF_SIZE )
-        return( false );
 
-    // Block until there's enough room in the buffer, allowing interrupts
+    // Get interrupt flag
     bool intrpt_en = sys_intrpt_enabled();
-    while( tx_buf_avail( usart ) < size )
-        sys_sei();
-    sys_set_intrpt_enabled( intrpt_en );
 
-    // Copy data into TX buffer
-    for( size_t idx = 0; idx < size; idx++ )
+    // Loop as long as there's untransmitted data
+    size_t count = 0;
+    while( size )
     {
-        TX_BUF( usart, TX_HEAD( usart ) ) = data[ idx ];
-        increment_rollover( TX_HEAD( usart ), TX_BUF_SIZE );
+        // Wait until we have room available in the transmit buffer.
+        // If there's no room, re-enable interrupts and then wait long enough for a couple of bits to TX.
+        sys_cli();
+        size_t avail = tx_buf_avail( usart );
+        if( avail == 0 )
+        {
+            if( wait_mode == USART_WAIT_MODE_NONE ) break;
+            sys_sei();
+            _delay_us( TX_DELAY_US );
+            continue;
+        }
+
+        // Write as many bytes as will fit
+        while( size && avail )
+        {
+            TX_BUF( usart, TX_HEAD( usart ) ) = *( data++ );
+            increment_rollover( TX_HEAD( usart ), TX_BUF_SIZE );
+            count++;
+            size--;
+            avail--;
+        }
+
+        // Enable interrupt to start transfer
+        set_data_empty_intrpt_enabled( usart, true );
     }
 
-    // Enable interrupt to start transfer
-    set_data_empty_intrpt_enabled( usart, true );
-    return( true );
+    // Wait for transmit to complete, if required
+    if( wait_mode == USART_WAIT_MODE_TX_COMPLETE )
+    {
+        sys_sei();
+        wait_tx_complete( usart );
+    }
+
+    // Restore original state of interrupt flag
+    sys_set_intrpt_enabled( intrpt_en );
+
+    return( count );
 
 }   /* usart_tx() */
 
 
-bool usart_tx_str( usart_t usart, char const * str )
+size_t usart_tx_str( usart_t usart, char const * str, usart_wait_mode_t wait_mode )
 {
-    return( usart_tx( usart, ( byte_t const * )str, strlen( str ) ) );
+    return( usart_tx( usart, ( byte_t const * )str, strlen( str ), wait_mode ) );
 
 }   /* usart_tx_str() */
-
-
-void usart_tx_sync( usart_t usart, byte_t const * data, size_t size )
-{
-    // Spin loop until USART is ready
-    wait_data_register_empty( usart );
-
-    // Disable interrupts, if required
-    bool intrpt_en = sys_intrpt_enabled();
-    sys_cli();
-
-    // Transmit each byte in order
-    for( size_t idx = 0; idx < size; idx++ )
-    {
-        write( usart, data[ idx ] );
-        wait_data_register_empty( usart );
-    }
-
-    // Re-enable interrupts, if required
-    sys_set_intrpt_enabled( intrpt_en );
-
-}   /* usart_tx_sync() */
-
-
-void usart_tx_sync_str( usart_t usart, char const * str )
-{
-    usart_tx_sync( usart, ( byte_t const * )str, strlen( str ) );
-
-}   /* usart_tx_sync_str() */
 
 
 static void autoconfigure_baud( usart_t usart )

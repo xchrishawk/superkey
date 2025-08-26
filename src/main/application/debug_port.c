@@ -232,7 +232,7 @@ void debug_port_init( void )
 
 bool debug_port_print( char const * str )
 {
-    return( usart_tx_str( DEBUG_PORT_USART, str ) );
+    return( usart_tx_str( DEBUG_PORT_USART, str, USART_WAIT_MODE_NORMAL ) );
 
 }   /* debug_port_print() */
 
