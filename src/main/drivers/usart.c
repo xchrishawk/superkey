@@ -133,13 +133,13 @@ _Static_assert( DOR0 == DOR1 &&
 
 // Asynchronous receive buffer
 static byte_t s_rx_buf[ USART_COUNT ][ RX_BUF_SIZE ];
-static size_t s_rx_head[ USART_COUNT ];
-static size_t s_rx_tail[ USART_COUNT ];
+static volatile size_t s_rx_head[ USART_COUNT ];
+static volatile size_t s_rx_tail[ USART_COUNT ];
 
 // Asynchronous transmit buffer
 static byte_t s_tx_buf[ USART_COUNT ][ TX_BUF_SIZE ];
-static size_t s_tx_head[ USART_COUNT ];
-static size_t s_tx_tail[ USART_COUNT ];
+static volatile size_t s_tx_head[ USART_COUNT ];
+static volatile size_t s_tx_tail[ USART_COUNT ];
 
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
 
@@ -380,13 +380,17 @@ bool usart_tx( usart_t usart, byte_t const * data, size_t size )
 {
     validate_usart( usart );
 
-    // Do nothing if there's no data
+    // Validate size
     if( size == 0 )
         return( true );
-
-    // Ensure we have enough room in the TX buffer
-    if( tx_buf_avail( usart ) < size )
+    if( size >= TX_BUF_SIZE )
         return( false );
+
+    // Block until there's enough room in the buffer, allowing interrupts
+    bool intrpt_en = sys_intrpt_enabled();
+    while( tx_buf_avail( usart ) < size )
+        sys_sei();
+    sys_set_intrpt_enabled( intrpt_en );
 
     // Copy data into TX buffer
     for( size_t idx = 0; idx < size; idx++ )
