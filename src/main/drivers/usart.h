@@ -89,6 +89,26 @@ enum
     USART_STOP_BITS_COUNT,                  /**< Number of valid stop bits settings.    */
 };
 
+/**
+ * @typedef usart_wait_mode_t
+ * @brief   Enumeration of supported wait modes for calls to `usart_tx()`.
+ */
+typedef uint8_t usart_wait_mode_t;
+enum
+{
+    /** The call to `usart_tx()` will block until all data has been written to the TX buffer. */
+    USART_WAIT_MODE_NORMAL,
+
+    /** The call to `usart_tx()` will block until all data has been transmitted by the USART. */
+    USART_WAIT_MODE_TX_COMPLETE,
+
+    /** The call to `usart_tx()` will not block, and will only write as many bytes as will fit in the TX buffer. */
+    USART_WAIT_MODE_NONE,
+
+    /** Number of valid wait modes. */
+    USART_WAIT_MODE_COUNT,
+};
+
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
 
 /**
@@ -131,40 +151,22 @@ size_t usart_max_tx_size( void );
 /**
  * @fn      usart_rx( usart_t, byte_t *, size_t )
  * @brief   Receives up to `max_size` bytes from the RX buffer for the specified USART.
- * @returns The number of bytes written to `data`.
+ * @returns The number of bytes read into `data`.
  */
 size_t usart_rx( usart_t usart, byte_t * data, size_t max_size );
 
 /**
  * @fn      usart_tx( usart_t, byte_t const *, size_t )
- * @brief   Asynchronously tranmits the specified data buffer.
- * @returns `true` if the buffer was successfully queued for transmission, or `false` if the data buffer is too large.
- * @note    Blocks until the data has been successfully queued for transmission.
+ * @brief   Tranmits the specified data buffer.
+ * @returns The number of bytes successfully transmitted.
  */
-bool usart_tx( usart_t usart, byte_t const * data, size_t size );
+size_t usart_tx( usart_t usart, byte_t const * data, size_t size, usart_wait_mode_t wait_mode );
 
 /**
  * @fn      usart_tx_str( usart_t, char const * )
- * @brief   Asynchronously transmits the specified string.
- * @returns `true` if the string was successfully queued for transmission, or `false` if the string is too long.
- * @note    Blocks until the string has been successfully queued for transmission.
+ * @brief   Transmits the specified string.
+ * @returns The number of bytes successfully transmitted.
  */
-bool usart_tx_str( usart_t usart, char const * str );
-
-/**
- * @fn      usart_tx_sync( usart_t, byte_t const *, size_t )
- * @brief   Synchronously transmits the specified data buffer.
- * @note    This function blocks until the data buffer has been completely transmitted. This is intended for debugging -
- *          the `usart_tx()` function should be used for normal purposes.
- */
-void usart_tx_sync( usart_t usart, byte_t const * data, size_t size );
-
-/**
- * @fn      usart_tx_sync_str( usart_t, char const * )
- * @brief   Synchronously transmits the specified string.
- * @note    This function blocks until the string has been completely transmitted. This is intended for debugging - the
- *          `usart_tx_str()` function should be used for normal purposes.
- */
-void usart_tx_sync_str( usart_t usart, char const * str );
+size_t usart_tx_str( usart_t usart, char const * str, usart_wait_mode_t wait_mode );
 
 #endif /* !defined( DRIVERS_USART_H ) */
