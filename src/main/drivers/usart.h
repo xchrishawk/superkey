@@ -138,30 +138,32 @@ size_t usart_rx( usart_t usart, byte_t * data, size_t max_size );
 /**
  * @fn      usart_tx( usart_t, byte_t const *, size_t )
  * @brief   Asynchronously tranmits the specified data buffer.
- * @returns `true` if the buffer was successfully queued for transmission, or `false` if there was not enough space in
- *          the transmit buffer for the message.
+ * @returns `true` if the buffer was successfully queued for transmission, or `false` if the data buffer is too large.
+ * @note    Blocks until the data has been successfully queued for transmission.
  */
 bool usart_tx( usart_t usart, byte_t const * data, size_t size );
 
 /**
  * @fn      usart_tx_str( usart_t, char const * )
  * @brief   Asynchronously transmits the specified string.
- * @returns `true` if the string was successfully queued for transmission, or `false` if there was not enough space in
- *          the transmit buffer for the message.
+ * @returns `true` if the string was successfully queued for transmission, or `false` if the string is too long.
+ * @note    Blocks until the string has been successfully queued for transmission.
  */
 bool usart_tx_str( usart_t usart, char const * str );
 
 /**
  * @fn      usart_tx_sync( usart_t, byte_t const *, size_t )
  * @brief   Synchronously transmits the specified data buffer.
- * @note    This function is intended for debugging. The `usart_tx()` function should be used for normal purposes.
+ * @note    This function blocks until the data buffer has been completely transmitted. This is intended for debugging -
+ *          the `usart_tx()` function should be used for normal purposes.
  */
 void usart_tx_sync( usart_t usart, byte_t const * data, size_t size );
 
 /**
  * @fn      usart_tx_sync_str( usart_t, char const * )
  * @brief   Synchronously transmits the specified string.
- * @note    This function is intended for debugging. The `usart_tx_str()` function should be used for normal purposes.
+ * @note    This function blocks until the string has been completely transmitted. This is intended for debugging - the
+ *          `usart_tx_str()` function should be used for normal purposes.
  */
 void usart_tx_sync_str( usart_t usart, char const * str );
 
