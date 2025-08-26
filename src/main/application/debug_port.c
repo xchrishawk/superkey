@@ -19,8 +19,10 @@
 #include "application/keyer.h"
 #include "core/sys.h"
 #include "core/version.h"
+#include "drivers/eeprom.h"
 #include "drivers/usart.h"
 #include "utility/constants.h"
+#include "utility/crc.h"
 #include "utility/types.h"
 
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
@@ -37,6 +39,60 @@
  * @brief   Size of the command receive buffer, in bytes.
  */
 #define RX_BUF_SIZE             64
+
+/**
+ * @def     CMD_STR_BUZZER
+ * @brief   The string for the `buzzer` command.
+ */
+#define CMD_STR_BUZZER          "Buzzer"
+
+/**
+ * @def     CMD_STR_CONFIG
+ * @brief   The string for the `config` command.
+ */
+#define CMD_STR_CONFIG          "Config"
+
+/**
+ * @def     CMD_STR_EEPROM
+ * @brief   The string for the `eeprom` command.
+ */
+#define CMD_STR_EEPROM          "EEPROM"
+
+/**
+ * @def     CMD_STR_HELP
+ * @brief   The string for the `help` command.
+ */
+#define CMD_STR_HELP            "Help"
+
+/**
+ * @def     CMD_STR_KEYER
+ * @brief   The string for the `keyer` command.
+ */
+#define CMD_STR_KEYER           "Keyer"
+
+/**
+ * @def     CMD_STR_PANIC
+ * @brief   The string for the `panic` command.
+ */
+#define CMD_STR_PANIC           "Panic"
+
+/**
+ * @def     CMD_STR_TICK
+ * @brief   The string for the `tick` command.
+ */
+#define CMD_STR_TICK            "Tick"
+
+/**
+ * @def     CMD_STR_VERSION
+ * @brief   The string for the `version` command.
+ */
+#define CMD_STR_VERSION         "Version"
+
+/**
+ * @def     CMD_STR_WPM
+ * @brief   The string for the `wpm` command.
+ */
+#define CMD_STR_WPM             "WPM"
 
 /**
  * @def     ENABLE_STR
@@ -109,90 +165,82 @@ static size_t s_rx_count = 0;
 static void evaluate_rx_buf( void );
 
 /**
- * @fn      exec_command( char const * command )
+ * @fn      exec_command( char const * const command )
  * @brief   Executes the specified command, including sending any required response.
  */
 static void exec_command( char const * const command );
 
 /**
- * @fn      exec_command_buzzer( char const * command )
+ * @fn      exec_command_buzzer( char const * const command )
  * @brief   Executes the `buzzer` command.
  */
 static void exec_command_buzzer( char const * const command );
 
 /**
- * @fn      exec_command_config( char const * command )
+ * @fn      exec_command_config( char const * const command )
  * @brief   Executes the `config` command.
  */
 static void exec_command_config( char const * const command );
 
 /**
- * @fn      exec_command_help( char const * command )
+ * @fn      exec_command_eeprom( char const * const command )
+ * @brief   Executes the `eeprom` command.
+ */
+static void exec_command_eeprom( char const * const command );
+
+/**
+ * @fn      exec_command_help( char const * const command )
  * @brief   Executes the `help` command.
  */
 static void exec_command_help( char const * const command );
 
 /**
- * @fn      exec_command_input( char const * command )
+ * @fn      exec_command_input( char const * const command )
  * @brief   Executes the `input` command.
  */
 static void exec_command_input( char const * const command );
 
 /**
- * @fn      exec_command_keyer( char const * command )
+ * @fn      exec_command_keyer( char const * const command )
  * @brief   Executes the `keyer` command.
  */
 static void exec_command_keyer( char const * const command );
 
 /**
- * @fn      exec_command_led( char const * command )
+ * @fn      exec_command_led( char const * const command )
  * @brief   Executes the `led` command.
  */
 static void exec_command_led( char const * const command );
 
 /**
- * @fn      exec_command_panic( char const * command )
+ * @fn      exec_command_panic( char const * const command )
  * @brief   Executes the `panic` command.
  */
 static void exec_command_panic( char const * const command );
 
 /**
- * @fn      exec_command_tick( char const * command )
+ * @fn      exec_command_tick( char const * const command )
  * @brief   Executes the `tick` command.
  */
 static void exec_command_tick( char const * const command );
 
 /**
- * @fn      exec_command_version( char const * command )
+ * @fn      exec_command_version( char const * const command )
  * @brief   Executes the `version` command.
  */
 static void exec_command_version( char const * const command );
 
 /**
- * @fn      exec_command_wpm( char const * command )
+ * @fn      exec_command_wpm( char const * const command )
  * @brief   Executes the `wpm` command.
  */
 static void exec_command_wpm( char const * const command );
 
 /**
- * @fn      print_invalid_command( char const * )
+ * @fn      print_invalid_command( char const * const )
  * @brief   Sends an "Invalid command" message for the specified command.
  */
 static void print_invalid_command( char const * const command );
-
-/**
- * @fn      read_long( char const *, long * )
- * @brief   Attempts to read a signed long integer from the specified buffer.
- * @returns `true` if reading the value succeeded and all data was consumed.
- */
-static bool read_long( char const * buf, long * value ) FUNC_MAY_BE_UNUSED;
-
-/**
- * @fn      read_ulong( char const *, unsigned long * )
- * @brief   Attempts to read an unsigned long integer from the specified buffer.
- * @returns `true` if reading the value succeeded and all data was consumed.
- */
-static bool read_ulong( char const * buf, unsigned long * value ) FUNC_MAY_BE_UNUSED;
 
 /**
  * @fn      string_begins_with( char const *, char const * )
@@ -314,25 +362,27 @@ static void evaluate_rx_buf( void )
 static void exec_command( char const * const command )
 {
     // Handle known commands, starting with panic because I'm paranoid
-    if( string_equals( command, "stop" ) || string_equals( command, "panic" ) )
+    if( string_begins_with( command, CMD_STR_PANIC ) )
         exec_command_panic( command );
-    else if( string_begins_with( command, "buzzer" ) )
+    else if( string_begins_with( command, CMD_STR_BUZZER ) )
         exec_command_buzzer( command );
-    else if( string_begins_with( command, "config" ) )
+    else if( string_begins_with( command, CMD_STR_CONFIG ) )
         exec_command_config( command );
-    else if( string_begins_with( command, "help" ) )
+    else if( string_begins_with( command, CMD_STR_EEPROM ) )
+        exec_command_eeprom( command );
+    else if( string_begins_with( command, CMD_STR_HELP ) )
         exec_command_help( command );
     else if( string_begins_with( command, "input" ) )
         exec_command_input( command );
-    else if( string_begins_with( command, "keyer" ) )
+    else if( string_begins_with( command, CMD_STR_KEYER ) )
         exec_command_keyer( command );
     else if( string_begins_with( command, "led" ) )
         exec_command_led( command );
-    else if( string_begins_with( command, "tick" ) )
+    else if( string_begins_with( command, CMD_STR_TICK ) )
         exec_command_tick( command );
-    else if( string_begins_with( command, "version" ) )
+    else if( string_begins_with( command, CMD_STR_VERSION ) )
         exec_command_version( command );
-    else if( string_begins_with( command, "wpm" ) )
+    else if( string_begins_with( command, CMD_STR_WPM ) )
         exec_command_wpm( command );
 
     // Handle unrecognized commands
@@ -344,42 +394,38 @@ static void exec_command( char const * const command )
 
 static void exec_command_buzzer( char const * const command )
 {
-    // Drop "buzzer" token
-    char const * c = command + 6;
+    // Scanned variables
+    unsigned int freq;
+    int sscanf_count;
 
-    if( string_is_empty( c ) )
+    // Parse subcommand
+    if( string_equals( command, CMD_STR_BUZZER ) )
     {
         // No subcommand - interpret as a status request. no action required
     }
-    else if( string_equals( c, " " ENABLE_STR ) )
+    else if( string_equals( command, CMD_STR_BUZZER " " ENABLE_STR ) )
     {
         // Turn buzzer on
         buzzer_set_enabled( true );
     }
-    else if( string_equals( c, " " DISABLE_STR ) )
+    else if( string_equals( command, CMD_STR_BUZZER " " DISABLE_STR ) )
     {
         // Turn buzzer oiff
         buzzer_set_enabled( false );
     }
-    else if( string_begins_with( c, " frequency " ) )
+    else if( string_begins_with( command, CMD_STR_BUZZER " frequency " ) &&
+             sscanf( command + 17, "%u %n", & freq, & sscanf_count ) == 1 &&
+             ( command + 17 )[ sscanf_count ] == NULL_CHAR )
     {
-        // Drop " frequency "
-        c += 11;
-        unsigned long freq;
-        if( read_ulong( c, & freq ) &&
-            freq >= BUZZER_MINIMUM_FREQUENCY &&
-            freq <= BUZZER_MAXIMUM_FREQUENCY )
+        if( freq < BUZZER_MINIMUM_FREQUENCY || freq > BUZZER_MAXIMUM_FREQUENCY )
         {
-            buzzer_set_frequency( ( buzzer_freq_t )freq );
-        }
-        else
-        {
-            debug_port_print( "Invalid frequency: \"" );
-            debug_port_print( c );
-            debug_port_print( "\". Must be between " stringize_value( BUZZER_MINIMUM_FREQUENCY )
-                              " and " stringize_value( BUZZER_MAXIMUM_FREQUENCY ) " Hz." NEWLINE_STR );
+            debug_port_printf( "Invalid frequency: \"%u\". Must be between "
+                               stringize_value( BUZZER_MINIMUM_FREQUENCY ) " and "
+                               stringize_value( BUZZER_MAXIMUM_FREQUENCY ) " Haz. " NEWLINE_STR,
+                               freq );
             return;
         }
+        buzzer_set_frequency( ( buzzer_freq_t )freq );
     }
     else
     {
@@ -389,7 +435,7 @@ static void exec_command_buzzer( char const * const command )
     }
 
     // Send buzzer status
-    debug_port_printf( "Buzzer: %s (%u Hz)" NEWLINE_STR,
+    debug_port_printf( CMD_STR_BUZZER ": %s (%u Hz)" NEWLINE_STR,
                        buzzer_get_enabled() ? ENABLED_STR : DISABLED_STR,
                        buzzer_get_frequency() );
 
@@ -398,10 +444,16 @@ static void exec_command_buzzer( char const * const command )
 
 static void exec_command_config( char const * const command )
 {
-    // Drop "config" token
-    char const * c = command + 6;
-
-    if( string_equals( c, " default" ) )
+    // Parse subcommand
+    if( string_equals( command, CMD_STR_CONFIG " crc" ) )
+    {
+        // Print config CRC
+        config_t config;
+        config_get( & config );
+        crc16_t crc = crc_calc_crc16( & config, sizeof( config_t ) );
+        debug_port_printf( CMD_STR_CONFIG " CRC16: 0x%04X" NEWLINE_STR, crc );
+    }
+    else if( string_equals( command, CMD_STR_CONFIG " default" ) )
     {
         // Restore default configuration
         config_t config;
@@ -409,12 +461,102 @@ static void exec_command_config( char const * const command )
         config_set( & config );
 
         // Send response
-        debug_port_print( "Default configuration restored." NEWLINE_STR );
+        debug_port_print( CMD_STR_CONFIG ": Default restored." NEWLINE_STR );
+        return;
+    }
+    else if( string_equals( command, CMD_STR_CONFIG " flush" ) )
+    {
+        // Flush config
+        config_flush();
+        debug_port_print( CMD_STR_CONFIG ": Flushed." NEWLINE_STR );
+    }
+    else if( string_equals( command, CMD_STR_CONFIG " size" ) )
+    {
+        // Report configuration size
+        debug_port_printf( CMD_STR_CONFIG " size: %u bytes." NEWLINE_STR, sizeof( config_t ) );
     }
     else
+    {
+        // Unknown subcommand?
         print_invalid_command( command );
+        return;
+    }
 
 }   /* exec_command_config() */
+
+
+static void exec_command_eeprom( char const * const command )
+{
+    // Scanned variables
+    unsigned int addr;
+    unsigned int data;
+    int sscanf_count;
+
+    // Parse subcommand
+    if( string_begins_with( command, CMD_STR_EEPROM " erase_byte " ) &&
+        sscanf( command + 18, "%u %n", & addr, & sscanf_count ) == 1 &&
+        ( command + 18 )[ sscanf_count ] == NULL_CHAR )
+    {
+        // Erase byte at address
+        if( addr >= EEPROM_COUNT )
+        {
+            debug_port_printf( "Invalid address: \"%u\". Must be less than "
+                               stringize_value( EEPROM_COUNT ) "." NEWLINE_STR,
+                               addr );
+            return;
+        }
+        eeprom_erase_byte( ( eeprom_addr_t )addr );
+        debug_port_printf( CMD_STR_EEPROM " Erase 0x%04X" NEWLINE_STR, addr );
+        return;
+    }
+    else if( string_begins_with( command, CMD_STR_EEPROM " read_byte " ) &&
+             sscanf( command + 17, "%u %n", & addr, & sscanf_count ) == 1 &&
+             ( command + 17 )[ sscanf_count ] == NULL_CHAR )
+    {
+        // Read byte at address
+        if( addr >= EEPROM_COUNT )
+        {
+            debug_port_printf( "Invalid address: \"%u\". Must be less than "
+                               stringize_value( EEPROM_COUNT ) "." NEWLINE_STR,
+                               addr );
+            return;
+        }
+        byte_t byte;
+        eeprom_read( ( eeprom_addr_t )addr, & byte, 1 );
+        debug_port_printf( CMD_STR_EEPROM " Read 0x%04X: 0x%02X" NEWLINE_STR, addr, byte );
+        return;
+    }
+    else if( string_begins_with( command, CMD_STR_EEPROM " write_byte " ) &&
+             sscanf( command + 18, "%u %u %n", & addr, & data, & sscanf_count ) == 2 &&
+             ( command + 18 )[ sscanf_count ] == NULL_CHAR )
+    {
+        // Write byte at address
+        if( addr >= EEPROM_COUNT )
+        {
+            debug_port_printf( "Invalid address: \"%u\". Must be less than "
+                               stringize_value( EEPROM_COUNT ) "." NEWLINE_STR,
+                               addr );
+            return;
+        }
+        if( data >= UINT8_MAX )
+        {
+            debug_port_printf( "Invalid byte: \"%u\". Must be less than "
+                               stringize_value( UINT8_MAX ) "." NEWLINE_STR,
+                               data );
+        }
+        byte_t byte = ( byte_t )data;
+        eeprom_write( ( eeprom_addr_t )addr, & byte, 1 );
+        debug_port_printf( CMD_STR_EEPROM " Write 0x%04X: 0x%02X" NEWLINE_STR, addr, byte );
+        return;
+    }
+    else
+    {
+        // Unrecognized command?
+        print_invalid_command( command );
+        return;
+    }
+
+}   /* exec_command_eeprom() */
 
 
 static void exec_command_help( char const * const command )
@@ -427,6 +569,10 @@ static void exec_command_help( char const * const command )
 
 static void exec_command_input( char const * const command )
 {
+    //
+    // TODO: UPDATE TO NEW STYLE FOR THESE FUNCTIONS
+    //
+
     // Local constants
     static char const * const s_pin_tbl[] =
     {
@@ -534,6 +680,7 @@ static void exec_command_input( char const * const command )
 
 static void exec_command_keyer( char const * const command )
 {
+    // String table
     static char const * s_paddle_mode_tbl[] =
     {
         stringize( KEYER_PADDLE_MODE_IAMBIC ),
@@ -542,44 +689,42 @@ static void exec_command_keyer( char const * const command )
     };
     _Static_assert( array_count( s_paddle_mode_tbl ) == KEYER_PADDLE_MODE_COUNT, "Invalid string table!" );
 
-    // Drop "keyer" prefix
-    char const * c = command + 5;
-
-    if( string_is_empty( c ) )
+    // Parse subcommand
+    if( string_equals( command, CMD_STR_KEYER ) )
     {
         // No subcommand - interpret as a status request. no action required
     }
-    else if( string_equals( c, " output_active_low " ENABLE_STR ) )
+    else if( string_equals( command, CMD_STR_KEYER " output_active_low " ENABLE_STR ) )
     {
         // Set output to active low
         keyer_set_output_active_low( true );
     }
-    else if( string_equals( c, " output_active_low " DISABLE_STR ) )
+    else if( string_equals( command, CMD_STR_KEYER " output_active_low " DISABLE_STR ) )
     {
         // Set output to active high
         keyer_set_output_active_low( false );
     }
-    else if( string_equals( c, " " stringize( KEYER_PADDLE_MODE_IAMBIC ) ) )
+    else if( string_equals( command, CMD_STR_KEYER " " stringize( KEYER_PADDLE_MODE_IAMBIC ) ) )
     {
         // Set to iambic mode
         keyer_set_paddle_mode( KEYER_PADDLE_MODE_IAMBIC );
     }
-    else if( string_equals( c, " " stringize( KEYER_PADDLE_MODE_ULTIMATIC ) ) )
+    else if( string_equals( command, CMD_STR_KEYER " " stringize( KEYER_PADDLE_MODE_ULTIMATIC ) ) )
     {
         // Set to ultimatic mode
         keyer_set_paddle_mode( KEYER_PADDLE_MODE_ULTIMATIC );
     }
-    else if( string_equals( c, " " stringize( KEYER_PADDLE_MODE_ULTIMATIC_ALTERNATE ) ) )
+    else if( string_equals( command, CMD_STR_KEYER " " stringize( KEYER_PADDLE_MODE_ULTIMATIC_ALTERNATE ) ) )
     {
         // Set to ultimatic alternate mode
         keyer_set_paddle_mode( KEYER_PADDLE_MODE_ULTIMATIC_ALTERNATE );
     }
-    else if( string_equals( c, " paddle_invert " ENABLE_STR ) )
+    else if( string_equals( command, CMD_STR_KEYER " paddle_invert " ENABLE_STR ) )
     {
         // Set invert paddles to true
         keyer_set_paddle_invert( true );
     }
-    else if( string_equals( c, " paddle_invert " DISABLE_STR ) )
+    else if( string_equals( command, CMD_STR_KEYER " paddle_invert " DISABLE_STR ) )
     {
         // Set invert paddles to false
         keyer_set_paddle_invert( false );
@@ -592,7 +737,7 @@ static void exec_command_keyer( char const * const command )
     }
 
     // Print status info
-    debug_port_printf( "Keyer: %s (%s - %s)" NEWLINE_STR,
+    debug_port_printf( CMD_STR_KEYER ": %s (%s - %s)" NEWLINE_STR,
                        keyer_get_on() ? ON_STR : OFF_STR,
                        s_paddle_mode_tbl[ keyer_get_paddle_mode() ],
                        keyer_get_paddle_invert() ? "inverted" : "normal" );
@@ -602,6 +747,10 @@ static void exec_command_keyer( char const * const command )
 
 static void exec_command_led( char const * const command )
 {
+    //
+    // TODO: UPDATE TO NEW STYLE FOR THESE FUNCTIONS
+    //
+
     // Local constants
     static char const * s_led_tbl[] =
     {
@@ -632,7 +781,7 @@ static void exec_command_led( char const * const command )
     }
     if( led == LED_COUNT )
     {
-        print_invalid_command( c );
+        print_invalid_command( command );
         return;
     }
 
@@ -669,6 +818,7 @@ static void exec_command_led( char const * const command )
 static void exec_command_panic( char const * const command )
 {
     ( void )command;
+
     keyer_panic();
     debug_port_print( "Stopped keyer." NEWLINE_STR );
 
@@ -678,7 +828,8 @@ static void exec_command_panic( char const * const command )
 static void exec_command_tick( char const * const command )
 {
     ( void )command;
-    debug_port_printf( "Tick: %lu" NEWLINE_STR, sys_get_tick() );
+
+    debug_port_printf( CMD_STR_TICK ": %lu" NEWLINE_STR, sys_get_tick() );
 
 }   /* exec_command_tick() */
 
@@ -704,31 +855,32 @@ static void exec_command_version( char const * const command )
 
 static void exec_command_wpm( char const * const command )
 {
-    // Drop "wpm" prefix
-    char const * c = command + 3;
+    // Scanned variables
+    unsigned int wpm;
+    int sscanf_count;
 
-    unsigned long wpm;
-    if( string_is_empty( c ) )
+    // Parse subcommand
+    if( string_equals( command, CMD_STR_WPM ) )
     {
-        // No subcommand - interpret as a status request. no action required
+        // No subcommand - interpret as a status request. No action required.
     }
-    else if( ( * c ) == ' ' && read_ulong( c + 1, & wpm ) )
+    else if( sscanf( command + 4, "%u %n", & wpm, & sscanf_count ) == 1 &&
+             ( command + 4 )[ sscanf_count ] == NULL_CHAR )
     {
-        if( wpm >= WPM_MINIMUM && wpm <= WPM_MAXIMUM )
+        // Set WPM
+        if( wpm < WPM_MINIMUM || wpm > WPM_MAXIMUM )
         {
-            wpm_set( ( wpm_t )wpm );
-        }
-        else
-        {
-            debug_port_print( "Invalid WPM: \"" );
-            debug_port_print( c + 1 );
-            debug_port_print( "\". Must be between " stringize_value( WPM_MINIMUM )
-                              " and " stringize_value( WPM_MAXIMUM ) "." NEWLINE_STR );
+            debug_port_printf( "Invalid WPM: \"%u\". Must be between "
+                               stringize_value( WPM_MINIMUM ) " and "
+                               stringize_value( WPM_MAXIMUM ) "." NEWLINE_STR,
+                               wpm );
             return;
         }
+        wpm_set( ( wpm_t )wpm );
     }
     else
     {
+        // Unrecognized command?
         print_invalid_command( command );
         return;
     }
@@ -736,7 +888,7 @@ static void exec_command_wpm( char const * const command )
     // Print status info
     tick_t dot, dash;
     wpm_ticks( wpm_get(), & dot, & dash, NULL, NULL, NULL );
-    debug_port_printf( "WPM: %u (%u.%u wpm - dot %lu ms, dash %lu ms)" NEWLINE_STR,
+    debug_port_printf( CMD_STR_WPM ": %u (%u.%u wpm - dot %lu ms, dash %lu ms)" NEWLINE_STR,
                        wpm_get(),
                        wpm_get() / 10,
                        wpm_get() % 10,
@@ -753,32 +905,6 @@ static void print_invalid_command( char const * const command )
     debug_port_print( "\"" NEWLINE_STR );
 
 }   /* print_invalid_command() */
-
-
-static bool read_long( char const * buf, long * value )
-{
-    char * end;
-    long parsed_value = strtol( buf, & end, 10 );
-    if( end == buf || * end != NULL_CHAR )
-        return( false );
-
-    *value = parsed_value;
-    return( true );
-
-}   /* read_long() */
-
-
-static bool read_ulong( char const * buf, unsigned long * value )
-{
-    char * end;
-    unsigned long parsed_value = strtoul( buf, & end, 10 );
-    if( end == buf || * end != NULL_CHAR )
-        return( false );
-
-    *value = parsed_value;
-    return( true );
-
-}   /* read_ulong() */
 
 
 static bool string_begins_with( char const * str, char const * token )

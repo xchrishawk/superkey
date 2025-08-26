@@ -397,10 +397,6 @@ size_t usart_tx( usart_t usart, byte_t const * data, size_t size, usart_wait_mod
     validate_usart( usart );
     validate_wait_mode( wait_mode );
 
-    // Validate size
-    if( size == 0 )
-        return( true );
-
     // Get interrupt flag
     bool intrpt_en = sys_intrpt_enabled();
 

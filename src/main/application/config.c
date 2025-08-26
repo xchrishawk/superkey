@@ -16,8 +16,25 @@
 #include "application/input.h"
 #include "application/keyer.h"
 #include "application/led.h"
+#include "application/storage.h"
+#include "core/sys.h"
 #include "utility/debug.h"
+#include "utility/types.h"
 #include "utility/utility.h"
+
+/* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
+
+/**
+ * @def     CONFIG_VERSION_CURRENT
+ * @brief   The currently active configuration version.
+ */
+#define CONFIG_VERSION_CURRENT  ( 1 )
+
+/**
+ * @def     MINIMUM_SAVE_PERIOD
+ * @brief   Minimum elapsed time between saving config to storage.
+ */
+#define MINIMUM_SAVE_PERIOD     ( 5 * TICKS_PER_SEC )
 
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
@@ -31,8 +48,16 @@ _Static_assert( _CONFIG_DFLT_BUZZER_FREQUENCY >= BUZZER_MINIMUM_FREQUENCY &&
 /* --------------------------------------------------- VARIABLES ---------------------------------------------------- */
 
 static config_t s_config;                   /**< Currently active app configuration.    */
+static bool s_modified = false;             /**< Has the configuration been modified?   */
+static tick_t s_save_tick = 0;              /**< Tick config was last saved.            */
 
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
+
+/**
+ * @fn      flush( tick_t )
+ * @brief   Writes the configuration to non-volatile storage and updates state.
+ */
+static void flush( tick_t tick );
 
 /**
  * @fn      validate_config( config_t const * )
@@ -83,17 +108,31 @@ void config_default( config_t * config )
 }   /* config_default() */
 
 
+void config_flush( void )
+{
+    flush( sys_get_tick() );
+
+}   /* config_flush() */
+
+
 void config_get( config_t * config )
 {
-    memcpy( config, & s_config, sizeof( config_t ) );
+    * config = s_config;
 
 }   /* config_get() */
 
 
 void config_init( void )
 {
-    // Set configuration to defaults, for now
-    config_default( & s_config );
+    // Try to get configuration from storage, and restore defaults if that fails.
+    // In this case, any existing configuration will be lost the next time config is saved.
+    config_t config;
+    if( ! storage_get_config( CONFIG_VERSION_CURRENT, sizeof( config_t ), & config ) ||
+        ! validate_config( & config ) )
+        config_default( & config );
+
+    // Set local copy
+    s_config = config;
 
 }   /* config_init() */
 
@@ -110,10 +149,29 @@ bool config_set( config_t const * config )
     if( ! validate_config( config ) )
         return( false );
 
-    memcpy( & s_config, config, sizeof( config_t ) );
+    s_config = * config;
+    s_modified = true;
     return( true );
 
 }   /* config_set() */
+
+
+void config_tick( tick_t tick )
+{
+    if( ! s_modified || sys_elapsed( tick, s_save_tick ) < MINIMUM_SAVE_PERIOD )
+        return;
+    flush( tick );
+
+}   /* config_tick() */
+
+
+static void flush( tick_t tick )
+{
+    storage_set_config( CONFIG_VERSION_CURRENT, sizeof( config_t ), & s_config );
+    s_modified = false;
+    s_save_tick = tick;
+
+}   /* flush() */
 
 
 static bool validate_config( config_t const * config )
