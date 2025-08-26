@@ -57,6 +57,12 @@ typedef struct
 
 } config_t;
 
+/**
+ * @typedef config_version_t
+ * @brief   Typedef for the configuration version number.
+ */
+typedef uint8_t config_version_t;
+
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
 /**
@@ -73,6 +79,12 @@ typedef struct
  * @brief   Populates the specified configuration struct with valid defaults.
  */
 void config_default( config_t * config );
+
+/**
+ * @fn      config_flush( void )
+ * @brief   Immediately writes the current configuration to storage.
+ */
+void config_flush( void );
 
 /**
  * @fn      config_get( config_t * )
@@ -99,5 +111,11 @@ config_t const * config_read_only( void );
  *          reason (for example, if any of the configuration parameters are invalid).
  */
 bool config_set( config_t const * config );
+
+/**
+ * @fn      config_tick( tick_t )
+ * @brief   Performs periodic processing at the specified tick.
+ */
+void config_tick( tick_t tick );
 
 #endif /* !defined( APPLICATION_CONFIG_H ) */
