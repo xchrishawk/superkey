@@ -14,17 +14,35 @@
 
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
 
+/**
+ * @def     VERSION_MAJOR
+ * @brief   The application's major version number.
+ */
+#define VERSION_MAJOR               0
+
+/**
+ * @def     VERSION_MINOR
+ * @brief   The application's minor version number.
+ */
+#define VERSION_MINOR               1
+
+/**
+ * @def     VERSION_REVISION
+ * @brief   The application's revision version number.
+ */
+#define VERSION_REVISION            0
+
 // Public variables
-uint8_t const PRODUCT_VERSION_MAJOR = _VERSION_MAJOR;
-uint8_t const PRODUCT_VERSION_MINOR = _VERSION_MINOR;
-uint8_t const PRODUCT_VERSION_REVISION = _VERSION_REVISION;
+uint8_t const PRODUCT_VERSION_MAJOR = VERSION_MAJOR;
+uint8_t const PRODUCT_VERSION_MINOR = VERSION_MINOR;
+uint8_t const PRODUCT_VERSION_REVISION = VERSION_REVISION;
 
 // Auto-generated variables
 static char const * const PRODUCT_NAME = _EXECUTABLE_PROJECT_NAME;
 static char const * const EXECUTABLE_NAME = _EXECUTABLE_NAME;
-static char const * const VERSION = stringize_value( _VERSION_MAJOR ) "."
-                                    stringize_value( _VERSION_MINOR ) "."
-                                    stringize_value( _VERSION_REVISION );
+static char const * const VERSION = stringize_value( VERSION_MAJOR ) "."
+                                    stringize_value( VERSION_MINOR ) "."
+                                    stringize_value( VERSION_REVISION );
 static char const * const BUILD_TYPE = _BUILD_TYPE;
 static char const * const BUILD_DIR = _EXECUTABLE_PROJECT_BUILD_DIR;
 static char const * const BUILD_DATE = _EXECUTABLE_BUILD_DATE;
