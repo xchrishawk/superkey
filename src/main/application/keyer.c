@@ -38,6 +38,8 @@ enum
     ELEMENT_UNKNOWN,                        /**< Element type is unknown (manual).      */
     ELEMENT_DOT,                            /**< Element is a dot.                      */
     ELEMENT_DASH,                           /**< Element is a dash.                     */
+    ELEMENT_LETTER_SPACE,                   /**< Element is a letter space.             */
+    ELEMENT_WORD_SPACE,                     /**< Element is a word space.               */
 
     ELEMENT_COUNT,                          /**< Number of valid elements.              */
 
@@ -57,6 +59,7 @@ enum
     STATE_DOTS,                             /**< Keyer emits continuous dots.           */
     STATE_DASHES,                           /**< Keyer emits continuous dashes.         */
     STATE_INTERLEAVED,                      /**< Keyer emits continuous dots and dashes.*/
+    STATE_AUTOKEY,                          /**< Keyer automatically keys characters.   */
 
     STATE_COUNT,                            /**< Number of valid states.                */
 };
@@ -69,7 +72,19 @@ enum
  */
 #define NO_TIMEOUT 0
 
-static gpio_pin_t const KEYER_OUT_PIN = GPIO_PIN_A6;
+/**
+ * @def     AUTOKEY_BUF_SZ
+ * @brief   Maximum number of elements queued in autokey buffer.
+ * @note    This 4-kilobyte buffer takes up 1/4th of our RAM space. This seems justified since autokey is such a core
+ *          part of the device's functionality. This could be reduced if required.
+ */
+#define AUTOKEY_BUF_SZ  4096
+
+/**
+ * @def     KEYER_OUT_PIN
+ * @brief   The GPIO pin which is used for the keyer output.
+ */
+#define KEYER_OUT_PIN GPIO_PIN_A6
 
 /* --------------------------------------------------- VARIABLES ---------------------------------------------------- */
 
@@ -77,40 +92,79 @@ static bool s_keyed = false;                /**< Is the keyer hardware currently
 static bool s_panicked = false;             /**< Was the keyer panic activated?         */
 
 static state_t s_state = STATE_OFF;         /**< Currently active keyer state.          */
-static element_t s_element = ELEMENT_NONE;  /**< Element which started current lockout. */
-static tick_t s_element_start = 0;          /**< Tick at which current element started. */
-static tick_t s_element_duration = NO_TIMEOUT;/**< Duration of current element.         */
-static tick_t s_element_lockout = NO_TIMEOUT;/**< Lockout until next element.           */
+
+static element_t s_el = ELEMENT_NONE;       /** The element currently being keyed.      */
+static element_t s_lockout_el = ELEMENT_NONE;/**< Element which started lockout.        */
+static tick_t s_el_stop_tick = 0;           /** Tick at which current element must stop.*/
+static bool s_el_stop_tick_vld = false;     /** Is `s_el_stop_tick` valid?              */
+static tick_t s_el_start_tick = 0;          /** Tick at which next element may start.   */
+static bool s_el_start_tick_vld = false;    /** Is `s_el_start_tick` valid?             */
+
+static element_t s_autokey_buf[ AUTOKEY_BUF_SZ ];/**< El buffer for autokey mode.       */
+static size_t s_autokey_head = 0;           /**< Head of autokey circular buffer.       */
+static size_t s_autokey_tail = 0;           /**< Tail of autokey circular buffer.       */
 
 static wpm_t s_ticks_wpm = 0;               /**< WPM at which ticks were evaluated.     */
 static tick_t s_dot_ticks = 0;              /**< Number of ticks per dot.               */
 static tick_t s_dash_ticks = 0;             /**< Number of ticks per dash.              */
 static tick_t s_space_ticks = 0;            /**< Number of ticks per element space.     */
+static tick_t s_letter_space_ticks = 0;     /**< Number of ticks per letter space.      */
+static tick_t s_word_space_ticks = 0;       /**< Number of ticks per word space.        */
 
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
 /**
- * @def     is_timeout_elapsed( _tick, _duration )
- * @brief   Returns `true` if the specified timeout has elapsed at the specified tick.
+ * @def     is_tick_passed( _tick, _timeout )
+ * @brief   Returns `true` if `_tick` represents a tick greater than or equal to `_timeout`.
  */
-#define is_timeout_elapsed( _tick, _duration )                                      \
-    ( sys_elapsed( ( _tick ), s_element_start ) > ( _duration ) )
+#define is_tick_passed( _tick, _timeout )                                           \
+    ( sys_is_tick_gte( _tick, _timeout ) )
 
 /**
- * @def     is_duration_elapsed( _tick )
- * @brief   Returns `true` if the `s_element_duration` timeout has elapsed at the specified tick.
+ * @def     is_stop_tick_passed( _tick )
+ * @brief   Returns `true` if `_tick` has passed `s_el_stop_tick`, or there is no valid stop tick.
  */
-#define is_duration_elapsed( _tick )                                                \
-    is_timeout_elapsed( _tick, s_element_duration )
+#define is_stop_tick_passed( _tick )                                                \
+    ( ! s_el_stop_tick_vld || is_tick_passed( _tick, s_el_stop_tick ) )
 
 /**
- * @def     is_lockout_elapsed( _tick )
- * @brief   Returns `true` if the `s_element_lockout` timeout has elapsed at the specified tick.
+ * @def     is_start_tick_passed( _tick )
+ * @brief   Returns `true` if `_tick` has passed `s_el_start_tick`, or there is no valid start tick.
  */
-#define is_lockout_elapsed( _tick )                                                 \
-    is_timeout_elapsed( _tick, s_element_lockout )
+#define is_start_tick_passed( _tick )                                               \
+    ( ! s_el_start_tick_vld || is_tick_passed( _tick, s_el_start_tick ) )
 
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
+
+/**
+ * @fn      autokey_avail( void )
+ * @brief   Returns the number of available slots in the autokey circular buffer.
+ */
+static size_t autokey_avail( void );
+
+/**
+ * @fn      autokey_count( void )
+ * @brief   Returns the number of items in the autokey circular buffer.
+ */
+static size_t autokey_count( void );
+
+/**
+ * @fn      autokey_dequeue( element_t * )
+ * @brief   Dequeues an element from the autokey buffer.
+ */
+static bool autokey_dequeue( element_t * el );
+
+/**
+ * @fn      autokey_enqueue( void )
+ * @brief   Enqueues the specified element in the autokey buffer.
+ */
+static bool autokey_enqueue( element_t el );
+
+/**
+ * @fn      do_state_autokey( tick_t, bool )
+ * @brief   Executes the `STATE_AUTOKEY` state.
+ */
+static void do_state_autokey( tick_t tick, bool new_state );
 
 /**
  * @fn      do_state_dashes( tick_t, bool )
@@ -141,6 +195,18 @@ static void do_state_off( tick_t tick, bool new_state );
  * @brief   Executes the `STATE_ON` state.
  */
 static void do_state_on( tick_t tick, bool new_state );
+
+/**
+ * @fn      element_duration( element_t )
+ * @brief   Returns the duration (in ticks) for the specified element.
+ */
+static tick_t element_duration( element_t el );
+
+/**
+ * @fn      element_is_keyed( element_t )
+ * @brief   Returns `true` if the specified element requires activating the key.
+ */
+static bool element_is_keyed( element_t el );
 
 /**
  * @fn      get_keyed( void )
@@ -174,6 +240,439 @@ static void update_hardware( void );
 static void update_ticks( void );
 
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
+
+bool keyer_autokey_char( char c )
+{
+    switch( c )
+    {
+    case ' ':
+        // Space
+        return( autokey_enqueue( ELEMENT_WORD_SPACE ) );
+
+    case 'a':
+    case 'A':
+        // Letter A
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'b':
+    case 'B':
+        // Letter B
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'c':
+    case 'C':
+        // Letter C
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'd':
+    case 'D':
+        // Letter D
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'e':
+    case 'E':
+        // Letter E
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'f':
+    case 'F':
+        // Letter F
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'g':
+    case 'G':
+        // Letter G
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'h':
+    case 'H':
+        // Letter H
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'i':
+    case 'I':
+        // Letter I
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'j':
+    case 'J':
+        // Letter J
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'k':
+    case 'K':
+        // Letter K
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'l':
+    case 'L':
+        // Letter L
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'm':
+    case 'M':
+        // Letter M
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'n':
+    case 'N':
+        // Letter N
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'o':
+    case 'O':
+        // Letter O
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'p':
+    case 'P':
+        // Letter P
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'q':
+    case 'Q':
+        // Letter Q
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'r':
+    case 'R':
+        // Letter R
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 's':
+    case 'S':
+        // Letter S
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 't':
+    case 'T':
+        // Letter T
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'u':
+    case 'U':
+        // Letter U
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'v':
+    case 'V':
+        // Letter V
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'w':
+    case 'W':
+        // Letter W
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'x':
+    case 'X':
+        // Letter X
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'y':
+    case 'Y':
+        // Letter Y
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case 'z':
+    case 'Z':
+        // Letter Z
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case '0':
+        // Number 0
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case '1':
+        // Number 1
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case '2':
+        // Number 2
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case '3':
+        // Number 3
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case '4':
+        // Number 4
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case '5':
+        // Number 5
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case '6':
+        // Number 6
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case '7':
+        // Number 7
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case '8':
+        // Number 8
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case '9':
+        // Number 9
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case '.':
+        // Period
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case ',':
+        // Comma
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case '?':
+        // Question mark
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case '\'':
+        // Single quote
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case '!':
+        // Exclamation mark
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) );
+
+    case '-':
+        // Dash
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) );
+
+    case '/':
+        // Slash
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case '=':
+        // Equals sign
+        return( autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case '+':
+        // Plus sign
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case '"':
+        // Double quote
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    case '_':
+        // Underscore
+        return( autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_DOT ) &&
+                autokey_enqueue( ELEMENT_DASH ) &&
+                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+
+    default:
+        return( false );
+    }
+
+}   /* keyer_autokey_char() */
+
+
+size_t keyer_autokey_str( char const * str )
+{
+    size_t count = 0;
+    while( * str )
+        if( keyer_autokey_char( *( str++ ) ) )
+            count++;
+
+    return( count );
+
+}   /* keyer_autokey_str() */
 
 bool keyer_get_on( void )
 {
@@ -209,10 +708,12 @@ void keyer_init( void )
     s_keyed = false;
     s_panicked = false;
     s_state = STATE_OFF;
-    s_element = ELEMENT_NONE;
-    s_element_start = 0;
-    s_element_duration = NO_TIMEOUT;
-    s_element_lockout = NO_TIMEOUT;
+    s_el = ELEMENT_NONE;
+    s_lockout_el = ELEMENT_NONE;
+    s_el_stop_tick = 0;
+    s_el_stop_tick_vld = false;
+    s_el_start_tick = 0;
+    s_el_start_tick_vld = false;
     s_ticks_wpm = 0;
     s_dot_ticks = 0;
     s_dash_ticks = 0;
@@ -230,6 +731,7 @@ void keyer_init( void )
 void keyer_panic( void )
 {
     s_panicked = true;
+    s_autokey_tail = s_autokey_head;
     set_keyed( false );
 
 }   /* keyer_panic() */
@@ -298,25 +800,97 @@ void keyer_tick( tick_t tick )
         case STATE_INTERLEAVED:
             do_state_interleaved( tick, new_state );
             break;
+        case STATE_AUTOKEY:
+            do_state_autokey( tick, new_state );
+            break;
     }
 
 }   /* keyer_tick() */
+
+
+static size_t autokey_avail( void )
+{
+    return( AUTOKEY_BUF_SZ - autokey_count() - 1 );
+
+}   /* autokey_avail() */
+
+
+static size_t autokey_count( void )
+{
+    if( s_autokey_head >= s_autokey_tail )
+        return( s_autokey_head - s_autokey_tail );
+    else
+        return( AUTOKEY_BUF_SZ - s_autokey_tail + s_autokey_head );
+
+}   /* autokey_count() */
+
+
+static bool autokey_dequeue( element_t * el )
+{
+    if( autokey_count() == 0 )
+        return( false );
+
+    * el = s_autokey_buf[ s_autokey_tail ];
+    increment_rollover( s_autokey_tail, AUTOKEY_BUF_SZ );
+    return( true );
+
+}   /* autokey_dequeue() */
+
+
+static bool autokey_enqueue( element_t el )
+{
+    if( autokey_avail() == 0 )
+        return( false );
+
+    s_autokey_buf[ s_autokey_head ] = el;
+    increment_rollover( s_autokey_head, AUTOKEY_BUF_SZ );
+    return( true );
+
+}   /* autokey_enqueue() */
+
+
+static void do_state_autokey( tick_t tick, bool new_state )
+{
+    ( void )new_state;
+
+    element_t el;
+    if( ! s_panicked && is_start_tick_passed( tick ) && autokey_dequeue( & el ) )
+    {
+        // Activate keyer hardware (if required)
+        s_el = el;
+        tick_t el_dur = element_duration( s_el );
+        s_el_stop_tick = tick + el_dur;
+        s_el_stop_tick_vld = true;
+        s_el_start_tick = tick + el_dur + s_space_ticks;
+        s_el_start_tick_vld = true;
+        if( element_is_keyed( s_el ) )
+            set_keyed( true );
+    }
+    else if( is_stop_tick_passed( tick ) && get_keyed() )
+    {
+        // Deactivate keyer hardware
+        set_keyed( false );
+    }
+
+}   /* do_state_autokey() */
 
 
 static void do_state_dashes( tick_t tick, bool new_state )
 {
     ( void )new_state;
 
-    if( ! s_panicked && is_lockout_elapsed( tick ) && ! get_keyed() )
+    if( ! s_panicked && is_start_tick_passed( tick ) && ! get_keyed() )
     {
         // Activate keyer hardware
+        s_el = ELEMENT_DASH;
+        s_lockout_el = ELEMENT_DASH;
+        s_el_stop_tick = tick + s_dash_ticks;
+        s_el_stop_tick_vld = true;
+        s_el_start_tick = tick + s_dash_ticks + s_space_ticks;
+        s_el_start_tick_vld = true;
         set_keyed( true );
-        s_element = ELEMENT_DASH;
-        s_element_start = tick;
-        s_element_duration = s_dash_ticks;
-        s_element_lockout = s_dash_ticks + s_space_ticks;
     }
-    else if( is_duration_elapsed( tick ) && get_keyed() )
+    else if( is_stop_tick_passed( tick ) && get_keyed() )
     {
         // Deactivate keyer hardware
         set_keyed( false );
@@ -329,16 +903,18 @@ static void do_state_dots( tick_t tick, bool new_state )
 {
     ( void )new_state;
 
-    if( ! s_panicked && is_lockout_elapsed( tick ) && ! get_keyed() )
+    if( ! s_panicked && is_start_tick_passed( tick ) && ! get_keyed() )
     {
         // Activate keyer hardware
+        s_el = ELEMENT_DOT;
+        s_lockout_el = ELEMENT_DOT;
+        s_el_stop_tick = tick + s_dot_ticks;
+        s_el_stop_tick_vld = true;
+        s_el_start_tick = tick + s_dot_ticks + s_space_ticks;
+        s_el_start_tick_vld = true;
         set_keyed( true );
-        s_element = ELEMENT_DOT;
-        s_element_start = tick;
-        s_element_duration = s_dot_ticks;
-        s_element_lockout = s_dot_ticks + s_space_ticks;
     }
-    else if( is_duration_elapsed( tick ) && get_keyed() )
+    else if( is_stop_tick_passed( tick ) && get_keyed() )
     {
         // Deactivate keyer hardware
         set_keyed( false );
@@ -351,15 +927,19 @@ static void do_state_interleaved( tick_t tick, bool new_state )
 {
     ( void )new_state;
 
-    if( ! s_panicked && is_lockout_elapsed( tick ) && ! get_keyed() )
+    if( ! s_panicked && is_start_tick_passed( tick ) && ! get_keyed() )
     {
+        // Activate keyer hardware
+        s_el = ( s_lockout_el == ELEMENT_DOT ? ELEMENT_DASH : ELEMENT_DOT );
+        s_lockout_el = s_el;
+        tick_t el_dur = element_duration( s_el );
+        s_el_stop_tick = tick + el_dur;
+        s_el_stop_tick_vld = true;
+        s_el_start_tick = tick + el_dur + s_space_ticks;
+        s_el_start_tick_vld = true;
         set_keyed( true );
-        s_element = ( s_element == ELEMENT_DOT ? ELEMENT_DASH : ELEMENT_DOT );
-        s_element_start = tick;
-        s_element_duration = ( s_element == ELEMENT_DOT ? s_dot_ticks : s_dash_ticks );
-        s_element_lockout = s_element_duration + s_space_ticks;
     }
-    else if( is_duration_elapsed( tick ) && get_keyed() )
+    else if( is_stop_tick_passed( tick ) && get_keyed() )
     {
         // Deactivate keyer hardware
         set_keyed( false );
@@ -373,18 +953,20 @@ static void do_state_off( tick_t tick, bool new_state )
     ( void )new_state;
 
     // Deactivate keyer hardware, once allowed
-    if( get_keyed() && ( s_element_duration == NO_TIMEOUT || is_duration_elapsed( tick ) ) )
+    if( get_keyed() && is_stop_tick_passed( tick ) )
     {
         set_keyed( false );
     }
 
     // Reset state, once allowed
-    if( s_element_start != 0 && ( s_element_lockout == NO_TIMEOUT || is_lockout_elapsed( tick ) ) )
+    if( s_el != ELEMENT_NONE && is_start_tick_passed( tick ) )
     {
-        s_element = ELEMENT_NONE;
-        s_element_start = 0;
-        s_element_duration = NO_TIMEOUT;
-        s_element_lockout = NO_TIMEOUT;
+        s_el = ELEMENT_NONE;
+        s_lockout_el = ELEMENT_NONE;
+        s_el_stop_tick = 0;
+        s_el_stop_tick_vld = false;
+        s_el_start_tick = 0;
+        s_el_start_tick_vld = false;
     }
 
 }   /* do_state_off() */
@@ -392,17 +974,48 @@ static void do_state_off( tick_t tick, bool new_state )
 
 static void do_state_on( tick_t tick, bool new_state )
 {
+    ( void )tick;
+
     // Activate unconditionally, unless panicked
     if( ! s_panicked && ( new_state || ! get_keyed() ) )
     {
+        s_el = ELEMENT_UNKNOWN;
+        s_el_stop_tick = 0;
+        s_el_stop_tick_vld = false;
+        s_el_start_tick = 0;
+        s_el_start_tick_vld = false;
         set_keyed( true );
-        s_element = ELEMENT_UNKNOWN;
-        s_element_start = tick;
-        s_element_duration = NO_TIMEOUT;
-        s_element_lockout = NO_TIMEOUT;
     }
 
 }   /* do_state_on() */
+
+
+static tick_t element_duration( element_t el )
+{
+    switch( el )
+    {
+    case ELEMENT_UNKNOWN:
+        return( 0 );
+    case ELEMENT_DOT:
+        return( s_dot_ticks );
+    case ELEMENT_DASH:
+        return( s_dash_ticks );
+    case ELEMENT_LETTER_SPACE:
+        return( s_letter_space_ticks - s_space_ticks );
+    case ELEMENT_WORD_SPACE:
+        return( s_word_space_ticks - s_space_ticks );
+    default:
+        return( 0 );
+    }
+
+}   /* element_duration() */
+
+
+static bool element_is_keyed( element_t el )
+{
+    return( el == ELEMENT_DOT || el == ELEMENT_DASH );
+
+}   /* element_is_keyed() */
 
 
 static bool get_keyed( void )
@@ -421,9 +1034,14 @@ static state_t get_next_state( void )
     bool paddle_invert = keyer_get_paddle_invert();
 
     // Determine next state
-    if( is_bit_set( inputs, INPUT_TYPE_STRAIGHT_KEY ) )
+    if( autokey_count() != 0 )
     {
-        // Straight key supersedes all others
+        // Autokey has highest priority
+        return( STATE_AUTOKEY );
+    }
+    else if( is_bit_set( inputs, INPUT_TYPE_STRAIGHT_KEY ) )
+    {
+        // Straight key supersedes all other inputs
         return( STATE_ON );
     }
     else if( is_bit_set( inputs, INPUT_TYPE_PADDLE_LEFT ) &&
@@ -518,6 +1136,11 @@ static void update_ticks( void )
     if( s_ticks_wpm == wpm )
         return;
 
-    wpm_ticks( s_ticks_wpm = wpm, & s_dot_ticks, & s_dash_ticks, & s_space_ticks, NULL, NULL );
+    wpm_ticks( s_ticks_wpm = wpm,
+               & s_dot_ticks,
+               & s_dash_ticks,
+               & s_space_ticks,
+               & s_letter_space_ticks,
+               & s_word_space_ticks );
 
 }   /* update_ticks() */
