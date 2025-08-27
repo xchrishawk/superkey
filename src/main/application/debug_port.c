@@ -709,7 +709,7 @@ static void exec_command_keyer( char const * const command )
     {
         // No subcommand - interpret as a status request. no action required
     }
-    else if( string_equals( command, CMD_STR_KEYER " immediate_autokey" ) )
+    else if( string_equals( command, CMD_STR_KEYER " immediate" ) )
     {
         // Enter immediate autokey mode
         s_immediate_autokey = true;
