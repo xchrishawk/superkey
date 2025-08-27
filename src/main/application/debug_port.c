@@ -38,7 +38,7 @@
  * @def     RX_BUF_SIZE
  * @brief   Size of the command receive buffer, in bytes.
  */
-#define RX_BUF_SIZE             64
+#define RX_BUF_SIZE             256
 
 /**
  * @def     CMD_STR_BUZZER
@@ -147,6 +147,8 @@
 static char s_rx_buf[ RX_BUF_SIZE ];
 static size_t s_rx_count = 0;
 
+bool s_immediate_autokey = false;
+
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
 /**
@@ -235,6 +237,12 @@ static void exec_command_version( char const * const command );
  * @brief   Executes the `wpm` command.
  */
 static void exec_command_wpm( char const * const command );
+
+/**
+ * @fn      exec_immediate_autokey_mode( void )
+ * @brief   Executes the special "immediate autokey" mode.
+ */
+static void exec_immediate_autokey_mode( void );
 
 /**
  * @fn      print_invalid_command( char const * const )
@@ -330,6 +338,13 @@ void debug_port_usart_rx( void )
 
 static void evaluate_rx_buf( void )
 {
+    // Are we in immediate autokey mode?
+    if( s_immediate_autokey )
+    {
+        exec_immediate_autokey_mode();
+        return;
+    }
+
     // If we receive the terminating character...
     if( s_rx_buf[ s_rx_count - 1 ] == TERMINATOR_CHAR )
     {
@@ -694,6 +709,20 @@ static void exec_command_keyer( char const * const command )
     {
         // No subcommand - interpret as a status request. no action required
     }
+    else if( string_equals( command, CMD_STR_KEYER " immediate" ) )
+    {
+        // Enter immediate autokey mode
+        s_immediate_autokey = true;
+        debug_port_print( CMD_STR_KEYER ": Now in immediate autokey mode. Send null character to exit." NEWLINE_STR );
+        return;
+    }
+    else if( string_begins_with( command, CMD_STR_KEYER " key " ) )
+    {
+        // Add remaining string to autokey buffer
+        size_t count = keyer_autokey_str( command + 10 );
+        debug_port_printf( CMD_STR_KEYER ": \"%s\" (%u chars queued)" NEWLINE_STR, command + 10, count );
+        return;
+    }
     else if( string_equals( command, CMD_STR_KEYER " output_active_low " ENABLE_STR ) )
     {
         // Set output to active low
@@ -896,6 +925,30 @@ static void exec_command_wpm( char const * const command )
                        dash / TICKS_PER_MSEC );
 
 }   /* exec_command_wpm() */
+
+
+static void exec_immediate_autokey_mode( void )
+{
+    // Loop through each available character
+    for( size_t idx = 0; idx < s_rx_count; idx++ )
+    {
+        // If we receive the null character, exit autokey mode
+        if( s_rx_buf[ idx ] == 0 )
+        {
+            debug_port_print( NEWLINE_STR CMD_STR_KEYER ": Exited immediate autokey mode." NEWLINE_STR );
+            s_immediate_autokey = false;
+            keyer_panic();
+            break;
+        }
+
+        // Otherwise, queue the character
+        keyer_autokey_char( ( char )s_rx_buf[ idx ] );
+    }
+
+    // All characters were consumed
+    s_rx_count = 0;
+
+}   /* exec_immediate_autokey_mode() */
 
 
 static void print_invalid_command( char const * const command )

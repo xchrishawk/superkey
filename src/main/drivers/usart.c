@@ -56,18 +56,14 @@ _Static_assert( array_count( s_reg_tbl ) == USART_COUNT, "Invalid register table
 /**
  * @def     RX_BUF_SIZE
  * @brief   Buffer size for received data.
- * @note    `RX_BUF_SIZE` is significantly smaller than `TX_BUF_SIZE`, because it is intended that data will be
- *          immediately read from the driver's RX buffer into a function-specific buffer for further processing.
  */
-#define RX_BUF_SIZE     16
+#define RX_BUF_SIZE     8
 
 /**
  * @def     TX_BUF_SIZE
  * @brief   Buffer size for transmitted data.
- * @note    `TX_BUF_SIZE` is significantly larger than `RX_BUF_SIZE`, because it needs to support queuing full-sized
- *          messages without requiring chunking.
  */
-#define TX_BUF_SIZE     256
+#define TX_BUF_SIZE     64
 
 /**
  * @def     TX_DELAY_US
