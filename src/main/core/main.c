@@ -114,6 +114,12 @@ static void periodic_50ms( tick_t tick );
 static void periodic_1s( tick_t tick );
 
 /**
+ * @fn      startup_display( void )
+ * @brief   Performs a short display at startup.
+ */
+static void startup_display( void );
+
+/**
  * @fn      test( void )
  * @brief   Test / prototyping function run after `init()`.
  */
@@ -205,6 +211,9 @@ static void init( void )
     debug_port_init();
     keyer_init();
 
+    // Flash LEDs to indicate successful startup
+    startup_display();
+
 }   /* init() */
 
 
@@ -259,6 +268,25 @@ static void periodic_1s( tick_t tick )
     led_toggle_on( LED_STATUS );
 
 }   /* periodic_1s() */
+
+
+static void startup_display( void )
+{
+    // Flash an S (for Superkey) at 20 WPM
+    for( uint8_t idx = 0; idx < 3; idx++ )
+    {
+        #define DELAY_MS 60
+        led_set_on( LED_STATUS, true );
+        _delay_ms( DELAY_MS );
+        led_set_on( LED_STATUS, false );
+        _delay_ms( DELAY_MS );
+        #undef DELAY_MS
+    }
+
+    // Leave the status LED on to indicate successful startup
+    led_set_on( LED_STATUS, true );
+
+}   /* startup_display() */
 
 
 static void test( void )
