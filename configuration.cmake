@@ -6,23 +6,6 @@
 # @date     2025-08-19
 #
 
-# -- Versioning --
-
-# Define values
-set(VERSION_MAJOR                           0
-    CACHE STRING                            "The major version number.")
-set(VERSION_MINOR                           1
-    CACHE STRING                            "The minor version number.")
-set(VERSION_REVISION                        0
-    CACHE STRING                            "The revision version number.")
-
-# Set compile definitions
-add_compile_definitions(
-    _VERSION_MAJOR=${VERSION_MAJOR}
-    _VERSION_MINOR=${VERSION_MINOR}
-    _VERSION_REVISION=${VERSION_REVISION}
-)
-
 # -- Configuration Defaults --
 
 # Define values
