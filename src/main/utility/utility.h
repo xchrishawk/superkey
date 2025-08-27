@@ -1,9 +1,10 @@
 /**
- * @file    src/main/utility/utility.h
- * @brief   Header defining common utility macros.
+ * @file        src/main/utility/utility.h
+ * @brief       Header defining common utility macros.
  *
- * @author  Chris Vig (chris@invictus.so)
- * @date    2025-08-16
+ * @author      Chris Vig (chris@invictus.so)
+ * @date        2025-08-16
+ * @copyright   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
  */
 
 #if !defined( UTILITY_UTILITY_H )

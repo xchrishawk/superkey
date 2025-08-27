@@ -1,9 +1,10 @@
 #
-# @file     .gitignore
-# @brief    Main project gitignore.
+# @file         .gitignore
+# @brief        Main project gitignore.
 #
-# @author   Chris Vig (chris@invictus.so)
-# @date     2025-08-16
+# @author       Chris Vig (chris@invictus.so)
+# @date         2025-08-16
+# @copyright    © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
 #
 
 # Ignore .vscode directory, except for c_cpp_properties.json since it's required for intellisense
