@@ -1,9 +1,10 @@
 /**
- * @file    src/main/utility/crc.c
- * @brief   Implementation for the CRC module.
+ * @file        src/main/utility/crc.c
+ * @brief       Implementation for the CRC module.
  *
- * @author  Chris Vig (chris@invictus.so)
- * @date    2025-08-26
+ * @author      Chris Vig (chris@invictus.so)
+ * @date        2025-08-26
+ * @copyright   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
  */
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */

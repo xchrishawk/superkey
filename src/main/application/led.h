@@ -1,9 +1,10 @@
 /**
- * @file    src/main/application/led.h
- * @brief   Header for the LED driver module.
+ * @file        src/main/application/led.h
+ * @brief       Header for the LED driver module.
  *
- * @author  Chris Vig (chris@invictus.so)
- * @date    2025-08-17
+ * @author      Chris Vig (chris@invictus.so)
+ * @date        2025-08-17
+ * @copyright   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
  */
 
 #if !defined( APPLICATION_LED_H )

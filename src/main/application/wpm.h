@@ -1,9 +1,10 @@
 /**
- * @file    src/main/application/wpm.h
- * @brief   Header for the words-per-minute calculation module.
+ * @file        src/main/application/wpm.h
+ * @brief       Header for the words-per-minute calculation module.
  *
- * @author  Chris Vig (chris@invictus.so)
- * @date    2025-08-22
+ * @author      Chris Vig (chris@invictus.so)
+ * @date        2025-08-22
+ * @copyright   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
  */
 
 #if !defined( APPLICATION_WPM_H )

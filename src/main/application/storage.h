@@ -1,9 +1,10 @@
 /**
- * @file    src/main/application/storage.h
- * @brief   Header for the application-specific storage module.
+ * @file        src/main/application/storage.h
+ * @brief       Header for the application-specific storage module.
  *
- * @author  Chris Vig (chris@invictus.so)
- * @date    2025-08-26
+ * @author      Chris Vig (chris@invictus.so)
+ * @date        2025-08-26
+ * @copyright   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
  */
 
 #if !defined( APPLICATION_STORAGE_H )

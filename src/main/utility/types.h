@@ -1,10 +1,11 @@
 /**
- * @file    src/main/utility/types.h
- * @brief   Header defining generic types.
- * @note    This header provides a "safe" place to declare types in order to prevent circular references.
+ * @file        src/main/utility/types.h
+ * @brief       Header defining generic types.
+ * @note        This header provides a "safe" place to declare types in order to prevent circular references.
  *
- * @author  Chris Vig (chris@invictus.so)
- * @date    2025-08-16
+ * @author      Chris Vig (chris@invictus.so)
+ * @date        2025-08-16
+ * @copyright   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
  */
 
 #if !defined( UTILITY_TYPES_H )

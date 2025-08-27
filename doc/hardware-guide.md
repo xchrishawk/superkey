@@ -1,6 +1,6 @@
-# SuperKey Hardware
+# SuperKey Hardware Guide
 
-This page describes the SuperKey's hardware.
+This guide describes the SuperKey's hardware.
 
 ## Microcontroller
 
