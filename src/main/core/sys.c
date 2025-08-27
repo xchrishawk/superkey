@@ -135,6 +135,21 @@ bool sys_intrpt_enabled( void )
 }   /* sys_intrpt_enabled() */
 
 
+bool sys_is_tick_gt( tick_t a, tick_t b )
+{
+    return( ( ( a > b ) && ( a - b <= ( TICK_MAX / 2 ) ) ) ||
+            ( ( b > a ) && ( b - a >  ( TICK_MAX / 2 ) ) ) );
+
+}   /* sys_is_tick_gt() */
+
+
+bool sys_is_tick_gte( tick_t a, tick_t b )
+{
+    return( a == b || sys_is_tick_gt( a, b ) );
+
+}   /* sys_is_tick_gte() */
+
+
 void sys_set_intrpt_enabled( bool enabled )
 {
     if( enabled )   sei();

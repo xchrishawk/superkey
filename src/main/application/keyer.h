@@ -12,6 +12,7 @@
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
 
 #include <stdint.h>
+#include <stdlib.h>
 
 #include "utility/types.h"
 
@@ -52,6 +53,20 @@ enum
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
 
 /**
+ * @fn      keyer_autokey_char( char )
+ * @brief   Adds the specified character to the keyer's autokey buffer.
+ * @returns `true` if the character was successfully queued.
+ */
+bool keyer_autokey_char( char c );
+
+/**
+ * @fn      keyer_autokey( char const * )
+ * @brief   Adds the specified string to the keyer's autokey buffer.
+ * @returns The number of characters that were successfully queued.
+ */
+size_t keyer_autokey_str( char const * str );
+
+/**
  * @fn      keyer_get_on( void )
  * @brief   Returns `true` if the keyer is currently commanding the radio to transmit.
  */
@@ -84,7 +99,7 @@ void keyer_init( void );
 
 /**
  * @fn      keyer_panic( void )
- * @brief   Immediately and unconditionally stops the keyer.
+ * @brief   Immediately and unconditionally stops the keyer, and clears any pending autokey characters.
  */
 void keyer_panic( void );
 

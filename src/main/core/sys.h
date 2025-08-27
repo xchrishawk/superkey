@@ -129,6 +129,22 @@ void sys_init( void );
 bool sys_intrpt_enabled( void );
 
 /**
+ * @fn      sys_is_tick_gt( tick_t, tick_t )
+ * @brief   Returns `true` if `a` is later than `b`.
+ * @note    This function is wraparound-aware, and will return the correct value even if the tick counter has reached
+ *          its maximum value and rolled over.
+ */
+bool sys_is_tick_gt( tick_t a, tick_t b );
+
+/**
+ * @fn      sys_is_tick_gte( tick_t, tick_t )
+ * @brief   Returns `true` if `a` is later than `b`.
+ * @note    This function is wraparound-aware, and will return the correct value even if the tick counter has reached
+ *          its maximum value and rolled over.
+ */
+bool sys_is_tick_gte( tick_t a, tick_t b );
+
+/**
  * @fn      sys_set_intrpt_enabled( bool )
  * @brief   Globally enables or disables interrupts.
  */
