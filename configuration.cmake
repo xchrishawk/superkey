@@ -10,8 +10,10 @@
 # -- Configuration Defaults --
 
 # Define values
-set(CONFIG_DFLT_WPM                         200
-    CACHE STRING                            "Default words per minute, in tenths of a WPM. (10 - 1000)")
+set(CONFIG_DFLT_WPM                         20.0f
+    CACHE STRING                            "Default words per minute. (1.0f - 100.0f)")
+set(CONFIG_DFLT_WPM_ELEMENT_SCALE           1.0f
+    CACHE STRING                            "Default Morse code element scale. (0.1f - 10.f)")
 set(CONFIG_DFLT_BUZZER_ENABLED              true
     CACHE STRING                            "Should the buzzer be enabled by default? (true / false)")
 set(CONFIG_DFLT_BUZZER_FREQUENCY            700
@@ -54,6 +56,7 @@ set(CONFIG_DFLT_KEYER_OUTPUT_ACTIVE_LOW     true
 # Set compile definitions
 add_compile_definitions(
     _CONFIG_DFLT_WPM=${CONFIG_DFLT_WPM}
+    _CONFIG_DFLT_WPM_ELEMENT_SCALE=${CONFIG_DFLT_WPM_ELEMENT_SCALE}
     _CONFIG_DFLT_BUZZER_ENABLED=${CONFIG_DFLT_BUZZER_ENABLED}
     _CONFIG_DFLT_BUZZER_FREQUENCY=${CONFIG_DFLT_BUZZER_FREQUENCY}
     _CONFIG_DFLT_LED_STATUS_ENABLED=${CONFIG_DFLT_LED_STATUS_ENABLED}

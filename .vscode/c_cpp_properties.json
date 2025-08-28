@@ -13,6 +13,7 @@
                 "_DEBUG=1",
                 "_BUILD_TYPE=\"Debug\"",
                 "_CONFIG_DFLT_WPM=200",
+                "_CONFIG_DFLT_WPM_ELEMENT_SCALE=1.0f",
                 "_CONFIG_DFLT_BUZZER_ENABLED=true",
                 "_CONFIG_DFLT_BUZZER_FREQUENCY=700",
                 "_CONFIG_DFLT_LED_STATUS_ENABLED=true",

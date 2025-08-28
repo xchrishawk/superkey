@@ -39,9 +39,6 @@
 
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
-_Static_assert( _CONFIG_DFLT_WPM >= WPM_MINIMUM &&
-                _CONFIG_DFLT_WPM <= WPM_MAXIMUM,
-                "Invalid default WPM!" );
 _Static_assert( _CONFIG_DFLT_BUZZER_FREQUENCY >= BUZZER_MINIMUM_FREQUENCY &&
                 _CONFIG_DFLT_BUZZER_FREQUENCY <= BUZZER_MAXIMUM_FREQUENCY,
                 "Invalid default buzzer frequency!" );
@@ -75,6 +72,8 @@ void config_default( config_t * config )
 
     // Global settings
     config->wpm                                     = _CONFIG_DFLT_WPM;
+    for( wpm_element_t el = 0; el < WPM_ELEMENT_COUNT; el++ )
+        config->wpm_element_scale[ el ]             = _CONFIG_DFLT_WPM_ELEMENT_SCALE;
 
     // Buzzer configuration
     config->buzzer_enabled                          = _CONFIG_DFLT_BUZZER_ENABLED;
@@ -178,8 +177,15 @@ static void flush( tick_t tick )
 static bool validate_config( config_t const * config )
 {
     if( config->wpm < WPM_MINIMUM ||
-        config->wpm > WPM_MAXIMUM ||
-        config->buzzer_frequency < BUZZER_MINIMUM_FREQUENCY ||
+        config->wpm > WPM_MAXIMUM )
+        return false;
+
+    for( wpm_element_t el = 0; el < WPM_ELEMENT_COUNT; el++ )
+        if( config->wpm_element_scale[ el ] < WPM_ELEMENT_SCALE_MINIMUM ||
+            config->wpm_element_scale[ el ] > WPM_ELEMENT_SCALE_MAXIMUM )
+            return( false );
+
+    if( config->buzzer_frequency < BUZZER_MINIMUM_FREQUENCY ||
         config->buzzer_frequency > BUZZER_MAXIMUM_FREQUENCY )
         return( false );
 

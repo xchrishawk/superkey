@@ -799,7 +799,10 @@ static void exec_command_version( char const * const command )
 static void exec_command_wpm( char const * const command )
 {
     // Scanned variables
-    unsigned int wpm;
+    float wpm;
+    char element_str[ TOKEN_MAX_LEN ];
+    wpm_element_t element;
+    float scale;
     int sscanf_count;
 
     // Parse subcommand
@@ -807,19 +810,47 @@ static void exec_command_wpm( char const * const command )
     {
         // No subcommand - interpret as a status request. No action required.
     }
-    else if( sscanf( command + 4, "%u %n", & wpm, & sscanf_count ) == 1 &&
+    else if( sscanf( command + 4, "%f %n", & wpm, & sscanf_count ) == 1 &&
              ( command + 4 )[ sscanf_count ] == NULL_CHAR )
     {
         // Set WPM
         if( wpm < WPM_MINIMUM || wpm > WPM_MAXIMUM )
         {
-            debug_port_printf( "Invalid WPM: \"%u\". Must be between "
-                               stringize_value( WPM_MINIMUM ) " and "
-                               stringize_value( WPM_MAXIMUM ) "." NEWLINE_STR,
-                               wpm );
+            debug_port_printf( "Invalid WPM: \"%.1f\". Must be between %.1f and %.1f." NEWLINE_STR,
+                               wpm, WPM_MINIMUM, WPM_MAXIMUM );
             return;
         }
         wpm_set( ( wpm_t )wpm );
+    }
+    else if( string_equals( command, CMD_STR_WPM " scale default" ) )
+    {
+        // Reset element scales to defaults
+        wpm_element_scale_default();
+    }
+    else if( string_begins_with( command, CMD_STR_WPM " scale " ) &&
+             sscanf( command + 10, TOKEN_FMT_STR " %n", element_str, & sscanf_count ) == 1 &&
+             ( command + 10 )[ sscanf_count ] == NULL_CHAR &&
+             string_to_element( element_str, & element ) )
+    {
+        // Report scale
+        debug_port_printf( CMD_STR_WPM " scale (%s): %.3f" NEWLINE_STR,
+                           string_from_element( element ),
+                           wpm_get_element_scale( element ) );
+        return;
+    }
+    else if( string_begins_with( command, CMD_STR_WPM " scale " ) &&
+             sscanf( command + 10, TOKEN_FMT_STR " %f %n", element_str, & scale, & sscanf_count ) == 2 &&
+             ( command + 10 )[ sscanf_count ] == NULL_CHAR &&
+             string_to_element( element_str, & element ) )
+    {
+        // Set scale
+        if( scale < WPM_ELEMENT_SCALE_MINIMUM || scale > WPM_ELEMENT_SCALE_MAXIMUM )
+        {
+            debug_port_printf( "Invalid scale: \"%.1f\". Must be between %.1f and %.1f." NEWLINE_STR,
+                               scale, WPM_ELEMENT_SCALE_MINIMUM, WPM_ELEMENT_SCALE_MAXIMUM );
+            return;
+        }
+        wpm_set_element_scale( element, scale );
     }
     else
     {
@@ -828,15 +859,17 @@ static void exec_command_wpm( char const * const command )
         return;
     }
 
+
     // Print status info
-    tick_t dot, dash;
-    wpm_ticks( wpm_get(), & dot, & dash, NULL, NULL, NULL );
-    debug_port_printf( CMD_STR_WPM ": %u (%u.%u wpm - dot %lu ms, dash %lu ms)" NEWLINE_STR,
+    wpm_ticks_t ticks;
+    wpm_ticks( wpm_get(), ticks );
+    debug_port_printf( CMD_STR_WPM ": %.1f (dot %lu ms, dash %lu ms, space %lu / %lu / %lu ms)" NEWLINE_STR,
                        wpm_get(),
-                       wpm_get() / 10,
-                       wpm_get() % 10,
-                       dot / TICKS_PER_MSEC,
-                       dash / TICKS_PER_MSEC );
+                       ticks[ WPM_ELEMENT_DOT ] / TICKS_PER_MSEC,
+                       ticks[ WPM_ELEMENT_DASH ] / TICKS_PER_MSEC,
+                       ticks[ WPM_ELEMENT_ELEMENT_SPACE ] / TICKS_PER_MSEC,
+                       ticks[ WPM_ELEMENT_LETTER_SPACE ] / TICKS_PER_MSEC,
+                       ticks[ WPM_ELEMENT_WORD_SPACE ] / TICKS_PER_MSEC );
 
 }   /* exec_command_wpm() */
 

@@ -102,6 +102,7 @@ bool storage_get_config( config_version_t version, size_t size, void * config )
 void storage_init( void )
 {
     // Confirm we have the right layout version
+    // If not... welp? No other versions are known, so nothing to do but reset the entire storage.
     layout_version_t layout = ( layout_version_t )eeprom_read_byte( EEPROM_ADDR_LAYOUT_VERSION );
     if( layout != LAYOUT_VERSION_CURRENT )
         reinit_layout();

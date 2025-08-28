@@ -30,25 +30,6 @@
 /* ----------------------------------------------------- TYPES ------------------------------------------------------ */
 
 /**
- * @typedef element_t
- * @brief   Enumeration of Morse code elements.
- */
-typedef uint8_t element_t;
-enum
-{
-    ELEMENT_UNKNOWN,                        /**< Element type is unknown (manual).      */
-    ELEMENT_DOT,                            /**< Element is a dot.                      */
-    ELEMENT_DASH,                           /**< Element is a dash.                     */
-    ELEMENT_LETTER_SPACE,                   /**< Element is a letter space.             */
-    ELEMENT_WORD_SPACE,                     /**< Element is a word space.               */
-
-    ELEMENT_COUNT,                          /**< Number of valid elements.              */
-
-    ELEMENT_NONE                            /**< No element is active.                  */
-        = ELEMENT_COUNT,
-};
-
-/**
  * @typedef state_t
  * @brief   Enumeration of states that the keyer module may be in.
  */
@@ -94,23 +75,19 @@ static bool s_panicked = false;             /**< Was the keyer panic activated? 
 
 static state_t s_state = STATE_OFF;         /**< Currently active keyer state.          */
 
-static element_t s_el = ELEMENT_NONE;       /** The element currently being keyed.      */
-static element_t s_lockout_el = ELEMENT_NONE;/**< Element which started lockout.        */
+static wpm_element_t s_el = WPM_ELEMENT_NONE;/** The element currently being keyed.     */
+static wpm_element_t s_lockout_el = WPM_ELEMENT_NONE;/**< Element which started lockout.*/
 static tick_t s_el_stop_tick = 0;           /** Tick at which current element must stop.*/
 static bool s_el_stop_tick_vld = false;     /** Is `s_el_stop_tick` valid?              */
 static tick_t s_el_start_tick = 0;          /** Tick at which next element may start.   */
 static bool s_el_start_tick_vld = false;    /** Is `s_el_start_tick` valid?             */
 
-static element_t s_autokey_buf[ AUTOKEY_BUF_SZ ];/**< El buffer for autokey mode.       */
+static wpm_element_t s_autokey_buf[ AUTOKEY_BUF_SZ ];/**< El buffer for autokey mode.   */
 static size_t s_autokey_head = 0;           /**< Head of autokey circular buffer.       */
 static size_t s_autokey_tail = 0;           /**< Tail of autokey circular buffer.       */
 
-static wpm_t s_ticks_wpm = 0;               /**< WPM at which ticks were evaluated.     */
-static tick_t s_dot_ticks = 0;              /**< Number of ticks per dot.               */
-static tick_t s_dash_ticks = 0;             /**< Number of ticks per dash.              */
-static tick_t s_space_ticks = 0;            /**< Number of ticks per element space.     */
-static tick_t s_letter_space_ticks = 0;     /**< Number of ticks per letter space.      */
-static tick_t s_word_space_ticks = 0;       /**< Number of ticks per word space.        */
+static wpm_ticks_t s_ticks;                 /**< Number of ticks for each element type. */
+static tick_t s_ticks_tick = 0;             /**< Tick at which s_ticks was updated.     */
 
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
@@ -150,16 +127,16 @@ static size_t autokey_avail( void );
 static size_t autokey_count( void );
 
 /**
- * @fn      autokey_dequeue( element_t * )
+ * @fn      autokey_dequeue( wpm_element_t * )
  * @brief   Dequeues an element from the autokey buffer.
  */
-static bool autokey_dequeue( element_t * el );
+static bool autokey_dequeue( wpm_element_t * el );
 
 /**
  * @fn      autokey_enqueue( void )
  * @brief   Enqueues the specified element in the autokey buffer.
  */
-static bool autokey_enqueue( element_t el );
+static bool autokey_enqueue( wpm_element_t el );
 
 /**
  * @fn      do_state_autokey( tick_t, bool )
@@ -198,18 +175,6 @@ static void do_state_off( tick_t tick, bool new_state );
 static void do_state_on( tick_t tick, bool new_state );
 
 /**
- * @fn      element_duration( element_t )
- * @brief   Returns the duration (in ticks) for the specified element.
- */
-static tick_t element_duration( element_t el );
-
-/**
- * @fn      element_is_keyed( element_t )
- * @brief   Returns `true` if the specified element requires activating the key.
- */
-static bool element_is_keyed( element_t el );
-
-/**
  * @fn      get_keyed( void )
  * @brief   Returns `true` if the keyer hardware is keying.
  */
@@ -238,7 +203,7 @@ static void update_hardware( void );
  * @brief   Update cached element tick counts, if required.
  * @note    This is an expensive calculation, so we only do it if the WPM changes.
  */
-static void update_ticks( void );
+static void update_ticks( tick_t tick );
 
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
 
@@ -248,414 +213,414 @@ bool keyer_autokey_char( char c )
     {
     case ' ':
         // Space
-        return( autokey_enqueue( ELEMENT_WORD_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_WORD_SPACE ) );
 
     case 'a':
     case 'A':
         // Letter A
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'b':
     case 'B':
         // Letter B
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'c':
     case 'C':
         // Letter C
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'd':
     case 'D':
         // Letter D
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'e':
     case 'E':
         // Letter E
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'f':
     case 'F':
         // Letter F
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'g':
     case 'G':
         // Letter G
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'h':
     case 'H':
         // Letter H
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'i':
     case 'I':
         // Letter I
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'j':
     case 'J':
         // Letter J
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'k':
     case 'K':
         // Letter K
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'l':
     case 'L':
         // Letter L
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'm':
     case 'M':
         // Letter M
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'n':
     case 'N':
         // Letter N
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'o':
     case 'O':
         // Letter O
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'p':
     case 'P':
         // Letter P
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'q':
     case 'Q':
         // Letter Q
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'r':
     case 'R':
         // Letter R
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 's':
     case 'S':
         // Letter S
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 't':
     case 'T':
         // Letter T
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'u':
     case 'U':
         // Letter U
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'v':
     case 'V':
         // Letter V
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'w':
     case 'W':
         // Letter W
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'x':
     case 'X':
         // Letter X
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'y':
     case 'Y':
         // Letter Y
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case 'z':
     case 'Z':
         // Letter Z
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case '0':
         // Number 0
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case '1':
         // Number 1
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case '2':
         // Number 2
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case '3':
         // Number 3
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case '4':
         // Number 4
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case '5':
         // Number 5
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case '6':
         // Number 6
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case '7':
         // Number 7
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case '8':
         // Number 8
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case '9':
         // Number 9
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case '.':
         // Period
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case ',':
         // Comma
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case '?':
         // Question mark
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case '\'':
         // Single quote
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case '!':
         // Exclamation mark
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) );
 
     case '-':
         // Dash
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) );
 
     case '/':
         // Slash
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case '=':
         // Equals sign
-        return( autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case '+':
         // Plus sign
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case '"':
         // Double quote
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     case '_':
         // Underscore
-        return( autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_DOT ) &&
-                autokey_enqueue( ELEMENT_DASH ) &&
-                autokey_enqueue( ELEMENT_LETTER_SPACE ) );
+        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
 
     default:
         return( false );
@@ -709,22 +674,24 @@ void keyer_init( void )
     s_keyed = false;
     s_panicked = false;
     s_state = STATE_OFF;
-    s_el = ELEMENT_NONE;
-    s_lockout_el = ELEMENT_NONE;
+    s_el = WPM_ELEMENT_NONE;
+    s_lockout_el = WPM_ELEMENT_NONE;
     s_el_stop_tick = 0;
     s_el_stop_tick_vld = false;
     s_el_start_tick = 0;
     s_el_start_tick_vld = false;
-    s_ticks_wpm = 0;
-    s_dot_ticks = 0;
-    s_dash_ticks = 0;
-    s_space_ticks = 0;
+    for( wpm_element_t el = 0; el < WPM_ELEMENT_COUNT; el++ )
+        s_ticks[ el ] = 0;
+    s_ticks_tick = 0;
 
     // Initialize GPIO
     gpio_set_dir( KEYER_OUT_PIN, GPIO_DIR_OUT );
 
     // Default to key off
     set_keyed( false );
+
+    // Update ticks
+    update_ticks( sys_get_tick() );
 
 }   /* keyer_init() */
 
@@ -771,7 +738,7 @@ void keyer_set_paddle_mode( keyer_paddle_mode_t mode )
 void keyer_tick( tick_t tick )
 {
     // Update element tick counts if required
-    update_ticks();
+    update_ticks( tick );
 
     // Check the next state, and determine if it's different than the current state
     state_t next_state = get_next_state();
@@ -826,7 +793,7 @@ static size_t autokey_count( void )
 }   /* autokey_count() */
 
 
-static bool autokey_dequeue( element_t * el )
+static bool autokey_dequeue( wpm_element_t * el )
 {
     if( autokey_count() == 0 )
         return( false );
@@ -838,7 +805,7 @@ static bool autokey_dequeue( element_t * el )
 }   /* autokey_dequeue() */
 
 
-static bool autokey_enqueue( element_t el )
+static bool autokey_enqueue( wpm_element_t el )
 {
     if( autokey_avail() == 0 )
         return( false );
@@ -854,18 +821,35 @@ static void do_state_autokey( tick_t tick, bool new_state )
 {
     ( void )new_state;
 
-    element_t el;
+    wpm_element_t el;
     if( ! s_panicked && is_start_tick_passed( tick ) && autokey_dequeue( & el ) )
     {
+        // Get info for current state
+        bool prev_el_was_letter_space = ( s_el == WPM_ELEMENT_LETTER_SPACE );
+        bool prev_lockout_el_was_keyed = wpm_element_is_keyed( s_lockout_el );
+
         // Activate keyer hardware (if required)
         s_el = el;
-        tick_t el_dur = element_duration( s_el );
-        s_el_stop_tick = tick + el_dur;
-        s_el_stop_tick_vld = true;
-        s_el_start_tick = tick + el_dur + s_space_ticks;
-        s_el_start_tick_vld = true;
-        if( element_is_keyed( s_el ) )
+        if( wpm_element_is_keyed( s_el ) )
+        {
+            s_lockout_el = s_el;
+            s_el_stop_tick = tick + s_ticks[ s_el ];
+            s_el_stop_tick_vld = true;
+            s_el_start_tick = tick + s_ticks[ s_el ] + s_ticks[ WPM_ELEMENT_ELEMENT_SPACE ];
+            s_el_start_tick_vld = true;
             set_keyed( true );
+        }
+        else
+        {
+            s_el_stop_tick = 0;
+            s_el_stop_tick_vld = false;
+            s_el_start_tick = tick + s_ticks[ s_el ]
+                            - ( prev_lockout_el_was_keyed ?
+                                s_ticks[ WPM_ELEMENT_ELEMENT_SPACE ] : 0 )
+                            - ( prev_el_was_letter_space ?
+                                ( s_ticks[ WPM_ELEMENT_LETTER_SPACE ] - s_ticks[ WPM_ELEMENT_ELEMENT_SPACE ] ) : 0 );
+            s_el_start_tick_vld = true;
+        }
     }
     else if( is_stop_tick_passed( tick ) && get_keyed() )
     {
@@ -883,11 +867,11 @@ static void do_state_dashes( tick_t tick, bool new_state )
     if( ! s_panicked && is_start_tick_passed( tick ) && ! get_keyed() )
     {
         // Activate keyer hardware
-        s_el = ELEMENT_DASH;
-        s_lockout_el = ELEMENT_DASH;
-        s_el_stop_tick = tick + s_dash_ticks;
+        s_el = WPM_ELEMENT_DASH;
+        s_lockout_el = s_el;
+        s_el_stop_tick = tick + s_ticks[ WPM_ELEMENT_DASH ];
         s_el_stop_tick_vld = true;
-        s_el_start_tick = tick + s_dash_ticks + s_space_ticks;
+        s_el_start_tick = tick + s_ticks[ WPM_ELEMENT_DASH ] + s_ticks[ WPM_ELEMENT_ELEMENT_SPACE ];
         s_el_start_tick_vld = true;
         set_keyed( true );
     }
@@ -907,11 +891,11 @@ static void do_state_dots( tick_t tick, bool new_state )
     if( ! s_panicked && is_start_tick_passed( tick ) && ! get_keyed() )
     {
         // Activate keyer hardware
-        s_el = ELEMENT_DOT;
-        s_lockout_el = ELEMENT_DOT;
-        s_el_stop_tick = tick + s_dot_ticks;
+        s_el = WPM_ELEMENT_DOT;
+        s_lockout_el = s_el;
+        s_el_stop_tick = tick + s_ticks[ WPM_ELEMENT_DOT ];
         s_el_stop_tick_vld = true;
-        s_el_start_tick = tick + s_dot_ticks + s_space_ticks;
+        s_el_start_tick = tick + s_ticks[ WPM_ELEMENT_DOT ] + s_ticks[ WPM_ELEMENT_ELEMENT_SPACE ];
         s_el_start_tick_vld = true;
         set_keyed( true );
     }
@@ -931,12 +915,11 @@ static void do_state_interleaved( tick_t tick, bool new_state )
     if( ! s_panicked && is_start_tick_passed( tick ) && ! get_keyed() )
     {
         // Activate keyer hardware
-        s_el = ( s_lockout_el == ELEMENT_DOT ? ELEMENT_DASH : ELEMENT_DOT );
+        s_el = ( s_lockout_el == WPM_ELEMENT_DOT ? WPM_ELEMENT_DASH : WPM_ELEMENT_DOT );
         s_lockout_el = s_el;
-        tick_t el_dur = element_duration( s_el );
-        s_el_stop_tick = tick + el_dur;
+        s_el_stop_tick = tick + s_ticks[ s_el ];
         s_el_stop_tick_vld = true;
-        s_el_start_tick = tick + el_dur + s_space_ticks;
+        s_el_start_tick = tick + s_ticks[ s_el ] + s_ticks[ WPM_ELEMENT_ELEMENT_SPACE ];
         s_el_start_tick_vld = true;
         set_keyed( true );
     }
@@ -960,10 +943,10 @@ static void do_state_off( tick_t tick, bool new_state )
     }
 
     // Reset state, once allowed
-    if( s_el != ELEMENT_NONE && is_start_tick_passed( tick ) )
+    if( s_el != WPM_ELEMENT_NONE && is_start_tick_passed( tick ) )
     {
-        s_el = ELEMENT_NONE;
-        s_lockout_el = ELEMENT_NONE;
+        s_el = WPM_ELEMENT_NONE;
+        s_lockout_el = s_el;
         s_el_stop_tick = 0;
         s_el_stop_tick_vld = false;
         s_el_start_tick = 0;
@@ -980,7 +963,8 @@ static void do_state_on( tick_t tick, bool new_state )
     // Activate unconditionally, unless panicked
     if( ! s_panicked && ( new_state || ! get_keyed() ) )
     {
-        s_el = ELEMENT_UNKNOWN;
+        s_el = WPM_ELEMENT_UNKNOWN;
+        s_lockout_el = s_el;
         s_el_stop_tick = 0;
         s_el_stop_tick_vld = false;
         s_el_start_tick = 0;
@@ -989,34 +973,6 @@ static void do_state_on( tick_t tick, bool new_state )
     }
 
 }   /* do_state_on() */
-
-
-static tick_t element_duration( element_t el )
-{
-    switch( el )
-    {
-    case ELEMENT_UNKNOWN:
-        return( 0 );
-    case ELEMENT_DOT:
-        return( s_dot_ticks );
-    case ELEMENT_DASH:
-        return( s_dash_ticks );
-    case ELEMENT_LETTER_SPACE:
-        return( s_letter_space_ticks - s_space_ticks );
-    case ELEMENT_WORD_SPACE:
-        return( s_word_space_ticks - s_space_ticks );
-    default:
-        return( 0 );
-    }
-
-}   /* element_duration() */
-
-
-static bool element_is_keyed( element_t el )
-{
-    return( el == ELEMENT_DOT || el == ELEMENT_DASH );
-
-}   /* element_is_keyed() */
 
 
 static bool get_keyed( void )
@@ -1131,17 +1087,15 @@ static void update_hardware( void )
 }   /* update_hardware() */
 
 
-static void update_ticks( void )
+static void update_ticks( tick_t tick )
 {
-    wpm_t wpm = wpm_get();
-    if( s_ticks_wpm == wpm )
+    // Limit this update to ~20 Hz, since it does floating point math
+    #define MIN_DELAY_MS 50
+    if( s_ticks_tick != 0 && sys_elapsed( tick, s_ticks_tick ) < ( MIN_DELAY_MS * TICKS_PER_MSEC ) )
         return;
+    #undef MIN_DELAY_MS
 
-    wpm_ticks( s_ticks_wpm = wpm,
-               & s_dot_ticks,
-               & s_dash_ticks,
-               & s_space_ticks,
-               & s_letter_space_ticks,
-               & s_word_space_ticks );
+    wpm_ticks( wpm_get(), s_ticks );
+    s_ticks_tick = tick;
 
 }   /* update_ticks() */

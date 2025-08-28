@@ -17,6 +17,7 @@
 #include "application/input.h"
 #include "application/keyer.h"
 #include "application/led.h"
+#include "application/wpm.h"
 
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
 
@@ -67,6 +68,12 @@ bool string_equals( char const * a, char const * b );
 char const * string_from_bool( bool b );
 
 /**
+ * @fn      string_from_element( wpm_element_t )
+ * @brief   Returns a string for the specified `wpm_element_t`.
+ */
+char const * string_from_element( wpm_element_t el );
+
+/**
  * @fn      string_from_input_pin( input_pin_t )
  * @brief   Returns a string for the specified `input_pin_t`.
  */
@@ -102,6 +109,13 @@ bool string_is_empty( char const * str );
  * @returns `true` if the conversion succeeded.
  */
 bool string_to_bool( char const * str, bool * b );
+
+/**
+ * @fn      string_to_element( char const *, wpm_element_t * )
+ * @brief   Converts a string to a `wpm_element_t`, if possible.
+ * @returns `true` if the conversion succeeded.
+ */
+bool string_to_element( char const * str, wpm_element_t * el );
 
 /**
  * @fn      string_to_input_pin( char const *, input_pin_t * )
