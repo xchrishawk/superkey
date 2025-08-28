@@ -18,6 +18,7 @@
 #include "application/config.h"
 #include "application/debug_port.h"
 #include "application/keyer.h"
+#include "application/strings.h"
 #include "core/sys.h"
 #include "core/version.h"
 #include "drivers/eeprom.h"
@@ -40,6 +41,18 @@
  * @brief   Size of the command receive buffer, in bytes.
  */
 #define RX_BUF_SIZE             256
+
+/**
+ * @def     TOKEN_MAX_LEN
+ * @brief   Maximum length of a parsed token.
+ */
+#define TOKEN_MAX_LEN           32
+
+/**
+ * @def     TOKEN_FMT_STR
+ * @brief   Token format string for `sscanf`.
+ */
+#define TOKEN_FMT_STR           "%31s"
 
 /**
  * @def     CMD_STR_BUZZER
@@ -66,10 +79,22 @@
 #define CMD_STR_HELP            "Help"
 
 /**
+ * @def     CMD_STR_INPUT
+ * @brief   The string for the `input` command.
+ */
+#define CMD_STR_INPUT           "Input"
+
+/**
  * @def     CMD_STR_KEYER
  * @brief   The string for the `keyer` command.
  */
 #define CMD_STR_KEYER           "Keyer"
+
+/**
+ * @def     CMD_STR_LED
+ * @brief   The string for the `led` command.
+ */
+#define CMD_STR_LED             "LED"
 
 /**
  * @def     CMD_STR_PANIC
@@ -102,34 +127,10 @@
 #define ENABLE_STR              "enable"
 
 /**
- * @def     ENABLED_STR
- * @brief   The token which indicates that an option is enabled.
- */
-#define ENABLED_STR             "enabled"
-
-/**
  * @def     DISABLE_STR
  * @brief   The token to disable an option.
  */
 #define DISABLE_STR             "disable"
-
-/**
- * @def     DISABLED_STR
- * @brief   The token which indicates that an option is disabled.
- */
-#define DISABLED_STR            "disabled"
-
-/**
- * @def     OFF_STR
- * @brief   The token which indicates that an input or output is off.
- */
-#define OFF_STR                 "off"
-
-/**
- * @def     ON_STR
- * @brief   The token which indicates that an input or output is on.
- */
-#define ON_STR                  "on"
 
 /**
  * @def     INVALID_COMMAND_STR
@@ -251,24 +252,6 @@ static void exec_immediate_autokey_mode( void );
  */
 static void print_invalid_command( char const * const command );
 
-/**
- * @fn      string_begins_with( char const *, char const * )
- * @brief   Returns `true` if `str` begins with `token`.
- */
-static bool string_begins_with( char const * str, char const * token );
-
-/**
- * @fn      string_equals( char const *, char const * )
- * @brief   Returns `true` if the specified strings are equal.
- */
-static bool string_equals( char const * str, char const * token );
-
-/**
- * @fn      string_is_empty( char const * )
- * @brief   Returns `true`
- */
-static bool string_is_empty( char const * str );
-
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
 
 void debug_port_init( void )
@@ -388,11 +371,11 @@ static void exec_command( char const * const command )
         exec_command_eeprom( command );
     else if( string_begins_with( command, CMD_STR_HELP ) )
         exec_command_help( command );
-    else if( string_begins_with( command, "input" ) )
+    else if( string_begins_with( command, CMD_STR_INPUT ) )
         exec_command_input( command );
     else if( string_begins_with( command, CMD_STR_KEYER ) )
         exec_command_keyer( command );
-    else if( string_begins_with( command, "led" ) )
+    else if( string_begins_with( command, CMD_STR_LED ) )
         exec_command_led( command );
     else if( string_begins_with( command, CMD_STR_TICK ) )
         exec_command_tick( command );
@@ -419,12 +402,12 @@ static void exec_command_buzzer( char const * const command )
     {
         // No subcommand - interpret as a status request. no action required
     }
-    else if( string_equals( command, CMD_STR_BUZZER " " ENABLE_STR ) )
+    else if( string_equals( command, CMD_STR_BUZZER " " ENABLED_STR " " stringize( true ) ) )
     {
         // Turn buzzer on
         buzzer_set_enabled( true );
     }
-    else if( string_equals( command, CMD_STR_BUZZER " " DISABLE_STR ) )
+    else if( string_equals( command, CMD_STR_BUZZER " " DISABLED_STR " " stringize( false ) ) )
     {
         // Turn buzzer oiff
         buzzer_set_enabled( false );
@@ -585,111 +568,58 @@ static void exec_command_help( char const * const command )
 
 static void exec_command_input( char const * const command )
 {
-    //
-    // TODO: UPDATE TO NEW STYLE FOR THESE FUNCTIONS
-    //
+    char pin_str[ TOKEN_MAX_LEN ];
+    char subcommand_str[ TOKEN_MAX_LEN ];
+    int sscanf_count;
 
-    // Local constants
-    static char const * const s_pin_tbl[] =
-    {
-        stringize( INPUT_PIN_TRS_0_TIP ),
-        stringize( INPUT_PIN_TRS_0_RING ),
-        stringize( INPUT_PIN_TRS_1_TIP ),
-        stringize( INPUT_PIN_TRS_1_RING ),
-        stringize( INPUT_PIN_TRS_2_TIP ),
-        stringize( INPUT_PIN_TRS_2_RING ),
-    };
-    _Static_assert( array_count( s_pin_tbl ) == INPUT_PIN_COUNT, "Invalid string table!" );
-    static char const * const s_type_tbl[] =
-    {
-        stringize( INPUT_TYPE_STRAIGHT_KEY ),
-        stringize( INPUT_TYPE_PADDLE_LEFT ),
-        stringize( INPUT_TYPE_PADDLE_RIGHT ),
-        stringize( INPUT_TYPE_PADDLE_NONE ),
-    };
-    _Static_assert( array_count( s_type_tbl ) == INPUT_TYPE_COUNT + 1, "Invalid string table!" );
-    static char const * const s_polarity_tbl[] =
-    {
-        stringize( INPUT_POLARITY_ACTIVE_LOW ),
-        stringize( INPUT_POLARITY_ACTIVE_HIGH ),
-    };
-    _Static_assert( array_count( s_polarity_tbl ) == INPUT_POLARITY_COUNT, "Invalid string table!" );
+    // Drop `input` prefix
+    char const * c = command + 6;
 
-    // Drop "input" prefix
-    char const * c = command + 5;
-
-    // Ensure we have data remaining (input pin is a mandatory argument)
-    if( string_is_empty( c++ ) )
+    // Get tokens
+    int token_count = sscanf( c, TOKEN_FMT_STR " " TOKEN_FMT_STR " %n", pin_str, subcommand_str, & sscanf_count );
+    if( ( token_count != 1 && token_count != 2 ) || c[ sscanf_count ] != NULL_CHAR )
     {
         print_invalid_command( command );
         return;
     }
 
-    // Find the relevant input pin
-    input_pin_t pin = INPUT_PIN_COUNT;
-    for( input_pin_t search_pin = 0; search_pin < INPUT_PIN_COUNT; search_pin++ )
+    // Parse input pin
+    input_pin_t pin;
+    if( ! string_to_input_pin( pin_str, & pin ) )
     {
-        if( ! string_begins_with( c, s_pin_tbl[ search_pin ] ) )
-            continue;
-        pin = search_pin;
-        c += strlen( s_pin_tbl[ search_pin ] );
-        break;
-    }
-    if( pin == INPUT_PIN_COUNT )
-    {
-        print_invalid_command( c );
+        print_invalid_command( command );
         return;
     }
 
-    // Interpret command
-    if( string_is_empty( c ) )
+    // Did we get a subcommand?
+    if( token_count == 2 )
     {
-        // No subcommand - interpret as a status request. no action required
-    }
-    else if( string_equals( c, " " DISABLE_STR ) ||
-             string_equals( c, " " stringize( INPUT_TYPE_NONE ) ) )
-    {
-        // Disable input
-        input_set_type( pin, INPUT_TYPE_NONE );
-    }
-    else if( string_equals( c, " " stringize( INPUT_TYPE_STRAIGHT_KEY ) ) )
-    {
-        // Set input as straight key
-        input_set_type( pin, INPUT_TYPE_STRAIGHT_KEY );
-    }
-    else if( string_equals( c, " " stringize( INPUT_TYPE_PADDLE_LEFT ) ) )
-    {
-        // Set input as left paddle
-        input_set_type( pin, INPUT_TYPE_PADDLE_LEFT );
-    }
-    else if( string_equals( c, " " stringize( INPUT_TYPE_PADDLE_RIGHT ) ) )
-    {
-        // Set input as right paddle
-        input_set_type( pin, INPUT_TYPE_PADDLE_RIGHT );
-    }
-    else if( string_equals( c, " " stringize( INPUT_POLARITY_ACTIVE_LOW ) ) )
-    {
-        // Set input to active low
-        input_set_polarity( pin, INPUT_POLARITY_ACTIVE_LOW );
-    }
-    else if( string_equals( c, " " stringize( INPUT_POLARITY_ACTIVE_HIGH ) ) )
-    {
-        // Set input to active high
-        input_set_polarity( pin, INPUT_POLARITY_ACTIVE_HIGH );
-    }
-    else
-    {
-        // Unknown subcommand
-        print_invalid_command( c );
-        return;
+        // Check subcommand
+        input_polarity_t polarity;
+        input_type_t type;
+        if( string_to_input_polarity( subcommand_str, & polarity ) )
+        {
+            // Set polarity
+            input_set_polarity( pin, polarity );
+        }
+        else if( string_to_input_type( subcommand_str, & type ) )
+        {
+            // Set type
+            input_set_type( pin, type );
+        }
+        else
+        {
+            print_invalid_command( command );
+            return;
+        }
     }
 
     // Print status info
-    debug_port_printf( "%s: %s (%s - %s)" NEWLINE_STR,
-                       s_pin_tbl[ pin ],
+    debug_port_printf( CMD_STR_INPUT " %s: %s (%s - %s)" NEWLINE_STR,
+                       string_from_input_pin( pin ),
                        input_get_on( pin ) ? ON_STR : OFF_STR,
-                       s_type_tbl[ input_get_type( pin ) ],
-                       s_polarity_tbl[ input_get_polarity( pin ) ] );
+                       string_from_input_type( input_get_type( pin ) ),
+                       string_from_input_polarity( input_get_polarity( pin ) ) );
 
 }   /* exec_command_input() */
 
@@ -777,68 +707,51 @@ static void exec_command_keyer( char const * const command )
 
 static void exec_command_led( char const * const command )
 {
-    //
-    // TODO: UPDATE TO NEW STYLE FOR THESE FUNCTIONS
-    //
+    char led_str[ TOKEN_MAX_LEN ];
+    char subcommand_str[ TOKEN_MAX_LEN ];
+    char value_str[ TOKEN_MAX_LEN ];
+    int sscanf_count;
 
-    // Local constants
-    static char const * s_led_tbl[] =
-    {
-        stringize( LED_STATUS ),
-        stringize( LED_KEY ),
-    };
-    _Static_assert( array_count( s_led_tbl ) == LED_COUNT, "Invalid string table!" );
+    // Drop `led` prefix
+    char const * c = command + 4;
 
-    // Drop "led" prefix
-    char const * c = command + 3;
-
-    // Ensure we have data remaining (input pin is a mandatory argument)
-    if( string_is_empty( c++ ) )
+    // Get tokens
+    int token_count = sscanf( c, TOKEN_FMT_STR " " TOKEN_FMT_STR " " TOKEN_FMT_STR " %n",
+                              led_str, subcommand_str, value_str, & sscanf_count );
+    if( ( token_count != 1 && token_count != 3 ) || c[ sscanf_count ] != NULL_CHAR )
     {
         print_invalid_command( command );
         return;
     }
 
-    // Find the relevant LED
-    led_t led = LED_COUNT;
-    for( led_t search_led = 0; search_led < LED_COUNT; search_led++ )
-    {
-        if( ! string_begins_with( c, s_led_tbl[ search_led ] ) )
-            continue;
-        led = search_led;
-        c += strlen( s_led_tbl[ search_led ] );
-        break;
-    }
-    if( led == LED_COUNT )
+    // Parse led
+    led_t led;
+    if( ! string_to_led( led_str, & led ) )
     {
         print_invalid_command( command );
         return;
     }
 
-    if( string_is_empty( c ) )
+    // Did we get a subcommand?
+    if( token_count == 3 )
     {
-        // No subcommand - interpret as a status request. no action required
-    }
-    else if( string_equals( c, " " ENABLE_STR ) )
-    {
-        // Enable LED
-        led_set_enabled( led, true );
-    }
-    else if( string_equals( c, " " DISABLE_STR ) )
-    {
-        // Disable LED
-        led_set_enabled( led, false );
-    }
-    else
-    {
-        // Unknown subcommand
-        print_invalid_command( command );
-        return;
+        // Check subcommand
+        bool value;
+        if( string_equals( subcommand_str, ENABLED_STR ) && string_to_bool( value_str, & value ) )
+        {
+            // Enable / disable
+            led_set_enabled( led, value );
+        }
+        else
+        {
+            print_invalid_command( command );
+            return;
+        }
     }
 
     // Print LED status
-    debug_port_printf( "%s: %s (%s)" NEWLINE_STR,
-                       s_led_tbl[ led ],
+    debug_port_printf( CMD_STR_LED " %s: %s (%s)" NEWLINE_STR,
+                       string_from_led( led ),
                        led_get_on( led ) ? ON_STR : OFF_STR,
                        led_get_enabled( led ) ? ENABLED_STR : DISABLED_STR );
 
@@ -959,24 +872,3 @@ static void print_invalid_command( char const * const command )
     debug_port_print( "\"" NEWLINE_STR );
 
 }   /* print_invalid_command() */
-
-
-static bool string_begins_with( char const * str, char const * token )
-{
-    return( ! strncasecmp( str, token, strlen( token ) ) );
-
-}   /* string_begins_with() */
-
-
-static bool string_equals( char const * str, char const * token )
-{
-    return( ! strcasecmp( str, token ) );
-
-}   /* string_equals() */
-
-
-static bool string_is_empty( char const * str )
-{
-    return( ( * str ) == NULL_CHAR );
-
-}   /* string_is_empty() */
