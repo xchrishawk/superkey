@@ -24,6 +24,17 @@ static char const * const s_bool_tbl[] =
 };
 _Static_assert( array_count( s_bool_tbl ) == 2, "Invalid string table!" );
 
+#define ELEMENT_PREFIX_LEN 12
+static char const * const s_element_tbl[] =
+{
+    stringize( WPM_ELEMENT_DOT ),
+    stringize( WPM_ELEMENT_DASH ),
+    stringize( WPM_ELEMENT_ELEMENT_SPACE ),
+    stringize( WPM_ELEMENT_LETTER_SPACE ),
+    stringize( WPM_ELEMENT_WORD_SPACE ),
+};
+_Static_assert( array_count( s_element_tbl ) == WPM_ELEMENT_COUNT, "Invalid string table!" );
+
 #define INPUT_PIN_PREFIX_LEN 10
 static char const * const s_input_pin_tbl[] =
 {
@@ -104,6 +115,13 @@ char const * string_from_bool( bool b )
 }   /* string_from_bool() */
 
 
+char const * string_from_element( wpm_element_t el )
+{
+    return( find_string( s_element_tbl, array_count( s_element_tbl ), ELEMENT_PREFIX_LEN, ( size_t )el ) );
+
+}   /* string_from_element() */
+
+
 char const * string_from_input_pin( input_pin_t pin )
 {
     return( find_string( s_input_pin_tbl, INPUT_PIN_COUNT, INPUT_PIN_PREFIX_LEN, ( size_t )pin ) );
@@ -149,6 +167,18 @@ bool string_to_bool( char const * str, bool * b )
     return( true );
 
 }   /* string_to_bool() */
+
+
+bool string_to_element( char const * str, wpm_element_t * el )
+{
+    size_t result = find_value( s_element_tbl, array_count( s_element_tbl ), ELEMENT_PREFIX_LEN, str );
+    if( result == WPM_ELEMENT_COUNT )
+        return( false );
+
+    * el = ( wpm_element_t )result;
+    return( true );
+
+}   /* string_to_element() */
 
 
 bool string_to_input_pin( char const * str, input_pin_t * pin )

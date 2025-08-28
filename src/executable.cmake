@@ -94,12 +94,16 @@ target_link_options(
     PRIVATE
     ${EXECUTABLE_LINK_OPTIONS}
     -Wl,-Map=${PROJECT_BUILD_DIR}/${EXECUTABLE_MAP_FILE}
+    -Wl,-u,vfprintf     # Floating point support for printf
+    -Wl,-u,vfscanf      # Floating point support for scanf
 )
 
 # Add libraries
 target_link_libraries(
     ${EXECUTABLE_NAME}
     ${EXECUTABLE_LIBS}
+    printf_flt          # Floating point support for printf
+    scanf_flt           # Floating point support for scanf
 )
 
 # Set custom filename for executable

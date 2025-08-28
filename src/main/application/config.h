@@ -32,6 +32,9 @@ typedef struct
     /** Global words per minute setting. */
     wpm_t               wpm;
 
+    /** Scale factor for each Morse code element. */
+    wpm_element_scale_t wpm_element_scale[ WPM_ELEMENT_COUNT ];
+
     /** If set to `false`, the buzzer will be disabled and will not sound. */
     bool                buzzer_enabled;
 

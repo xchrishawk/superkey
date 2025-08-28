@@ -1,6 +1,6 @@
 /**
  * @file        src/main/application/wpm.c
- * @brief       Implementation for the words-per-minute calculation module.
+ * @brief       Implementation for the Morse code utility module.
  *
  * @author      Chris Vig (chris@invictus.so)
  * @date        2025-08-22
@@ -33,13 +33,48 @@
  */
 #define MSEC_PER_MIN        ( ( uint32_t )MSEC_PER_SEC * ( uint32_t )SEC_PER_MIN )
 
+/* ----------------------------------------------------- MACROS ----------------------------------------------------- */
+
+// Validation macros
+#define validate_element( _element )                                                    \
+    assert_always( ( _element ) < WPM_ELEMENT_COUNT )
+
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
+
+bool wpm_element_is_keyed( wpm_element_t el )
+{
+    // Do not validate element for this function (allow checking WPM_ELEMENT_UNKNOWN, etc.)
+
+    return( el == WPM_ELEMENT_DOT || el == WPM_ELEMENT_DASH );
+
+}   /* wpm_element_is_keyed() */
+
+
+void wpm_element_scale_default( void )
+{
+    config_t config;
+    config_get( & config );
+    for( wpm_element_t el = 0; el < WPM_ELEMENT_COUNT; el++ )
+        config.wpm_element_scale[ el ] = WPM_ELEMENT_SCALE_DEFAULT;
+    config_set( & config );
+
+}   /* wpm_element_scale_default() */
+
 
 wpm_t wpm_get( void )
 {
     return( config()->wpm );
 
 }   /* wpm_get() */
+
+
+wpm_element_scale_t wpm_get_element_scale( wpm_element_t el )
+{
+    validate_element( el );
+
+    return( config()->wpm_element_scale[ el ] );
+
+}   /* wpm_get_element_scale() */
 
 
 void wpm_set( wpm_t wpm )
@@ -52,29 +87,37 @@ void wpm_set( wpm_t wpm )
 }   /* wpm_set() */
 
 
-void wpm_ticks( wpm_t wpm,
-                tick_t * dot,
-                tick_t * dash,
-                tick_t * element_space,
-                tick_t * letter_space,
-                tick_t * word_space )
+void wpm_set_element_scale( wpm_element_t el, wpm_element_scale_t scale )
+{
+    validate_element( el );
+
+    config_t config;
+    config_get( & config );
+    config.wpm_element_scale[ el ] = clamp( scale, WPM_ELEMENT_SCALE_MINIMUM, WPM_ELEMENT_SCALE_MAXIMUM );
+    config_set( & config );
+
+}   /* wpm_set_element_scale() */
+
+#include "debug_port.h"
+
+void wpm_ticks( wpm_t wpm, wpm_ticks_t ticks )
 {
     if( wpm < WPM_MINIMUM || wpm > WPM_MAXIMUM )
         return;
 
     // https://morsecode.world/international/timing/
-    float unit_ms = ( float )MSEC_PER_MIN / ( ( ( float )wpm / ( float )WPM_T_SCALE ) * ( float )WORD_UNIT_LENGTH );
+    float unit_ms = ( float )MSEC_PER_MIN / ( wpm * ( float )WORD_UNIT_LENGTH );
     assert_always( unit_ms > 0.0f );
 
-    if( dot )
-        * dot               = ( tick_t )roundf( 1.0f * unit_ms ) * TICKS_PER_MSEC;
-    if( dash )
-        * dash              = ( tick_t )roundf( 3.0f * unit_ms ) * TICKS_PER_MSEC;
-    if( element_space )
-        * element_space     = ( tick_t )roundf( 1.0f * unit_ms ) * TICKS_PER_MSEC;
-    if( letter_space )
-        * letter_space      = ( tick_t )roundf( 3.0f * unit_ms ) * TICKS_PER_MSEC;
-    if( word_space )
-        * word_space        = ( tick_t )roundf( 7.0f * unit_ms ) * TICKS_PER_MSEC;
+    ticks[ WPM_ELEMENT_DOT ]
+        = ( tick_t )roundf( 1.0f * unit_ms * wpm_get_element_scale( WPM_ELEMENT_DOT ) ) * TICKS_PER_MSEC;
+    ticks[ WPM_ELEMENT_DASH ]
+        = ( tick_t )roundf( 3.0f * unit_ms * wpm_get_element_scale( WPM_ELEMENT_DASH ) ) * TICKS_PER_MSEC;
+    ticks[ WPM_ELEMENT_ELEMENT_SPACE ]
+        = ( tick_t )roundf( 1.0f * unit_ms * wpm_get_element_scale( WPM_ELEMENT_ELEMENT_SPACE ) ) * TICKS_PER_MSEC;
+    ticks[ WPM_ELEMENT_LETTER_SPACE ]
+        = ( tick_t )roundf( 3.0f * unit_ms * wpm_get_element_scale( WPM_ELEMENT_LETTER_SPACE ) ) * TICKS_PER_MSEC;
+    ticks[ WPM_ELEMENT_WORD_SPACE ]
+        = ( tick_t )roundf( 7.0f * unit_ms * wpm_get_element_scale( WPM_ELEMENT_WORD_SPACE ) ) * TICKS_PER_MSEC;
 
 }   /* wpm_ticks() */
