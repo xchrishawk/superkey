@@ -85,6 +85,9 @@ add_compile_definitions(
     $<$<CONFIG:RelWithDebuInfo>:_DEBUG=0>
     $<$<CONFIG:MinSizeRel>:NDEBUG>
     $<$<CONFIG:MinSizeRel>:_DEBUG=0>
+    # Flags for features
+    _FEATURE_ON=1
+    _FEATURE_OFF=0
 )
 
 # Set compiler options

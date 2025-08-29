@@ -7,6 +7,17 @@
 # @cpyrt    © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
 #
 
+# -- Feature Enablement --
+
+# Define values
+set(FEATURE_ENABLE_DEBUG_PORT               _FEATURE_ON
+    CACHE STRING                            "Set to _FEATURE_ON to enable the debug port.")
+
+# Set compile definitions
+add_compile_definitions(
+    _FEATURE_ENABLE_DEBUG_PORT=${FEATURE_ENABLE_DEBUG_PORT}
+)
+
 # -- Configuration Defaults --
 
 # Define values

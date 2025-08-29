@@ -9,10 +9,13 @@
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
 
+// Unconditionally include these so the compiler doesn't complain about an empty translation unit
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#if defined( _FEATURE_ENABLE_DEBUG_PORT ) && _FEATURE_ENABLE_DEBUG_PORT
 
 #include "application/buzzer.h"
 #include "application/config.h"
@@ -928,3 +931,5 @@ static void print_invalid_command( char const * const command )
     debug_port_print( "\"" NEWLINE_STR );
 
 }   /* print_invalid_command() */
+
+#endif /* defined( _FEATURE_ENABLE_DEBUG_PORT ) && _FEATURE_ENABLE_DEBUG_PORT */
