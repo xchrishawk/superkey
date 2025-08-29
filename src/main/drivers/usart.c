@@ -18,7 +18,6 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/delay.h>
-#include <util/setbaud.h>
 
 #include "core/sys.h"
 #include "drivers/usart.h"
@@ -71,8 +70,9 @@ _Static_assert( array_count( s_reg_tbl ) == USART_COUNT, "Invalid register table
 /**
  * @def     TX_DELAY_US
  * @brief   The time to wait before trying again if the TX buffer is full, in microseconds.
+ * @note    This macro uses `19200` as a conservative estimated baud rate.
  */
-#define TX_DELAY_US     ( ( ( USEC_PER_MSEC * MSEC_PER_SEC ) / ( unsigned int )BAUD ) * 2 )
+#define TX_DELAY_US     ( ( ( USEC_PER_MSEC * MSEC_PER_SEC ) / ( unsigned int )19200 ) * BITS_PER_BYTE )
 
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
@@ -154,12 +154,6 @@ static volatile size_t s_tx_head[ USART_COUNT ];
 static volatile size_t s_tx_tail[ USART_COUNT ];
 
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
-
-/**
- * @fn      autoconfigure_baud( usart_t )
- * @brief   Automatically configures the baud rate for the specified USART based on the `BAUD` macro.
- */
-static void autoconfigure_baud( usart_t usart ) FUNC_MAY_BE_UNUSED;
 
 /**
  * @fn      isr_rx_complete( usart_t )
@@ -447,19 +441,6 @@ size_t usart_tx_str( usart_t usart, char const * str, usart_wait_mode_t wait_mod
     return( usart_tx( usart, ( byte_t const * )str, strlen( str ), wait_mode ) );
 
 }   /* usart_tx_str() */
-
-
-static void autoconfigure_baud( usart_t usart )
-{
-    UBRRH( usart ) = UBRRH_VALUE;
-    UBRRL( usart ) = UBRRL_VALUE;
-    #if( USE_2X )
-        set_bit( UCSRA( usart ), U2X0 );
-    #else
-        clear_bit( UCSRA( usart ), U2X0 );
-    #endif
-
-}   /* autoconfigure_baud() */
 
 
 static void isr_rx_complete( usart_t usart, event_t event )

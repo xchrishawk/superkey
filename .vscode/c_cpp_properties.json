@@ -8,7 +8,6 @@
             ],
             "defines": [
                 "MCU=\"atmega1284p\"",
-                "BAUD=19200",
                 "F_CPU=16000000",
                 "_DEBUG=1",
                 "_BUILD_TYPE=\"Debug\"",

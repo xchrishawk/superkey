@@ -37,8 +37,6 @@ set(DEVICE_MCU                      atmega1284p
     CACHE STRING                    "The MCU model to compile for.")
 set(DEVICE_F_CPU                    16000000
     CACHE STRING                    "The device's CPU frequency, in Hz.")
-set(DEVICE_BAUD                     19200
-    CACHE STRING                    "The default USART baud rate, in bits per second.")
 
 # -- Project Setup --
 
@@ -75,7 +73,6 @@ add_compile_definitions(
     # Device information
     MCU="${DEVICE_MCU}"
     F_CPU=${DEVICE_F_CPU}
-    BAUD=${DEVICE_BAUD}
     # Build type
     _BUILD_TYPE="${CMAKE_BUILD_TYPE}"
     $<$<CONFIG:Debug>:_DEBUG=1>
