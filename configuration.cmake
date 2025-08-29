@@ -22,30 +22,38 @@ set(CONFIG_DFLT_LED_STATUS_ENABLED          true
     CACHE STRING                            "Is the status LED enabled? (true / false)")
 set(CONFIG_DFLT_LED_KEY_ENABLED             true
     CACHE STRING                            "Is the key LED enabled? (true / false)")
-set(CONFIG_DFLT_INPUT_TYPE_TRS_0_TIP        INPUT_TYPE_STRAIGHT_KEY
-    CACHE STRING                            "Input type for the tip of TRS 0. (input_type_t)")
-set(CONFIG_DFLT_INPUT_POLARITY_TRS_0_TIP    INPUT_POLARITY_ACTIVE_LOW
-    CACHE STRING                            "Input polarity for the tip of TRS 0. (input_polarity_t)")
-set(CONFIG_DFLT_INPUT_TYPE_TRS_0_RING       INPUT_TYPE_NONE
-    CACHE STRING                            "Input type for the ring of TRS 0. (input_type_t)")
-set(CONFIG_DFLT_INPUT_POLARITY_TRS_0_RING   INPUT_POLARITY_ACTIVE_LOW
-    CACHE STRING                            "Input polarity for the ring of TRS 0. (input_polarity_t)")
-set(CONFIG_DFLT_INPUT_TYPE_TRS_1_TIP        INPUT_TYPE_PADDLE_LEFT
-    CACHE STRING                            "Input type for the tip of TRS 0. (input_type_t)")
-set(CONFIG_DFLT_INPUT_POLARITY_TRS_1_TIP    INPUT_POLARITY_ACTIVE_LOW
-    CACHE STRING                            "Input polarity for the tip of TRS 0. (input_polarity_t)")
-set(CONFIG_DFLT_INPUT_TYPE_TRS_1_RING       INPUT_TYPE_PADDLE_RIGHT
-    CACHE STRING                            "Input type for the ring of TRS 0. (input_type_t)")
-set(CONFIG_DFLT_INPUT_POLARITY_TRS_1_RING   INPUT_POLARITY_ACTIVE_LOW
-    CACHE STRING                            "Input polarity for the ring of TRS 0. (input_polarity_t)")
-set(CONFIG_DFLT_INPUT_TYPE_TRS_2_TIP        INPUT_TYPE_NONE
-    CACHE STRING                            "Input type for the tip of TRS 0. (input_type_t)")
-set(CONFIG_DFLT_INPUT_POLARITY_TRS_2_TIP    INPUT_POLARITY_ACTIVE_LOW
-    CACHE STRING                            "Input polarity for the tip of TRS 0. (input_polarity_t)")
-set(CONFIG_DFLT_INPUT_TYPE_TRS_2_RING       INPUT_TYPE_NONE
-    CACHE STRING                            "Input type for the ring of TRS 0. (input_type_t)")
-set(CONFIG_DFLT_INPUT_POLARITY_TRS_2_RING   INPUT_POLARITY_ACTIVE_LOW
-    CACHE STRING                            "Input polarity for the ring of TRS 0. (input_polarity_t)")
+set(CONFIG_DFLT_IO_TYPE_TRS_0_TIP           IO_TYPE_INPUT_STRAIGHT_KEY
+    CACHE STRING                            "I/O type for the tip of TRS 0. (io_type_t)")
+set(CONFIG_DFLT_IO_POLARITY_TRS_0_TIP       IO_POLARITY_ACTIVE_LOW
+    CACHE STRING                            "I/O polarity for the tip of TRS 0. (io_polarity_t)")
+set(CONFIG_DFLT_IO_TYPE_TRS_0_RING          IO_TYPE_NONE
+    CACHE STRING                            "I/O type for the ring of TRS 0. (io_type_t)")
+set(CONFIG_DFLT_IO_POLARITY_TRS_0_RING      IO_POLARITY_ACTIVE_LOW
+    CACHE STRING                            "I/O polarity for the ring of TRS 0. (io_polarity_t)")
+set(CONFIG_DFLT_IO_TYPE_TRS_1_TIP           IO_TYPE_INPUT_PADDLE_LEFT
+    CACHE STRING                            "I/O type for the tip of TRS 1. (io_type_t)")
+set(CONFIG_DFLT_IO_POLARITY_TRS_1_TIP       IO_POLARITY_ACTIVE_LOW
+    CACHE STRING                            "I/O polarity for the tip of TRS 1. (io_polarity_t)")
+set(CONFIG_DFLT_IO_TYPE_TRS_1_RING          IO_TYPE_INPUT_PADDLE_RIGHT
+    CACHE STRING                            "I/O type for the ring of TRS 1. (io_type_t)")
+set(CONFIG_DFLT_IO_POLARITY_TRS_1_RING      IO_POLARITY_ACTIVE_LOW
+    CACHE STRING                            "I/O polarity for the ring of TRS 1. (io_polarity_t)")
+set(CONFIG_DFLT_IO_TYPE_TRS_2_TIP           IO_TYPE_NONE
+    CACHE STRING                            "I/O type for the tip of TRS 2. (io_type_t)")
+set(CONFIG_DFLT_IO_POLARITY_TRS_2_TIP       IO_POLARITY_ACTIVE_LOW
+    CACHE STRING                            "I/O polarity for the tip of TRS 2. (io_polarity_t)")
+set(CONFIG_DFLT_IO_TYPE_TRS_2_RING          IO_TYPE_NONE
+    CACHE STRING                            "I/O type for the ring of TRS 2. (io_type_t)")
+set(CONFIG_DFLT_IO_POLARITY_TRS_2_RING      IO_POLARITY_ACTIVE_LOW
+    CACHE STRING                            "I/O polarity for the ring of TRS 2. (io_polarity_t)")
+set(CONFIG_DFLT_IO_TYPE_TRS_3_TIP           IO_TYPE_OUTPUT_KEYER
+    CACHE STRING                            "I/O type for the tip of TRS 3. (io_type_t)")
+set(CONFIG_DFLT_IO_POLARITY_TRS_3_TIP       IO_POLARITY_ACTIVE_LOW
+    CACHE STRING                            "I/O polarity for the tip of TRS 3. (io_polarity_t)")
+set(CONFIG_DFLT_IO_TYPE_TRS_3_RING          IO_TYPE_NONE
+    CACHE STRING                            "I/O type for the ring of TRS 3. (io_type_t)")
+set(CONFIG_DFLT_IO_POLARITY_TRS_3_RING      IO_POLARITY_ACTIVE_LOW
+    CACHE STRING                            "I/O polarity for the ring of TRS 3. (io_polarity_t)")
 set(CONFIG_DFLT_KEYER_PADDLE_MODE           KEYER_PADDLE_MODE_IAMBIC
     CACHE STRING                            "Keyer paddle mode. (keyer_paddle_mode_t)")
 set(CONFIG_DFLT_KEYER_PADDLE_INVERT         false
@@ -63,18 +71,22 @@ add_compile_definitions(
     _CONFIG_DFLT_LED_STATUS_ACTIVE_LO=${CONFIG_DFLT_LED_STATUS_ACTIVE_LO}
     _CONFIG_DFLT_LED_KEY_ENABLED=${CONFIG_DFLT_LED_KEY_ENABLED}
     _CONFIG_DFLT_LED_KEY_ACTIVE_LO=${CONFIG_DFLT_LED_KEY_ACTIVE_LO}
-    _CONFIG_DFLT_INPUT_TYPE_TRS_0_TIP=${CONFIG_DFLT_INPUT_TYPE_TRS_0_TIP}
-    _CONFIG_DFLT_INPUT_POLARITY_TRS_0_TIP=${CONFIG_DFLT_INPUT_POLARITY_TRS_0_TIP}
-    _CONFIG_DFLT_INPUT_TYPE_TRS_0_RING=${CONFIG_DFLT_INPUT_TYPE_TRS_0_RING}
-    _CONFIG_DFLT_INPUT_POLARITY_TRS_0_RING=${CONFIG_DFLT_INPUT_POLARITY_TRS_0_RING}
-    _CONFIG_DFLT_INPUT_TYPE_TRS_1_TIP=${CONFIG_DFLT_INPUT_TYPE_TRS_1_TIP}
-    _CONFIG_DFLT_INPUT_POLARITY_TRS_1_TIP=${CONFIG_DFLT_INPUT_POLARITY_TRS_1_TIP}
-    _CONFIG_DFLT_INPUT_TYPE_TRS_1_RING=${CONFIG_DFLT_INPUT_TYPE_TRS_1_RING}
-    _CONFIG_DFLT_INPUT_POLARITY_TRS_1_RING=${CONFIG_DFLT_INPUT_POLARITY_TRS_1_RING}
-    _CONFIG_DFLT_INPUT_TYPE_TRS_2_TIP=${CONFIG_DFLT_INPUT_TYPE_TRS_2_TIP}
-    _CONFIG_DFLT_INPUT_POLARITY_TRS_2_TIP=${CONFIG_DFLT_INPUT_POLARITY_TRS_2_TIP}
-    _CONFIG_DFLT_INPUT_TYPE_TRS_2_RING=${CONFIG_DFLT_INPUT_TYPE_TRS_2_RING}
-    _CONFIG_DFLT_INPUT_POLARITY_TRS_2_RING=${CONFIG_DFLT_INPUT_POLARITY_TRS_2_RING}
+    _CONFIG_DFLT_IO_TYPE_TRS_0_TIP=${CONFIG_DFLT_IO_TYPE_TRS_0_TIP}
+    _CONFIG_DFLT_IO_POLARITY_TRS_0_TIP=${CONFIG_DFLT_IO_POLARITY_TRS_0_TIP}
+    _CONFIG_DFLT_IO_TYPE_TRS_0_RING=${CONFIG_DFLT_IO_TYPE_TRS_0_RING}
+    _CONFIG_DFLT_IO_POLARITY_TRS_0_RING=${CONFIG_DFLT_IO_POLARITY_TRS_0_RING}
+    _CONFIG_DFLT_IO_TYPE_TRS_1_TIP=${CONFIG_DFLT_IO_TYPE_TRS_1_TIP}
+    _CONFIG_DFLT_IO_POLARITY_TRS_1_TIP=${CONFIG_DFLT_IO_POLARITY_TRS_1_TIP}
+    _CONFIG_DFLT_IO_TYPE_TRS_1_RING=${CONFIG_DFLT_IO_TYPE_TRS_1_RING}
+    _CONFIG_DFLT_IO_POLARITY_TRS_1_RING=${CONFIG_DFLT_IO_POLARITY_TRS_1_RING}
+    _CONFIG_DFLT_IO_TYPE_TRS_2_TIP=${CONFIG_DFLT_IO_TYPE_TRS_2_TIP}
+    _CONFIG_DFLT_IO_POLARITY_TRS_2_TIP=${CONFIG_DFLT_IO_POLARITY_TRS_2_TIP}
+    _CONFIG_DFLT_IO_TYPE_TRS_2_RING=${CONFIG_DFLT_IO_TYPE_TRS_2_RING}
+    _CONFIG_DFLT_IO_POLARITY_TRS_2_RING=${CONFIG_DFLT_IO_POLARITY_TRS_2_RING}
+    _CONFIG_DFLT_IO_TYPE_TRS_3_TIP=${CONFIG_DFLT_IO_TYPE_TRS_3_TIP}
+    _CONFIG_DFLT_IO_POLARITY_TRS_3_TIP=${CONFIG_DFLT_IO_POLARITY_TRS_3_TIP}
+    _CONFIG_DFLT_IO_TYPE_TRS_3_RING=${CONFIG_DFLT_IO_TYPE_TRS_3_RING}
+    _CONFIG_DFLT_IO_POLARITY_TRS_3_RING=${CONFIG_DFLT_IO_POLARITY_TRS_3_RING}
     _CONFIG_DFLT_KEYER_PADDLE_MODE=${CONFIG_DFLT_KEYER_PADDLE_MODE}
     _CONFIG_DFLT_KEYER_PADDLE_INVERT=${CONFIG_DFLT_KEYER_PADDLE_INVERT}
     _CONFIG_DFLT_KEYER_OUTPUT_ACTIVE_LOW=${CONFIG_DFLT_KEYER_OUTPUT_ACTIVE_LOW}

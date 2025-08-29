@@ -15,7 +15,7 @@
 
 #include "application/buzzer.h"
 #include "application/config.h"
-#include "application/input.h"
+#include "application/io.h"
 #include "application/keyer.h"
 #include "application/led.h"
 #include "application/wpm.h"
@@ -61,12 +61,6 @@ enum
  *          part of the device's functionality. This could be reduced if required.
  */
 #define AUTOKEY_BUF_SZ  4096
-
-/**
- * @def     KEYER_OUT_PIN
- * @brief   The GPIO pin which is used for the keyer output.
- */
-#define KEYER_OUT_PIN GPIO_PIN_A6
 
 /* --------------------------------------------------- VARIABLES ---------------------------------------------------- */
 
@@ -647,13 +641,6 @@ bool keyer_get_on( void )
 }   /* keyer_get_on() */
 
 
-bool keyer_get_output_active_low( void )
-{
-    return( config()->keyer_output_active_low );
-
-}   /* keyer_get_output_active_low() */
-
-
 bool keyer_get_paddle_invert( void )
 {
     return( config()->keyer_paddle_invert );
@@ -684,9 +671,6 @@ void keyer_init( void )
         s_ticks[ el ] = 0;
     s_ticks_tick = 0;
 
-    // Initialize GPIO
-    gpio_set_dir( KEYER_OUT_PIN, GPIO_DIR_OUT );
-
     // Default to key off
     set_keyed( false );
 
@@ -703,16 +687,6 @@ void keyer_panic( void )
     set_keyed( false );
 
 }   /* keyer_panic() */
-
-
-void keyer_set_output_active_low( bool active_low )
-{
-    config_t config;
-    config_get( & config );
-    config.keyer_output_active_low = active_low;
-    config_set( & config );
-
-}   /* keyer_set_output_active_low() */
 
 
 void keyer_set_paddle_invert( bool invert )
@@ -984,10 +958,21 @@ static bool get_keyed( void )
 
 static state_t get_next_state( void )
 {
-    // Get all relevant inputs
-    static input_type_field_t inputs = 0;
-    input_type_field_t prev_inputs = inputs;
-    inputs = input_types_get_on();
+    // Static variables to store values from previous invocations
+    static bool straight_key = false;
+    static bool paddle_left  = false;
+    static bool paddle_right = false;
+
+    // Store previous values for paddles
+    bool prev_paddle_left  = paddle_left;
+    bool prev_paddle_right = paddle_right;
+
+    // Get updated inputs
+    straight_key = ( io_get_state_type( IO_TYPE_INPUT_STRAIGHT_KEY ) == IO_STATE_ON );
+    paddle_left  = ( io_get_state_type( IO_TYPE_INPUT_PADDLE_LEFT ) == IO_STATE_ON );
+    paddle_right = ( io_get_state_type( IO_TYPE_INPUT_PADDLE_RIGHT ) == IO_STATE_ON );
+
+    // Get other required settings
     bool paddle_invert = keyer_get_paddle_invert();
 
     // Determine next state
@@ -996,13 +981,12 @@ static state_t get_next_state( void )
         // Autokey has highest priority
         return( STATE_AUTOKEY );
     }
-    else if( is_bit_set( inputs, INPUT_TYPE_STRAIGHT_KEY ) )
+    else if( straight_key )
     {
         // Straight key supersedes all other inputs
         return( STATE_ON );
     }
-    else if( is_bit_set( inputs, INPUT_TYPE_PADDLE_LEFT ) &&
-             is_bit_set( inputs, INPUT_TYPE_PADDLE_RIGHT ) )
+    else if( paddle_left && paddle_right )
     {
         switch( keyer_get_paddle_mode() )
         {
@@ -1016,14 +1000,12 @@ static state_t get_next_state( void )
 
         case KEYER_PADDLE_MODE_ULTIMATIC_ALTERNATE:
             // The most recently activated paddle wins
-            if( is_bit_set( inputs, INPUT_TYPE_PADDLE_LEFT ) &&
-                is_bit_clear( prev_inputs, INPUT_TYPE_PADDLE_LEFT ) )
+            if( paddle_left && ! prev_paddle_left )
             {
                 // Left paddle was more recently activated
                 return( paddle_invert ? STATE_DASHES : STATE_DOTS );
             }
-            else if( is_bit_set( inputs, INPUT_TYPE_PADDLE_RIGHT ) &&
-                     is_bit_clear( prev_inputs, INPUT_TYPE_PADDLE_RIGHT ) )
+            else if( paddle_right && ! prev_paddle_right )
             {
                 // Right paddle was more recently activated
                 return( paddle_invert ? STATE_DOTS : STATE_DASHES );
@@ -1039,14 +1021,14 @@ static state_t get_next_state( void )
             fail();
         }
     }
-    else if( ( ! paddle_invert && is_bit_set( inputs, INPUT_TYPE_PADDLE_LEFT ) ) ||
-             (   paddle_invert && is_bit_set( inputs, INPUT_TYPE_PADDLE_RIGHT ) ) )
+    else if( ( ! paddle_invert && paddle_left ) ||
+             (   paddle_invert && paddle_right ) )
     {
         // The left paddle traditionally emits dots
         return( STATE_DOTS );
     }
-    else if( ( ! paddle_invert && is_bit_set( inputs, INPUT_TYPE_PADDLE_RIGHT ) ) ||
-             (   paddle_invert && is_bit_set( inputs, INPUT_TYPE_PADDLE_LEFT ) ) )
+    else if( ( ! paddle_invert && paddle_right ) ||
+             (   paddle_invert && paddle_left ) )
     {
         // The right paddle traditionally emits dashes
         return( STATE_DASHES );
@@ -1071,17 +1053,8 @@ static void set_keyed( bool keyed )
 
 static void update_hardware( void )
 {
-    // Update GPIO
-    bool active_lo = keyer_get_output_active_low();
-    gpio_set_state( KEYER_OUT_PIN,
-                    s_keyed ?
-                        ( active_lo ? GPIO_STATE_LOW : GPIO_STATE_HIGH ) :
-                        ( active_lo ? GPIO_STATE_HIGH : GPIO_STATE_LOW ) );
-
-    // Update LED
+    io_set_output_state_type( IO_TYPE_OUTPUT_KEYER, s_keyed ? IO_STATE_ON : IO_STATE_OFF );
     led_set_on( LED_KEY, s_keyed );
-
-    // Update buzzer
     buzzer_set_on( s_keyed );
 
 }   /* update_hardware() */

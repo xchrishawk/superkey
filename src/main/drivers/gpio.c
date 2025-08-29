@@ -137,6 +137,15 @@ gpio_port_t gpio_get_pin_port( gpio_pin_t pin )
 }   /* gpio_get_pin_port() */
 
 
+bool gpio_get_pullup( gpio_pin_t pin )
+{
+    validate_pin( pin );
+
+    return( is_bit_set( PIN_OUT( pin ), PIN_INDEX( pin ) ) );
+
+}   /* gpio_get_pullup() */
+
+
 gpio_state_t gpio_get_state( gpio_pin_t pin )
 {
     validate_pin( pin );

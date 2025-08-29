@@ -19,7 +19,6 @@
 #include "application/buzzer.h"
 #include "application/config.h"
 #include "application/debug_port.h"
-#include "application/input.h"
 #include "application/keyer.h"
 #include "application/led.h"
 #include "application/storage.h"
@@ -60,10 +59,10 @@
 int main( void );
 
 /**
- * @fn      handle_input_state( void )
- * @brief   Handles the `EVENT_INPUT_STATE` event.
+ * @fn      handle_io_state( void )
+ * @brief   Handles the `EVENT_IO_STATE` event.
  */
-static void handle_input_state( void );
+static void handle_io_state( void );
 
 /**
  * @fn      handle_tick( void )
@@ -136,7 +135,7 @@ int main( void )
 }   /* main() */
 
 
-static void handle_input_state( void )
+static void handle_io_state( void )
 {
     // An input state changed - immediately update the keyer
     keyer_tick( sys_get_tick() );
@@ -206,7 +205,7 @@ static void init( void )
     storage_init();
     config_init();
     led_init();
-    input_init();
+    io_init();
     buzzer_init();
     debug_port_init();
     keyer_init();
@@ -225,8 +224,8 @@ static void main_loop( void )
         event_field_t events = sys_wait();
         if( is_bit_set( events, EVENT_TICK ) )
             handle_tick();
-        if( is_bit_set( events, EVENT_INPUT_STATE ) )
-            handle_input_state();
+        if( is_bit_set( events, EVENT_IO_STATE ) )
+            handle_io_state();
         if( is_bit_set( events, EVENT_USART_0_RX_COMPLETE ) )
             handle_usart_rx_complete( USART_0 );
         if( is_bit_set( events, EVENT_USART_0_TX_COMPLETE ) )
@@ -243,7 +242,6 @@ static void main_loop( void )
 static void periodic_1ms( tick_t tick )
 {
     // Periodic processing for modules with 1000 Hz tick rates
-    input_tick( tick );
     keyer_tick( tick );
 
 }   /* periodic_1ms() */
@@ -253,6 +251,7 @@ static void periodic_50ms( tick_t tick )
 {
     // Periodic processing for modules with 20 Hz tick rates
     buzzer_tick( tick );
+    io_tick( tick );
     led_tick( tick );
 
 }   /* periodic_50ms() */

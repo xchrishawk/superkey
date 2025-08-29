@@ -74,12 +74,6 @@ size_t keyer_autokey_str( char const * str );
 bool keyer_get_on( void );
 
 /**
- * @fn      keyer_get_output_active_low( void )
- * @brief   Returns `true` if the keyer's output is active low.
- */
-bool keyer_get_output_active_low( void );
-
-/**
  * @fn      keyer_get_paddle_invert( void )
  * @brief   Returns `true` if the keyer is configured to invert the paddles. In this case, the right paddle will emit
  *          dots and the left paddle will emit dashes.
@@ -103,13 +97,6 @@ void keyer_init( void );
  * @brief   Immediately and unconditionally stops the keyer, and clears any pending autokey characters.
  */
 void keyer_panic( void );
-
-/**
- * @fn      keyer_set_output_active_low( bool )
- * @brief   Sets whether the keyer's output is active low or not.
- * @note    This modifies the application configuration.
- */
-void keyer_set_output_active_low( bool active_low );
 
 /**
  * @fn      keyer_set_paddle_invert( bool )
