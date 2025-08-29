@@ -16,7 +16,7 @@
 #include <stdint.h>
 
 #include "application/buzzer.h"
-#include "application/input.h"
+#include "application/io.h"
 #include "application/keyer.h"
 #include "application/led.h"
 #include "application/wpm.h"
@@ -44,20 +44,17 @@ typedef struct
     /** If set to `false`, the LED will be disabled and will not illuminate. */
     bool                led_enabled[ LED_COUNT ];
 
-    /** The configured input type for each input pin. */
-    input_type_t        input_type[ INPUT_PIN_COUNT ];
+    /** The configured I/O type for each I/O pin. */
+    io_type_t           io_type[ IO_PIN_COUNT ];
 
-    /** The configured input polarity for each input pin. */
-    input_polarity_t    input_polarity[ INPUT_PIN_COUNT ];
+    /** The configured I/O polarity for each I/O pin. */
+    io_polarity_t       io_polarity[ IO_PIN_COUNT ];
 
     /** The keyer's paddle mode. */
     keyer_paddle_mode_t keyer_paddle_mode;
 
     /** If set to `true`, the keyer will emit dashes from the left paddle and dots from the right paddle. */
     bool                keyer_paddle_invert;
-
-    /** If set to `true`, the keyer's output is active low. */
-    bool                keyer_output_active_low;
 
 } config_t;
 

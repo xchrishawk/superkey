@@ -28,7 +28,7 @@ typedef uint8_t event_t;
 enum
 {
     EVENT_TICK,                             /**< 1 millisecond tick event.              */
-    EVENT_INPUT_STATE,                      /**< Key input state changed.               */
+    EVENT_IO_STATE,                         /**< Keyer input / output state changed.    */
     EVENT_USART_0_RX_COMPLETE,              /**< USART 0 completed receiving data.      */
     EVENT_USART_0_TX_COMPLETE,              /**< USART 0 completed transmitting data.   */
     EVENT_USART_1_RX_COMPLETE,              /**< USART 1 completed receiving data.      */

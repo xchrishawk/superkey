@@ -146,6 +146,13 @@ gpio_dir_t gpio_get_dir( gpio_pin_t pin );
 gpio_port_t gpio_get_pin_port( gpio_pin_t pin );
 
 /**
+ * @fn      gpio_get_pullup( gpio_pin_t )
+ * @brief   Returns the state of the pull-up resistor for the specified pin.
+ * @note    This is only applicable to input pins.
+ */
+bool gpio_get_pullup( gpio_pin_t pin );
+
+/**
  * @fn      gpio_get_state( gpio_pin_t )
  * @brief   Returns the current state of the specified pin.
  */

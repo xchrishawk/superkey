@@ -79,10 +79,10 @@
 #define CMD_STR_HELP            "Help"
 
 /**
- * @def     CMD_STR_INPUT
- * @brief   The string for the `input` command.
+ * @def     CMD_STR_IO
+ * @brief   The string for the `io` command.
  */
-#define CMD_STR_INPUT           "Input"
+#define CMD_STR_IO              "IO"
 
 /**
  * @def     CMD_STR_KEYER
@@ -199,10 +199,10 @@ static void exec_command_eeprom( char const * const command );
 static void exec_command_help( char const * const command );
 
 /**
- * @fn      exec_command_input( char const * const command )
- * @brief   Executes the `input` command.
+ * @fn      exec_command_io( char const * const command )
+ * @brief   Executes the `io` command.
  */
-static void exec_command_input( char const * const command );
+static void exec_command_io( char const * const command );
 
 /**
  * @fn      exec_command_keyer( char const * const command )
@@ -371,8 +371,8 @@ static void exec_command( char const * const command )
         exec_command_eeprom( command );
     else if( string_begins_with( command, CMD_STR_HELP ) )
         exec_command_help( command );
-    else if( string_begins_with( command, CMD_STR_INPUT ) )
-        exec_command_input( command );
+    else if( string_begins_with( command, CMD_STR_IO ) )
+        exec_command_io( command );
     else if( string_begins_with( command, CMD_STR_KEYER ) )
         exec_command_keyer( command );
     else if( string_begins_with( command, CMD_STR_LED ) )
@@ -407,7 +407,7 @@ static void exec_command_buzzer( char const * const command )
         // Turn buzzer on
         buzzer_set_enabled( true );
     }
-    else if( string_equals( command, CMD_STR_BUZZER " " DISABLED_STR " " stringize( false ) ) )
+    else if( string_equals( command, CMD_STR_BUZZER " " ENABLED_STR " " stringize( false ) ) )
     {
         // Turn buzzer oiff
         buzzer_set_enabled( false );
@@ -566,14 +566,19 @@ static void exec_command_help( char const * const command )
 }   /* exec_command_help() */
 
 
-static void exec_command_input( char const * const command )
+static void exec_command_io( char const * const command )
 {
     char pin_str[ TOKEN_MAX_LEN ];
     char subcommand_str[ TOKEN_MAX_LEN ];
     int sscanf_count;
 
-    // Drop `input` prefix
-    char const * c = command + 6;
+    // Drop `io` prefix
+    if( ! string_begins_with( command, CMD_STR_IO " " ) )
+    {
+        print_invalid_command( command );
+        return;
+    }
+    char const * c = command + 3;
 
     // Get tokens
     int token_count = sscanf( c, TOKEN_FMT_STR " " TOKEN_FMT_STR " %n", pin_str, subcommand_str, & sscanf_count );
@@ -583,9 +588,9 @@ static void exec_command_input( char const * const command )
         return;
     }
 
-    // Parse input pin
-    input_pin_t pin;
-    if( ! string_to_input_pin( pin_str, & pin ) )
+    // Parse pin
+    io_pin_t pin;
+    if( ! string_to_io_pin( pin_str, & pin ) )
     {
         print_invalid_command( command );
         return;
@@ -595,33 +600,40 @@ static void exec_command_input( char const * const command )
     if( token_count == 2 )
     {
         // Check subcommand
-        input_polarity_t polarity;
-        input_type_t type;
-        if( string_to_input_polarity( subcommand_str, & polarity ) )
+        io_polarity_t polarity;
+        io_type_t type;
+        if( string_to_io_polarity( subcommand_str, & polarity ) )
         {
             // Set polarity
-            input_set_polarity( pin, polarity );
+            io_set_polarity( pin, polarity );
         }
-        else if( string_to_input_type( subcommand_str, & type ) )
+        else if( string_to_io_type( subcommand_str, & type ) )
         {
             // Set type
-            input_set_type( pin, type );
+            io_set_type( pin, type );
+        }
+        else if( string_equals( subcommand_str, "disable" ) )
+        {
+            // Set type to NONE
+            io_set_type( pin, IO_TYPE_NONE );
         }
         else
         {
+            debug_port_printf( "%s\r\n", subcommand_str );
+            debug_port_printf( "%s\r\n", string_from_io_type( IO_TYPE_NONE ) );
             print_invalid_command( command );
             return;
         }
     }
 
     // Print status info
-    debug_port_printf( CMD_STR_INPUT " %s: %s (%s - %s)" NEWLINE_STR,
-                       string_from_input_pin( pin ),
-                       input_get_on( pin ) ? ON_STR : OFF_STR,
-                       string_from_input_type( input_get_type( pin ) ),
-                       string_from_input_polarity( input_get_polarity( pin ) ) );
+    debug_port_printf( CMD_STR_IO " %s: %s (%s - %s)" NEWLINE_STR,
+                       string_from_io_pin( pin ),
+                       string_from_io_state( io_get_state( pin ) ),
+                       string_from_io_type( io_get_type( pin ) ),
+                       string_from_io_polarity( io_get_polarity( pin ) ) );
 
-}   /* exec_command_input() */
+}   /* exec_command_io() */
 
 
 static void exec_command_keyer( char const * const command )
@@ -653,16 +665,6 @@ static void exec_command_keyer( char const * const command )
         size_t count = keyer_autokey_str( command + 10 );
         debug_port_printf( CMD_STR_KEYER ": \"%s\" (%u chars queued)" NEWLINE_STR, command + 10, count );
         return;
-    }
-    else if( string_equals( command, CMD_STR_KEYER " output_active_low " ENABLE_STR ) )
-    {
-        // Set output to active low
-        keyer_set_output_active_low( true );
-    }
-    else if( string_equals( command, CMD_STR_KEYER " output_active_low " DISABLE_STR ) )
-    {
-        // Set output to active high
-        keyer_set_output_active_low( false );
     }
     else if( string_equals( command, CMD_STR_KEYER " " stringize( KEYER_PADDLE_MODE_IAMBIC ) ) )
     {
@@ -713,6 +715,11 @@ static void exec_command_led( char const * const command )
     int sscanf_count;
 
     // Drop `led` prefix
+    if( ! string_begins_with( command, CMD_STR_LED " " ) )
+    {
+        print_invalid_command( command );
+        return;
+    }
     char const * c = command + 4;
 
     // Get tokens
@@ -760,7 +767,12 @@ static void exec_command_led( char const * const command )
 
 static void exec_command_panic( char const * const command )
 {
-    ( void )command;
+    // No arguments are supported
+    if( ! string_equals( command, CMD_STR_PANIC ) )
+    {
+        print_invalid_command( command );
+        return;
+    }
 
     keyer_panic();
     debug_port_print( "Stopped keyer." NEWLINE_STR );
@@ -770,7 +782,12 @@ static void exec_command_panic( char const * const command )
 
 static void exec_command_tick( char const * const command )
 {
-    ( void )command;
+    // No arguments are supported
+    if( ! string_equals( command, CMD_STR_TICK ) )
+    {
+        print_invalid_command( command );
+        return;
+    }
 
     debug_port_printf( CMD_STR_TICK ": %lu" NEWLINE_STR, sys_get_tick() );
 
@@ -779,7 +796,12 @@ static void exec_command_tick( char const * const command )
 
 static void exec_command_version( char const * const command )
 {
-    ( void )command;
+    // No arguments are supported
+    if( ! string_equals( command, CMD_STR_VERSION ) )
+    {
+        print_invalid_command( command );
+        return;
+    }
 
     version_t version;
     version_get( & version );
@@ -810,7 +832,8 @@ static void exec_command_wpm( char const * const command )
     {
         // No subcommand - interpret as a status request. No action required.
     }
-    else if( sscanf( command + 4, "%f %n", & wpm, & sscanf_count ) == 1 &&
+    else if( string_begins_with( command, CMD_STR_WPM " " ) &&
+             sscanf( command + 4, "%f %n", & wpm, & sscanf_count ) == 1 &&
              ( command + 4 )[ sscanf_count ] == NULL_CHAR )
     {
         // Set WPM

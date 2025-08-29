@@ -16,6 +16,8 @@
 
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
+/* -- COMPILER UTILITIES -- */
+
 /**
  * @def     FUNC_MAY_BE_UNUSED
  * @brief   May be placed after a function declaration to inform the compiler that a function may not be called, and
@@ -30,6 +32,36 @@
  */
 #define FUNC_NEVER_RETURNS                                                              \
     __attribute__((noreturn))
+
+/**
+ * @def     array_count( _a )
+ * @brief   Returns the number of elements in the specified array.
+ */
+#define array_count( _a )                                                               \
+    ( sizeof( _a ) / sizeof( _a[ 0 ] ) )
+
+/**
+ * @def     sizeof_bits( _x )
+ * @brief   Returns the size of `_x`, in bits.
+ */
+#define sizeof_bits( _x )                                                               \
+    ( sizeof( _x ) * BITS_PER_BYTE )
+
+/**
+ * @def     stringize( _x )
+ * @brief   Returns a string representation of the argument.
+ */
+#define stringize( _x )                                                                 \
+    # _x
+
+/**
+ * @def     stringize_value( _x )
+ * @brief   Returns a string representation of the *value* of the argument.
+ */
+#define stringize_value( _x )                                                           \
+    stringize( _x )
+
+/* -- SIMPLE CONSTANTS -- */
 
 /**
  * @def     TRUE
@@ -63,12 +95,14 @@
 #define OFF                                                                             \
     ( 0 )
 
+/* -- UTILITY FUNCTIONS -- */
+
 /**
- * @def     array_count( _a )
- * @brief   Returns the number of elements in the specified array.
+ * @def     nop()
+ * @brief   Do nothing, stylishly.
  */
-#define array_count( _a )                                                               \
-    ( sizeof( _a ) / sizeof( _a[ 0 ] ) )
+#define nop()                                                                           \
+    ( void )0
 
 /**
  * @def     clamp( _x, _min, _max )
@@ -92,33 +126,7 @@
     }                                                                                   \
     while( 0 )
 
-/**
- * @def     nop()
- * @brief   Do nothing, stylishly.
- */
-#define nop()                                                                           \
-    ( void )0
-
-/**
- * @def     sizeof_bits( _x )
- * @brief   Returns the size of `_x`, in bits.
- */
-#define sizeof_bits( _x )                                                               \
-    ( sizeof( _x ) * BITS_PER_BYTE )
-
-/**
- * @def     stringize( _x )
- * @brief   Returns a string representation of the argument.
- */
-#define stringize( _x )                                                                 \
-    # _x
-
-/**
- * @def     stringize_value( _x )
- * @brief   Returns a string representation of the *value* of the argument.
- */
-#define stringize_value( _x )                                                           \
-    stringize( _x )
+/* -- BITFIELD MANIPULATION -- */
 
 /**
  * @def     bitmask( _b )

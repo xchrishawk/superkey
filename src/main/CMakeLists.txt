@@ -17,8 +17,8 @@ set(EXECUTABLE_SOURCE   application/buzzer.c
                         application/config.h
                         application/debug_port.c
                         application/debug_port.h
-                        application/input.c
-                        application/input.h
+                        application/io.c
+                        application/io.h
                         application/keyer.c
                         application/keyer.h
                         application/led.c

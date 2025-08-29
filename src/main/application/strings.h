@@ -14,7 +14,7 @@
 
 #include <stdbool.h>
 
-#include "application/input.h"
+#include "application/io.h"
 #include "application/keyer.h"
 #include "application/led.h"
 #include "application/wpm.h"
@@ -35,13 +35,13 @@
 
 /**
  * @def     OFF_STR
- * @brief   The token which indicates that an input or output is off.
+ * @brief   The token which indicates that an io or output is off.
  */
 #define OFF_STR                 "off"
 
 /**
  * @def     ON_STR
- * @brief   The token which indicates that an input or output is on.
+ * @brief   The token which indicates that an io or output is on.
  */
 #define ON_STR                  "on"
 
@@ -74,22 +74,28 @@ char const * string_from_bool( bool b );
 char const * string_from_element( wpm_element_t el );
 
 /**
- * @fn      string_from_input_pin( input_pin_t )
- * @brief   Returns a string for the specified `input_pin_t`.
+ * @fn      string_from_io_pin( io_pin_t )
+ * @brief   Returns a string for the specified `io_pin_t`.
  */
-char const * string_from_input_pin( input_pin_t pin );
+char const * string_from_io_pin( io_pin_t pin );
 
 /**
- * @fn      string_from_input_polarity( input_polarity_t )
- * @brief   Returns a string for the specified `input_polarity_t`.
+ * @fn      string_from_io_polarity( io_polarity_t )
+ * @brief   Returns a string for the specified `io_polarity_t`.
  */
-char const * string_from_input_polarity( input_polarity_t polarity );
+char const * string_from_io_polarity( io_polarity_t polarity );
 
 /**
- * @fn      string_from_input_type( input_type_t )
- * @brief   Returns a string for the specified `input_type_t`.
+ * @fn      string_from_io_state( io_state_t )
+ * @brief   Returns a string for the specified `io_state_t`.
  */
-char const * string_from_input_type( input_type_t type );
+char const * string_from_io_state( io_state_t state );
+
+/**
+ * @fn      string_from_io_type( io_type_t )
+ * @brief   Returns a string for the specified `io_type_t`.
+ */
+char const * string_from_io_type( io_type_t type );
 
 /**
  * @fn      string_from_led( led_t )
@@ -118,25 +124,32 @@ bool string_to_bool( char const * str, bool * b );
 bool string_to_element( char const * str, wpm_element_t * el );
 
 /**
- * @fn      string_to_input_pin( char const *, input_pin_t * )
- * @brief   Converts a string to an `input_pin_t`, if possible.
+ * @fn      string_to_io_pin( char const *, io_pin_t * )
+ * @brief   Converts a string to an `io_pin_t`, if possible.
  * @returns `true` if the conversion succeeded.
  */
-bool string_to_input_pin( char const * str, input_pin_t * pin );
+bool string_to_io_pin( char const * str, io_pin_t * pin );
 
 /**
- * @fn      string_to_input_polarity( char const *, input_polarity_t * )
- * @brief   Converts a string to an `input_polarity_t`, if possible.
+ * @fn      string_to_io_polarity( char const *, io_polarity_t * )
+ * @brief   Converts a string to an `io_polarity_t`, if possible.
  * @returns `true` if the conversion succeeded.
  */
-bool string_to_input_polarity( char const * str, input_polarity_t * polarity );
+bool string_to_io_polarity( char const * str, io_polarity_t * polarity );
 
 /**
- * @fn      string_to_input_type( char const *, input_type_t * )
- * @brief   Converts a string to an `input_type_t`, if possible.
+ * @fn      string_to_io_state( char const *, io_state_t )
+ * @brief   Converts a string to an `io_state_t`, if possible.
  * @returns `true` if the conversion succeeded.
  */
-bool string_to_input_type( char const * str, input_type_t * type );
+bool string_to_io_state( char const * str, io_state_t * state );
+
+/**
+ * @fn      string_to_io_type( char const *, io_type_t * )
+ * @brief   Converts a string to an `io_type_t`, if possible.
+ * @returns `true` if the conversion succeeded.
+ */
+bool string_to_io_type( char const * str, io_type_t * type );
 
 /**
  * @fn      string_to_led( char const *, led_t * )

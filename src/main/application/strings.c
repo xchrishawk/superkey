@@ -11,6 +11,7 @@
 
 #include <string.h>
 
+#include "application/io.h"
 #include "application/strings.h"
 #include "utility/constants.h"
 #include "utility/utility.h"
@@ -35,34 +36,47 @@ static char const * const s_element_tbl[] =
 };
 _Static_assert( array_count( s_element_tbl ) == WPM_ELEMENT_COUNT, "Invalid string table!" );
 
-#define INPUT_PIN_PREFIX_LEN 10
-static char const * const s_input_pin_tbl[] =
+#define IO_PIN_PREFIX_LEN 7
+static char const * const s_io_pin_tbl[] =
 {
-    stringize( INPUT_PIN_TRS_0_TIP ),
-    stringize( INPUT_PIN_TRS_0_RING ),
-    stringize( INPUT_PIN_TRS_1_TIP ),
-    stringize( INPUT_PIN_TRS_1_RING ),
-    stringize( INPUT_PIN_TRS_2_TIP ),
-    stringize( INPUT_PIN_TRS_2_RING ),
+    stringize( IO_PIN_TRS_0_TIP ),
+    stringize( IO_PIN_TRS_0_RING ),
+    stringize( IO_PIN_TRS_1_TIP ),
+    stringize( IO_PIN_TRS_1_RING ),
+    stringize( IO_PIN_TRS_2_TIP ),
+    stringize( IO_PIN_TRS_2_RING ),
+    stringize( IO_PIN_TRS_3_TIP ),
+    stringize( IO_PIN_TRS_3_RING ),
 };
-_Static_assert( array_count( s_input_pin_tbl ) == INPUT_PIN_COUNT, "Invalid string table!" );
+_Static_assert( array_count( s_io_pin_tbl ) == IO_PIN_COUNT, "Invalid string table!" );
 
-#define INPUT_POLARITY_PREFIX_LEN 15
-static char const * const s_input_polarity_tbl[] =
+#define IO_POLARITY_PREFIX_LEN 12
+static char const * const s_io_polarity_tbl[] =
 {
-    stringize( INPUT_POLARITY_ACTIVE_LOW ),
-    stringize( INPUT_POLARITY_ACTIVE_HIGH ),
+    stringize( IO_POLARITY_ACTIVE_LOW ),
+    stringize( IO_POLARITY_ACTIVE_HIGH ),
 };
-_Static_assert( array_count( s_input_polarity_tbl ) == INPUT_POLARITY_COUNT, "Invalid string table!" );
+_Static_assert( array_count( s_io_polarity_tbl ) == IO_POLARITY_COUNT, "Invalid string table!" );
 
-#define INPUT_TYPE_PREFIX_LEN 11
-static char const * const s_input_type_tbl[] =
+#define IO_STATE_PREFIX_LEN 9
+static char const * const s_io_state_tbl[] =
 {
-    stringize( INPUT_TYPE_STRAIGHT_KEY ),
-    stringize( INPUT_TYPE_PADDLE_LEFT ),
-    stringize( INPUT_TYPE_PADDLE_RIGHT ),
+    stringize( IO_STATE_OFF ),
+    stringize( IO_STATE_ON ),
+    stringize( IO_STATE_NONE ),
 };
-_Static_assert( array_count( s_input_type_tbl ) == INPUT_TYPE_COUNT, "Invalid string table!" );
+_Static_assert( array_count( s_io_state_tbl ) == IO_STATE_COUNT + 1 /* for NONE */, "Invalid string table!" );
+
+#define IO_TYPE_PREFIX_LEN 8
+static char const * const s_io_type_tbl[] =
+{
+    stringize( IO_TYPE_INPUT_STRAIGHT_KEY ),
+    stringize( IO_TYPE_INPUT_PADDLE_LEFT ),
+    stringize( IO_TYPE_INPUT_PADDLE_RIGHT ),
+    stringize( IO_TYPE_OUTPUT_KEYER ),
+    stringize( IO_TYPE_NONE ),
+};
+_Static_assert( array_count( s_io_type_tbl ) == IO_TYPE_COUNT + 1 /* for NONE */, "Invalid string table!" );
 
 #define LED_PREFIX_LEN 4
 static char const * const s_led_tbl[] =
@@ -122,30 +136,37 @@ char const * string_from_element( wpm_element_t el )
 }   /* string_from_element() */
 
 
-char const * string_from_input_pin( input_pin_t pin )
+char const * string_from_io_pin( io_pin_t pin )
 {
-    return( find_string( s_input_pin_tbl, INPUT_PIN_COUNT, INPUT_PIN_PREFIX_LEN, ( size_t )pin ) );
+    return( find_string( s_io_pin_tbl, array_count( s_io_pin_tbl ), IO_PIN_PREFIX_LEN, ( size_t )pin ) );
 
-}   /* string_from_input_pin() */
+}   /* string_from_io_pin() */
 
 
-char const * string_from_input_polarity( input_polarity_t polarity )
+char const * string_from_io_polarity( io_polarity_t polarity )
 {
-    return( find_string( s_input_polarity_tbl, INPUT_POLARITY_COUNT, INPUT_POLARITY_PREFIX_LEN, ( size_t )polarity ) );
+    return( find_string( s_io_polarity_tbl, array_count( s_io_polarity_tbl ), IO_POLARITY_PREFIX_LEN, ( size_t )polarity ) );
 
-}   /* string_from_input_polarity() */
+}   /* string_from_io_polarity() */
 
 
-char const * string_from_input_type( input_type_t type )
+char const * string_from_io_state( io_state_t state )
 {
-    return( find_string( s_input_type_tbl, INPUT_TYPE_COUNT, INPUT_TYPE_PREFIX_LEN, ( size_t )type ) );
+    return( find_string( s_io_state_tbl, array_count( s_io_state_tbl ), IO_STATE_PREFIX_LEN, ( size_t )state ) );
 
-}   /* string_from_input_type() */
+}   /* string_from_io_state() */
+
+
+char const * string_from_io_type( io_type_t type )
+{
+    return( find_string( s_io_type_tbl, array_count( s_io_type_tbl ), IO_TYPE_PREFIX_LEN, ( size_t )type ) );
+
+}   /* string_from_io_type() */
 
 
 char const * string_from_led( led_t led )
 {
-    return( find_string( s_led_tbl, LED_COUNT, LED_PREFIX_LEN, ( size_t )led ) );
+    return( find_string( s_led_tbl, array_count( s_led_tbl ), LED_PREFIX_LEN, ( size_t )led ) );
 
 }   /* string_from_led() */
 
@@ -172,7 +193,7 @@ bool string_to_bool( char const * str, bool * b )
 bool string_to_element( char const * str, wpm_element_t * el )
 {
     size_t result = find_value( s_element_tbl, array_count( s_element_tbl ), ELEMENT_PREFIX_LEN, str );
-    if( result == WPM_ELEMENT_COUNT )
+    if( result == array_count( s_element_tbl ) )
         return( false );
 
     * el = ( wpm_element_t )result;
@@ -181,46 +202,58 @@ bool string_to_element( char const * str, wpm_element_t * el )
 }   /* string_to_element() */
 
 
-bool string_to_input_pin( char const * str, input_pin_t * pin )
+bool string_to_io_pin( char const * str, io_pin_t * pin )
 {
-    size_t result = find_value( s_input_pin_tbl, array_count( s_input_pin_tbl ), INPUT_PIN_PREFIX_LEN, str );
-    if( result == INPUT_PIN_COUNT )
+    size_t result = find_value( s_io_pin_tbl, array_count( s_io_pin_tbl ), IO_PIN_PREFIX_LEN, str );
+    if( result == array_count( s_io_pin_tbl ) )
         return( false );
 
-    * pin = ( input_pin_t )result;
+    * pin = ( io_pin_t )result;
     return( true );
 
-}   /* string_to_input_pin() */
+}   /* string_to_io_pin() */
 
 
-bool string_to_input_polarity( char const * str, input_polarity_t * polarity )
+bool string_to_io_polarity( char const * str, io_polarity_t * polarity )
 {
-    size_t result = find_value( s_input_polarity_tbl, array_count( s_input_polarity_tbl ), INPUT_POLARITY_PREFIX_LEN, str );
-    if( result == INPUT_POLARITY_COUNT )
+    size_t result = find_value( s_io_polarity_tbl, array_count( s_io_polarity_tbl ), IO_POLARITY_PREFIX_LEN, str );
+    if( result == array_count( s_io_polarity_tbl ) )
         return( false );
 
-    * polarity = ( input_polarity_t )result;
+    * polarity = ( io_polarity_t )result;
     return( true );
 
-}   /* string_to_input_polarity() */
+}   /* string_to_io_polarity() */
 
 
-bool string_to_input_type( char const * str, input_type_t * type )
+bool string_to_io_state( char const * str, io_state_t * state )
 {
-    size_t result = find_value( s_input_type_tbl, array_count( s_input_type_tbl ), INPUT_TYPE_PREFIX_LEN, str );
-    if( result == INPUT_TYPE_COUNT )
+    size_t result = find_value( s_io_state_tbl, array_count( s_io_state_tbl ), IO_STATE_PREFIX_LEN, str );
+    if( result == array_count( s_io_state_tbl ) )
         return( false );
 
-    * type = ( input_type_t )result;
+    * state = ( io_state_t )result;
     return( true );
 
-}   /* string_to_input_type() */
+}   /* string_to_io_state() */
+
+
+bool string_to_io_type( char const * str, io_type_t * type )
+{
+    size_t result = find_value( s_io_type_tbl, array_count( s_io_type_tbl ), IO_TYPE_PREFIX_LEN, str );
+    if( result == array_count( s_io_type_tbl ) )
+        return( false );
+
+    * type = ( io_type_t )result;
+    return( true );
+
+}   /* string_to_io_type() */
 
 
 bool string_to_led( char const * str, led_t * led )
 {
     size_t result = find_value( s_led_tbl, array_count( s_led_tbl ), LED_PREFIX_LEN, str );
-    if( result == LED_COUNT )
+    if( result == array_count( s_led_tbl ) )
         return( false );
 
     * led = ( led_t )result;

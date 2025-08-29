@@ -14,7 +14,6 @@
 #include <string.h>
 
 #include "application/config.h"
-#include "application/input.h"
 #include "application/keyer.h"
 #include "application/led.h"
 #include "application/storage.h"
@@ -83,24 +82,28 @@ void config_default( config_t * config )
     config->led_enabled[ LED_STATUS ]               = _CONFIG_DFLT_LED_STATUS_ENABLED;
     config->led_enabled[ LED_KEY ]                  = _CONFIG_DFLT_LED_KEY_ENABLED;
 
-    // Input configuration
-    config->input_type[     INPUT_PIN_TRS_0_TIP  ]  = _CONFIG_DFLT_INPUT_TYPE_TRS_0_TIP;
-    config->input_polarity[ INPUT_PIN_TRS_0_TIP  ]  = _CONFIG_DFLT_INPUT_POLARITY_TRS_0_TIP;
-    config->input_type[     INPUT_PIN_TRS_0_RING ]  = _CONFIG_DFLT_INPUT_TYPE_TRS_0_RING;
-    config->input_polarity[ INPUT_PIN_TRS_0_RING ]  = _CONFIG_DFLT_INPUT_POLARITY_TRS_0_RING;
-    config->input_type[     INPUT_PIN_TRS_1_TIP  ]  = _CONFIG_DFLT_INPUT_TYPE_TRS_1_TIP;
-    config->input_polarity[ INPUT_PIN_TRS_1_TIP  ]  = _CONFIG_DFLT_INPUT_POLARITY_TRS_1_TIP;
-    config->input_type[     INPUT_PIN_TRS_1_RING ]  = _CONFIG_DFLT_INPUT_TYPE_TRS_1_RING;
-    config->input_polarity[ INPUT_PIN_TRS_1_RING ]  = _CONFIG_DFLT_INPUT_POLARITY_TRS_1_RING;
-    config->input_type[     INPUT_PIN_TRS_2_TIP  ]  = _CONFIG_DFLT_INPUT_TYPE_TRS_2_TIP;
-    config->input_polarity[ INPUT_PIN_TRS_2_TIP  ]  = _CONFIG_DFLT_INPUT_POLARITY_TRS_2_TIP;
-    config->input_type[     INPUT_PIN_TRS_2_RING ]  = _CONFIG_DFLT_INPUT_TYPE_TRS_2_RING;
-    config->input_polarity[ INPUT_PIN_TRS_2_RING ]  = _CONFIG_DFLT_INPUT_POLARITY_TRS_2_RING;
+    // I/O configuration
+    // TODO: Compile-time constants
+    config->io_type[        IO_PIN_TRS_0_TIP    ]   = _CONFIG_DFLT_IO_TYPE_TRS_0_TIP;
+    config->io_polarity[    IO_PIN_TRS_0_TIP    ]   = _CONFIG_DFLT_IO_POLARITY_TRS_0_TIP;
+    config->io_type[        IO_PIN_TRS_0_RING   ]   = _CONFIG_DFLT_IO_TYPE_TRS_0_RING;
+    config->io_polarity[    IO_PIN_TRS_0_RING   ]   = _CONFIG_DFLT_IO_POLARITY_TRS_0_RING;
+    config->io_type[        IO_PIN_TRS_1_TIP    ]   = _CONFIG_DFLT_IO_TYPE_TRS_1_TIP;
+    config->io_polarity[    IO_PIN_TRS_1_TIP    ]   = _CONFIG_DFLT_IO_POLARITY_TRS_1_TIP;
+    config->io_type[        IO_PIN_TRS_1_RING   ]   = _CONFIG_DFLT_IO_TYPE_TRS_1_RING;
+    config->io_polarity[    IO_PIN_TRS_1_RING   ]   = _CONFIG_DFLT_IO_POLARITY_TRS_1_RING;
+    config->io_type[        IO_PIN_TRS_2_TIP    ]   = _CONFIG_DFLT_IO_TYPE_TRS_2_TIP;
+    config->io_polarity[    IO_PIN_TRS_2_TIP    ]   = _CONFIG_DFLT_IO_POLARITY_TRS_2_TIP;
+    config->io_type[        IO_PIN_TRS_2_RING   ]   = _CONFIG_DFLT_IO_TYPE_TRS_2_RING;
+    config->io_polarity[    IO_PIN_TRS_2_RING   ]   = _CONFIG_DFLT_IO_POLARITY_TRS_2_RING;
+    config->io_type[        IO_PIN_TRS_3_TIP    ]   = _CONFIG_DFLT_IO_TYPE_TRS_3_TIP;
+    config->io_polarity[    IO_PIN_TRS_3_TIP    ]   = _CONFIG_DFLT_IO_POLARITY_TRS_3_TIP;
+    config->io_type[        IO_PIN_TRS_3_RING   ]   = _CONFIG_DFLT_IO_TYPE_TRS_3_RING;
+    config->io_polarity[    IO_PIN_TRS_3_RING   ]   = _CONFIG_DFLT_IO_POLARITY_TRS_3_RING;
 
     // Keyer configuration
     config->keyer_paddle_mode                       = _CONFIG_DFLT_KEYER_PADDLE_MODE;
     config->keyer_paddle_invert                     = _CONFIG_DFLT_KEYER_PADDLE_INVERT;
-    config->keyer_output_active_low                 = _CONFIG_DFLT_KEYER_OUTPUT_ACTIVE_LOW;
 
     // Ensure we generated a valid configuration
     assert_always( validate_config( config ) );
