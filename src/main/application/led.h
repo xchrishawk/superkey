@@ -49,6 +49,7 @@ bool led_get_on( led_t led );
 /**
  * @fn      led_init( void )
  * @brief   Initializes the LED driver module.
+ * @note    Requires that the `config` module has been initialized.
  */
 void led_init( void );
 

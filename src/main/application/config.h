@@ -96,6 +96,9 @@ void config_get( config_t * config );
 /**
  * @fn      config_init( void )
  * @brief   Initializes the system's configuration.
+ * @note    Requires that the following modules have been initialized:
+ *          - `storage`
+ *          - `sys`
  */
 void config_init( void );
 

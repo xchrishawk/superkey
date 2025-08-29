@@ -30,6 +30,7 @@
 /**
  * @fn      debug_port_init( void )
  * @brief   Initializes the debug port.
+ * @note    The debug port should be initialized after all other modules.
  */
 void debug_port_init( void );
 

@@ -89,6 +89,12 @@ keyer_paddle_mode_t keyer_get_paddle_mode( void );
 /**
  * @fn      keyer_init( void )
  * @brief   Initializes the keyer module.
+ * @note    Requires that the following modules have been initialized:
+ *          - `buzzer`
+ *          - `config`
+ *          - `io`
+ *          - `led`
+ *          - `sys`
  */
 void keyer_init( void );
 

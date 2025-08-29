@@ -67,6 +67,9 @@ bool buzzer_get_on( void );
 /**
  * @fn      buzzer_init( void )
  * @brief   Initializes the buzzer driver module.
+ * @note    Requires that the following modules have been initialized:
+ *          - `config`
+ *          - `blah`
  */
 void buzzer_init( void );
 

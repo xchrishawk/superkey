@@ -207,8 +207,8 @@ static void init( void )
     led_init();
     io_init();
     buzzer_init();
-    debug_port_init();
     keyer_init();
+    debug_port_init();
 
     // Flash LEDs to indicate successful startup
     startup_display();

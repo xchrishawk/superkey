@@ -126,6 +126,9 @@ io_type_t io_get_type( io_pin_t pin );
 /**
  * @fn      io_init( void )
  * @brief   Initializes the keyer input / output module.
+ * @note    Requires that the following modules have been initialized:
+ *          - `config`
+ *          - `sys`
  */
 void io_init( void );
 
