@@ -1,10 +1,10 @@
 #
-# @file         executable.cmake
-# @brief        Template CMake file for executable images.
+# @file     executable.cmake
+# @brief    Template CMake file for executable images.
 #
-# @author       Chris Vig (chris@invictus.so)
-# @date         2025-08-16
-# @copyright    © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+# @author   Chris Vig (chris@invictus.so)
+# @date     2025-08-16
+# @cpyrt    © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
 #
 # Skeleton CMake file which can be included in a CMakeLists.txt file to set up an executable.
 # This allows quickly creating new executables with a minimum amount of boilerplate.

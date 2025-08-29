@@ -1,10 +1,10 @@
 /**
- * @file        src/main/core/main.c
- * @brief       Main entry point for the application.
+ * @file    src/main/core/main.c
+ * @brief   Main entry point for the application.
  *
- * @author      Chris Vig (chris@invictus.so)
- * @date        2025-08-16
- * @copyright   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ * @author  Chris Vig (chris@invictus.so)
+ * @date    2025-08-16
+ * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
  */
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */

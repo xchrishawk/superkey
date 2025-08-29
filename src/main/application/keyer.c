@@ -1,10 +1,10 @@
 /**
- * @file        src/main/application/keyer.c
- * @brief       Implementation for the keyer module.
+ * @file    src/main/application/keyer.c
+ * @brief   Implementation for the keyer module.
  *
- * @author      Chris Vig (chris@invictus.so)
- * @date        2025-08-19
- * @copyright   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ * @author  Chris Vig (chris@invictus.so)
+ * @date    2025-08-19
+ * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
  */
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */

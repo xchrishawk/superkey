@@ -1,10 +1,10 @@
 /**
- * @file        src/main/application/strings.c
- * @brief       Implementation for the strings module.
+ * @file    src/main/application/strings.c
+ * @brief   Implementation for the strings module.
  *
- * @author      Chris Vig (chris@invictus.so)
- * @date        2025-08-28
- * @copyright   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ * @author  Chris Vig (chris@invictus.so)
+ * @date    2025-08-28
+ * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
  */
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
