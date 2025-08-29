@@ -120,6 +120,7 @@ tick_t sys_get_tick( void );
 /**
  * @fn      sys_init( void )
  * @brief   Initializes the system module.
+ * @note    `sys` should always be the first module initialized.
  */
 void sys_init( void );
 

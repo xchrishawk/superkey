@@ -31,6 +31,7 @@ bool storage_get_config( config_version_t version, size_t size, void * config );
 /**
  * @fn      storage_init( void )
  * @brief   Initializes the storage module.
+ * @note    Does not currently depend on any other modules being initialized.
  */
 void storage_init( void );
 

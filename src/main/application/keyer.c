@@ -20,7 +20,6 @@
 #include "application/led.h"
 #include "application/wpm.h"
 #include "core/sys.h"
-#include "drivers/gpio.h"
 #include "utility/debug.h"
 #include "utility/types.h"
 #include "utility/utility.h"
