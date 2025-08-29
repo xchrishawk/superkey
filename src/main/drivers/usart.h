@@ -35,6 +35,31 @@ enum
 };
 
 /**
+ * @typedef usart_baud_t
+ * @brief   Enumeration of the supported USART baud settings.
+ * @note    The approximate error percentage for each setting is indicated in the comment. Baud settings with an error
+ *          of more than 0.5% are not recommended.
+ */
+typedef uint8_t usart_baud_t;
+enum
+{
+    USART_BAUD_2400,                        /**< 2400 baud (0.0% error).                */
+    USART_BAUD_4800,                        /**< 4800 baud (-0.1% error).               */
+    USART_BAUD_9600,                        /**< 9600 baud (0.2% error).                */
+    USART_BAUD_14400,                       /**< 14400 baud (-0.1% error).              */
+    USART_BAUD_19200,                       /**< 19200 baud (0.2% error).               */
+    USART_BAUD_28800_NOT_RECOMMENDED,       /**< 28800 baud (0.6% error - N/R).         */
+    USART_BAUD_38400,                       /**< 38400 baud (0.2% error).               */
+    USART_BAUD_57600_NOT_RECOMMENDED,       /**< 57600 baud (-0.8% error - N/R).        */
+    USART_BAUD_76800,                       /**< 76800 baud (0.2% error).               */
+    USART_BAUD_115200_NOT_RECOMMENDED,      /**< 115200 baud (2.1% error - N/R).        */
+    USART_BAUD_230400_NOT_RECOMMENDED,      /**< 230400 baud (-3.5% error - N/R).       */
+    USART_BAUD_250000,                      /**< 250000 baud (0.0% error).              */
+
+    USART_BAUD_COUNT,                       /**< Number of valid USART baud settings.   */
+};
+
+/**
  * @typedef usart_data_bits_t
  * @brief   Enumeration of the supported data bits settings for the USARTs.
  * @note    9-bit words are not supported.
@@ -126,28 +151,17 @@ void usart_deinit( usart_t usart );
 usart_error_t usart_get_errors( usart_t usart );
 
 /**
- * @fn      usart_init( usart_t, bool, bool, usart_data_bits_t, usart_stop_bits_t, usart_parity_t )
+ * @fn      usart_init( usart_t, bool, bool, usart_baud_t, usart_data_bits_t, usart_stop_bits_t, usart_parity_t )
  * @brief   Initializes the specified USART with the specified configuration.
  * @note    Must be called prior to attempting any use of the USART.
  */
 void usart_init( usart_t usart,
                  bool rx_enabled,
                  bool tx_enabled,
+                 usart_baud_t baud,
                  usart_data_bits_t data_bits,
                  usart_stop_bits_t stop_bits,
                  usart_parity_t parity );
-
-/**
- * @fn      usart_max_rx_size( void )
- * @brief   Returns the maximum supported RX buffer size for all USARTs.
- */
-size_t usart_max_rx_size( void );
-
-/**
- * @fn      usart_max_tx_size( void )
- * @brief   Returns the maximum supported TX buffer size for all USARTs.
- */
-size_t usart_max_tx_size( void );
 
 /**
  * @fn      usart_rx( usart_t, byte_t *, size_t )

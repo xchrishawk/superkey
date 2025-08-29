@@ -266,6 +266,7 @@ void debug_port_init( void )
     usart_init( DEBUG_PORT_USART,
                 true,
                 true,
+                _FEATURE_OPT_DEBUG_PORT_BAUD,
                 USART_DATA_BITS_8,
                 USART_STOP_BITS_1,
                 USART_PARITY_DISABLED );
