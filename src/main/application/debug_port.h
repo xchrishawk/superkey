@@ -1,10 +1,10 @@
 /**
- * @file        src/main/application/debug_port.h
- * @brief       Header for the debug port module.
+ * @file    src/main/application/debug_port.h
+ * @brief   Header for the debug port module.
  *
- * @author      Chris Vig (chris@invictus.so)
- * @date        2025-08-20
- * @copyright   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ * @author  Chris Vig (chris@invictus.so)
+ * @date    2025-08-20
+ * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
  */
 
 #if !defined( APPLICATION_DEBUG_PORT_H )

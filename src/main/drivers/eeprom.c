@@ -1,10 +1,10 @@
 /**
- * @file        src/main/drivers/eeprom.c
- * @brief       Implementation for the EEPROM driver module.
+ * @file    src/main/drivers/eeprom.c
+ * @brief   Implementation for the EEPROM driver module.
  *
- * @author      Chris Vig (chris@invictus.so)
- * @date        2025-08-25
- * @copyright   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ * @author  Chris Vig (chris@invictus.so)
+ * @date    2025-08-25
+ * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
  */
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */

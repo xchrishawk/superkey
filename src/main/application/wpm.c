@@ -1,10 +1,10 @@
 /**
- * @file        src/main/application/wpm.c
- * @brief       Implementation for the Morse code utility module.
+ * @file    src/main/application/wpm.c
+ * @brief   Implementation for the Morse code utility module.
  *
- * @author      Chris Vig (chris@invictus.so)
- * @date        2025-08-22
- * @copyright   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ * @author  Chris Vig (chris@invictus.so)
+ * @date    2025-08-22
+ * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
  */
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */

@@ -1,10 +1,10 @@
 /**
- * @file        src/main/drivers/usart.c
- * @brief       Implementation for the USART driver module.
+ * @file    src/main/drivers/usart.c
+ * @brief   Implementation for the USART driver module.
  *
- * @author      Chris Vig (chris@invictus.so)
- * @date        2025-08-17
- * @copyright   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ * @author  Chris Vig (chris@invictus.so)
+ * @date    2025-08-17
+ * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
  */
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */

@@ -1,10 +1,10 @@
 /**
- * @file        src/main/core/version.c
- * @brief       Implementation for the version module.
+ * @file    src/main/core/version.c
+ * @brief   Implementation for the version module.
  *
- * @author      Chris Vig (chris@invictus.so)
- * @date        2025-08-23
- * @copyright   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ * @author  Chris Vig (chris@invictus.so)
+ * @date    2025-08-23
+ * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
  */
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */

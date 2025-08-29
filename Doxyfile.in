@@ -1,10 +1,10 @@
 #
-# @file         Doxyfile
-# @brief        Doxyfile for generating Doxygen documentation.
+# @file     Doxyfile
+# @brief    Doxyfile for generating Doxygen documentation.
 #
-# @author       Chris Vig (chris@invictus.so)
-# @date         2025-08-25
-# @copyright    © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+# @author   Chris Vig (chris@invictus.so)
+# @date     2025-08-25
+# @cpyrt    © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
 #
 # NOTE:
 # CMake processes Doxyfile.in in the root directory, and saves it to build/Doxyfile, which is then used to generate the
@@ -24,3 +24,4 @@ GENERATE_HTML           = YES
 EXCLUDE_SYMBOLS         = _Static_assert ISR
 USE_MDFILE_AS_MAINPAGE  = @CMAKE_SOURCE_DIR@/readme.md
 MARKDOWN_SUPPORT        = YES
+ALIASES                 += cpyrt=\copyright
