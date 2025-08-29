@@ -24,10 +24,16 @@
 typedef uint8_t byte_t;
 
 /**
- * @typedef register_t
- * @brief   Typedef for a pointer to a memory-mapped register.
+ * @typedef register8_t
+ * @brief   Typedef for a pointer to an 8-bit memory-mapped register.
  */
-typedef volatile byte_t * register_t;
+typedef volatile byte_t * register8_t;
+
+/**
+ * @typedef register16_t
+ * @brief   Typedef for a pointer to a 16-bit memory-mapped register.
+ */
+typedef volatile uint16_t * register16_t;
 
 /**
  * @typedef tick_t
@@ -38,10 +44,17 @@ typedef uint32_t tick_t;
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
 /**
- * @def     register_addr( _reg )
- * @brief   Returns the address of the specified register as a `register_t`.
+ * @def     register8_addr( _reg )
+ * @brief   Returns the address of the specified 8-bit register as a `register8_t`.
  */
-#define register_addr( _reg )                                                           \
-    ( ( register_t )( & ( _reg ) ) )
+#define register8_addr( _reg )                                                          \
+    ( ( register8_t )( & ( _reg ) ) )
+
+/**
+ * @def     register16_addr( _reg )
+ * @brief   Returns the address of the specified 16-bit register as a `register16_t`.
+ */
+#define register16_addr( _reg )                                                         \
+    ( ( register16_t )( & ( _reg ) ) )
 
 #endif /* !defined( UTILITY_TYPES_H ) */

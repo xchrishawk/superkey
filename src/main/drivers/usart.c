@@ -29,21 +29,23 @@
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
 
 #define usart_reg( _idx )                                                               \
-    { register_addr( UDR ## _idx ),                                                     \
-      register_addr( UCSR ## _idx ## A ),                                               \
-      register_addr( UCSR ## _idx ## B ),                                               \
-      register_addr( UCSR ## _idx ## C ),                                               \
-      register_addr( UBRR ## _idx ## H ),                                               \
-      register_addr( UBRR ## _idx ## L ) }
+    { register8_addr( UDR ## _idx ),                                                    \
+      register8_addr( UCSR ## _idx ## A ),                                              \
+      register8_addr( UCSR ## _idx ## B ),                                              \
+      register8_addr( UCSR ## _idx ## C ),                                              \
+      register16_addr( UBRR ## _idx ),                                                  \
+      register8_addr( UBRR ## _idx ## H ),                                              \
+      register8_addr( UBRR ## _idx ## L ) }
 
 static struct
 {
-    register_t  udr;                        /**< The UDRn register for this USART.      */
-    register_t  ucsra;                      /**< The UCSRnA register for this USART.    */
-    register_t  ucsrb;                      /**< The UCSRnB register for this USART.    */
-    register_t  ucsrc;                      /**< The UCSRnC register for this USART.    */
-    register_t  ubrrh;                      /**< The UBRRnH register for this USART.    */
-    register_t  ubrrl;                      /**< The UBRRnL register for this USART.    */
+    register8_t     udr;                    /**< The UDRn register for this USART.      */
+    register8_t     ucsra;                  /**< The UCSRnA register for this USART.    */
+    register8_t     ucsrb;                  /**< The UCSRnB register for this USART.    */
+    register8_t     ucsrc;                  /**< The UCSRnC register for this USART.    */
+    register16_t    ubrr;                   /**< The UBRRn register for this USART.     */
+    register8_t     ubrrh;                  /**< The UBRRnH register for this USART.    */
+    register8_t     ubrrl;                  /**< The UBRRnL register for this USART.    */
 }
 const s_reg_tbl[] =
 {
@@ -77,6 +79,8 @@ _Static_assert( array_count( s_reg_tbl ) == USART_COUNT, "Invalid register table
 // Validation macros
 #define validate_usart( _usart )                                                        \
     assert_always( ( _usart ) < USART_COUNT )
+#define validate_baud( _baud )                                                          \
+    assert_always( ( _baud ) < USART_BAUD_COUNT )
 #define validate_data_bits( _data_bits )                                                \
     assert_always( ( _data_bits ) < USART_DATA_BITS_COUNT )
 #define validate_parity( _parity )                                                      \
@@ -95,6 +99,8 @@ _Static_assert( array_count( s_reg_tbl ) == USART_COUNT, "Invalid register table
     ( * ( s_reg_tbl[ ( _usart ) ].ucsrb ) )
 #define UCSRC( _usart )                                                                 \
     ( * ( s_reg_tbl[ ( _usart ) ].ucsrc ) )
+#define UBRR( _usart )                                                                  \
+    ( * ( s_reg_tbl[ ( _usart ) ].ubrr ) )
 #define UBRRH( _usart )                                                                 \
     ( * ( s_reg_tbl[ ( _usart ) ].ubrrh ) )
 #define UBRRL( _usart )                                                                 \
@@ -153,7 +159,7 @@ static volatile size_t s_tx_tail[ USART_COUNT ];
  * @fn      autoconfigure_baud( usart_t )
  * @brief   Automatically configures the baud rate for the specified USART based on the `BAUD` macro.
  */
-static void autoconfigure_baud( usart_t usart );
+static void autoconfigure_baud( usart_t usart ) FUNC_MAY_BE_UNUSED;
 
 /**
  * @fn      isr_rx_complete( usart_t )
@@ -184,6 +190,12 @@ static size_t rx_buf_avail( usart_t usart );
  * @brief   Returns the number of bytes in the RX buffer for the specified USART.
  */
 static size_t rx_buf_count( usart_t usart );
+
+/**
+ * @fn      set_baud( usart_t, usart_baud_t )
+ * @brief   Sets the baud rate for the specified USART.
+ */
+static void set_baud( usart_t usart, usart_baud_t baud );
 
 /**
  * @fn      set_data_bits( usart_t, usart_data_bits_t )
@@ -314,11 +326,13 @@ usart_error_t usart_get_errors( usart_t usart )
 void usart_init( usart_t usart,
                  bool rx_enabled,
                  bool tx_enabled,
+                 usart_baud_t baud,
                  usart_data_bits_t data_bits,
                  usart_stop_bits_t stop_bits,
                  usart_parity_t parity )
 {
     validate_usart( usart );
+    validate_baud( baud );
     validate_data_bits( data_bits );
     validate_stop_bits( stop_bits );
     validate_parity( parity );
@@ -332,7 +346,7 @@ void usart_init( usart_t usart,
     TX_TAIL( usart ) = 0;
 
     // Configure USART
-    autoconfigure_baud( usart );
+    set_baud( usart, baud );
     set_data_bits( usart, data_bits );
     set_stop_bits( usart, stop_bits );
     set_parity( usart, parity );
@@ -345,20 +359,6 @@ void usart_init( usart_t usart,
     set_tx_enabled( usart, tx_enabled );
 
 }   /* usart_init() */
-
-
-size_t usart_max_rx_size( void )
-{
-    return( RX_BUF_SIZE );
-
-}   /* usart_max_rx_size() */
-
-
-size_t usart_max_tx_size( void )
-{
-    return( TX_BUF_SIZE );
-
-}   /* usart_max_tx_size() */
 
 
 size_t usart_rx( usart_t usart, byte_t * data, size_t max_size )
@@ -521,6 +521,70 @@ static size_t rx_buf_count( usart_t usart )
         return( RX_BUF_SIZE - RX_TAIL( usart ) + RX_HEAD( usart ) );
 
 }   /* rx_buf_count() */
+
+
+static void set_baud( usart_t usart, usart_baud_t baud )
+{
+    _Static_assert( F_CPU == 16000000UL, "Baud settings depend on F_CPU of 16 MHz!" );
+
+    // Always enable 2X setting
+    set_bit( UCSRA( usart ), U2X0 );
+
+    // Set UBRR register based on selected baud rate
+    // These are taken from table 19-12 in the ATmega1283P data sheet:
+    // https://ww1.microchip.com/downloads/en/DeviceDoc/ATmega164A_PA-324A_PA-644A_PA-1284_P_Data-Sheet-40002070B.pdf
+    switch( baud )
+    {
+    case USART_BAUD_2400:
+        UBRR( usart ) = 832;
+        break;
+
+    case USART_BAUD_4800:
+        UBRR( usart ) = 416;
+        break;
+
+    case USART_BAUD_9600:
+        UBRR( usart ) = 207;
+        break;
+
+    case USART_BAUD_14400:
+        UBRR( usart ) = 138;
+        break;
+
+    case USART_BAUD_19200:
+        UBRR( usart ) = 103;
+        break;
+
+    case USART_BAUD_28800_NOT_RECOMMENDED:
+        UBRR( usart ) = 68;
+        break;
+
+    case USART_BAUD_38400:
+        UBRR( usart ) = 51;
+        break;
+
+    case USART_BAUD_57600_NOT_RECOMMENDED:
+        UBRR( usart ) = 34;
+        break;
+
+    case USART_BAUD_76800:
+        UBRR( usart ) = 25;
+        break;
+
+    case USART_BAUD_115200_NOT_RECOMMENDED:
+        UBRR( usart ) = 16;
+        break;
+
+    case USART_BAUD_230400_NOT_RECOMMENDED:
+        UBRR( usart ) = 8;
+        break;
+
+    case USART_BAUD_250000:
+        UBRR( usart ) = 7;
+        break;
+    }
+
+}   /* set_baud() */
 
 
 static void set_data_bits( usart_t usart, usart_data_bits_t data_bits )

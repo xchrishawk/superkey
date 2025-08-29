@@ -24,19 +24,19 @@
 
 // Helper macro for the register table below
 #define gpio_reg( _port, _pin, _pcmsk_reg )                                             \
-    { register_addr( DDR ## _port ),                                                    \
-      register_addr( PIN ## _port ),                                                    \
-      register_addr( PORT ## _port ),                                                   \
-      register_addr( PCMSK ## _pcmsk_reg ),                                             \
+    { register8_addr( DDR ## _port ),                                                   \
+      register8_addr( PIN ## _port ),                                                   \
+      register8_addr( PORT ## _port ),                                                  \
+      register8_addr( PCMSK ## _pcmsk_reg ),                                            \
       _pin }
 
 // This array must be in the same order as the gpio_pin_t enumeration
 static struct
 {
-    register_t  ddr_reg;                    /**< DDR register.                          */
-    register_t  in_reg;                     /**< PIN register.                          */
-    register_t  out_reg;                    /**< PORT register.                         */
-    register_t  pcmsk_reg;                  /**< PCMSK register.                        */
+    register8_t ddr_reg;                    /**< DDR register.                          */
+    register8_t in_reg;                     /**< PIN register.                          */
+    register8_t out_reg;                    /**< PORT register.                         */
+    register8_t pcmsk_reg;                  /**< PCMSK register.                        */
     uint8_t     index;                      /**< Pin index in port.                     */
 }
 const s_reg_tbl[] =
