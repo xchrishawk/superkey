@@ -27,6 +27,8 @@
 
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
 
+#if defined( _FEATURE_ENABLE_DEBUG_PORT ) && _FEATURE_ENABLE_DEBUG_PORT
+
 /**
  * @fn      debug_port_init( void )
  * @brief   Initializes the debug port.
@@ -57,5 +59,16 @@ void debug_port_tick( tick_t tick );
  * @brief   Notifies the debug port module that the USART has new data available.
  */
 void debug_port_usart_rx( void );
+
+#else
+
+// Define dummy macros if debug port is disabled
+#define debug_port_init()
+#define debug_port_print( _str )        ( false )
+#define debug_port_printf( _fmt, ... )  ( false )
+#define debug_port_tick( _tick )
+#define debug_port_usart_rx()
+
+#endif /* defined( _FEATURE_ENABLE_DEBUG_PORT ) && _FEATURE_ENABLE_DEBUG_PORT */
 
 #endif /* !defined( APPLICATION_DEBUG_PORT_H ) */
