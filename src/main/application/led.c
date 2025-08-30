@@ -24,7 +24,7 @@
 static gpio_pin_t const s_gpio_tbl[] =
 {
     // Must be in same order as led_t enum
-    GPIO_PIN_D7,                            /* LED_STATUS                               */
+    GPIO_PIN_C0,                            /* LED_STATUS                               */
     GPIO_PIN_D6,                            /* LED_KEY                                  */
 };
 _Static_assert( array_count( s_gpio_tbl ) == LED_COUNT, "Invalid GPIO table!" );

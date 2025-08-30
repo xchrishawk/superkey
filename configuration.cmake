@@ -21,7 +21,7 @@ add_compile_definitions(
 # -- Feature Options --
 
 # Define values
-set(FEATURE_OPT_DEBUG_PORT_BAUD             USART_BAUD_38400
+set(FEATURE_OPT_DEBUG_PORT_BAUD             USART_BAUD_19200
     CACHE STRING                            "Baud rate for debug port. (usart_baud_t)")
 
 # Set compile definitions
@@ -60,11 +60,11 @@ set(CONFIG_DFLT_IO_TYPE_TRS_1_RING          IO_TYPE_INPUT_PADDLE_RIGHT
     CACHE STRING                            "I/O type for the ring of TRS 1. (io_type_t)")
 set(CONFIG_DFLT_IO_POLARITY_TRS_1_RING      IO_POLARITY_ACTIVE_LOW
     CACHE STRING                            "I/O polarity for the ring of TRS 1. (io_polarity_t)")
-set(CONFIG_DFLT_IO_TYPE_TRS_2_TIP           IO_TYPE_NONE
+set(CONFIG_DFLT_IO_TYPE_TRS_2_TIP           IO_TYPE_INPUT_PADDLE_LEFT
     CACHE STRING                            "I/O type for the tip of TRS 2. (io_type_t)")
 set(CONFIG_DFLT_IO_POLARITY_TRS_2_TIP       IO_POLARITY_ACTIVE_LOW
     CACHE STRING                            "I/O polarity for the tip of TRS 2. (io_polarity_t)")
-set(CONFIG_DFLT_IO_TYPE_TRS_2_RING          IO_TYPE_NONE
+set(CONFIG_DFLT_IO_TYPE_TRS_2_RING          IO_TYPE_INPUT_PADDLE_RIGHT
     CACHE STRING                            "I/O type for the ring of TRS 2. (io_type_t)")
 set(CONFIG_DFLT_IO_POLARITY_TRS_2_RING      IO_POLARITY_ACTIVE_LOW
     CACHE STRING                            "I/O polarity for the ring of TRS 2. (io_polarity_t)")
