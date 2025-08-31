@@ -83,8 +83,6 @@ set(CONFIG_DFLT_KEYER_PADDLE_MODE           KEYER_PADDLE_MODE_IAMBIC
     CACHE STRING                            "Keyer paddle mode. (keyer_paddle_mode_t)")
 set(CONFIG_DFLT_KEYER_PADDLE_INVERT         false
     CACHE STRING                            "Set to true to invert the paddles. (true / false)")
-set(CONFIG_DFLT_KEYER_OUTPUT_ACTIVE_LOW     true
-    CACHE STRING                            "Set to true for active low keyer output. (true / false)")
 
 # Set compile definitions
 add_compile_definitions(
