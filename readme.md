@@ -12,15 +12,15 @@ SuperKey is **100% open source**, and always will be - you are free to build, mo
 
 SuperKey provides many useful features for hams:
 
-- Supports **all types of CW keys** — straight key, paddles, bugs, sideswipers, etc.
+- Supports **all types of CW keys** — traight key, paddles, bugs, sideswipers, etc.
 
-- Supports **all common paddle modes**  — iambic, ultimatic, etc.
+- Supports **all common paddle modes** — iambic, ultimatic, etc.
 
-- Supports **all types of radios** - if it has a keyer input, you can connect a SuperKey to it.
+- Supports **all types of radios** — if it has a keyer input, you can connect a SuperKey to it.
 
 - Connects **multiple keys to a single radio** — no need to choose between straight key and paddles!
 
-- Connects **multiple radios to a single key** — if that's something you need to do, SuperKey can do it for you.
+- Connects **multiple radios to a single key** — if that's something you need to do (🤨), SuperKey can do it for you.
 
 - Allows **keyboard text entry and automatic Morse code generation** with autokeyer support.
 

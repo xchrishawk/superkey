@@ -1,15 +1,18 @@
 # SuperKey Python Interfae
 
-This README file will document SuperKey's Python interface (the `superkey` package). The intent of this library is to
+This README file will document SuperKey's Python interface (the `superkey` library). The intent of this library is to
 provide a "reference implementation" for working with SuperKey's serial protocol, as well as to provide a way for users
 to script SuperKey's functionality.
 
 The root `scripts` directory also includes several handy stand-alone utility scripts:
 
-- `example.py` shows a demonstration of using the `superkey` package, as well as demonstrating some of SuperKey's
+- `example.py` shows a demonstration of using the `superkey` library, as well as demonstrating some of SuperKey's
   hardware features.
 - `interactive.py` creates an "interactive" environment for interfacing with SuperKey with a console-like REPL
   experience.
+
+`superkey` has no dependencies other than the built-in Python standard library. A future improvement is to improve the
+packaging for this library, to make it more consumable by other Python projects.
 
 ## Interactive Python Environment
 
