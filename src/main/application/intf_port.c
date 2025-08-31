@@ -132,10 +132,11 @@ void intf_port_tick( tick_t tick )
 
 void intf_port_usart_rx( void )
 {
+    s_rx_tick = sys_get_tick();
+
     while( rx_buf_avail() != 0 &&
            usart_rx( INTF_PORT_USART, s_rx_buf + s_rx_count, 1 ) )
     {
-        s_rx_tick = sys_get_tick();
         s_rx_count++;
         evaluate_rx_buf();
     }
@@ -189,6 +190,13 @@ static void evaluate_rx_buf( void )
             s_rx_count = 0;
             return;
         }
+    }
+    else if( header->crc != 0 )
+    {
+        // Enforce a CRC of zero for zero-sized packets
+        send_empty_packet( INTF_MESSAGE_REPLY_INVALID_CRC );
+        s_rx_count = 0;
+        return;
     }
 
     // CRC check passed - process the packet then reset the buffer
