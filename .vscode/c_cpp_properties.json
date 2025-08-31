@@ -39,7 +39,17 @@
                 "_CONFIG_DFLT_IO_TYPE_TRS_3_RING=IO_TYPE_NONE",
                 "_CONFIG_DFLT_IO_POLARITY_TRS_3_RING=IO_POLARITY_ACTIVE_LOW",
                 "_CONFIG_DFLT_KEYER_PADDLE_MODE=KEYER_PADDLE_MODE_IAMBIC",
-                "_CONFIG_DFLT_KEYER_PADDLE_INVERT=false"
+                "_CONFIG_DFLT_KEYER_PADDLE_INVERT=false",
+                "_PIN_LED_STATUS=GPIO_PIN_D7",
+                "_PIN_LED_KEY=GPIO_PIN_D6",
+                "_PIN_IO_PIN_TRS_0_TIP=GPIO_PIN_A0",
+                "_PIN_IO_PIN_TRS_0_RING=GPIO_PIN_A1",
+                "_PIN_IO_PIN_TRS_1_TIP=GPIO_PIN_A2",
+                "_PIN_IO_PIN_TRS_1_RING=GPIO_PIN_A3",
+                "_PIN_IO_PIN_TRS_2_TIP=GPIO_PIN_A4",
+                "_PIN_IO_PIN_TRS_2_RING=GPIO_PIN_A5",
+                "_PIN_IO_PIN_TRS_3_TIP=GPIO_PIN_A6",
+                "_PIN_IO_PIN_TRS_3_RING=GPIO_PIN_A7"
             ],
             "compilerPath": "/usr/bin/avr-gcc",
             "compilerArgs": [

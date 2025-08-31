@@ -114,3 +114,41 @@ add_compile_definitions(
     _CONFIG_DFLT_KEYER_PADDLE_INVERT=${CONFIG_DFLT_KEYER_PADDLE_INVERT}
     _CONFIG_DFLT_KEYER_OUTPUT_ACTIVE_LOW=${CONFIG_DFLT_KEYER_OUTPUT_ACTIVE_LOW}
 )
+
+# -- Pin Configuration --
+
+# Define values
+set(PIN_IO_PIN_TRS_0_TIP                    GPIO_PIN_A0
+    CACHE STRING                            "GPIO pin for the tip connector of TRS 0. (gpio_pin_t)")
+set(PIN_IO_PIN_TRS_0_RING                   GPIO_PIN_A1
+    CACHE STRING                            "GPIO pin for the ring connector of TRS 0. (gpio_pin_t)")
+set(PIN_IO_PIN_TRS_1_TIP                    GPIO_PIN_A2
+    CACHE STRING                            "GPIO pin for the tip connector of TRS 1. (gpio_pin_t)")
+set(PIN_IO_PIN_TRS_1_RING                   GPIO_PIN_A3
+    CACHE STRING                            "GPIO pin for the ring connector of TRS 1. (gpio_pin_t)")
+set(PIN_IO_PIN_TRS_2_TIP                    GPIO_PIN_A4
+    CACHE STRING                            "GPIO pin for the tip connector of TRS 2. (gpio_pin_t)")
+set(PIN_IO_PIN_TRS_2_RING                   GPIO_PIN_A5
+    CACHE STRING                            "GPIO pin for the ring connector of TRS 2. (gpio_pin_t)")
+set(PIN_IO_PIN_TRS_3_TIP                    GPIO_PIN_A6
+    CACHE STRING                            "GPIO pin for the tip connector of TRS 3. (gpio_pin_t)")
+set(PIN_IO_PIN_TRS_3_RING                   GPIO_PIN_A7
+    CACHE STRING                            "GPIO pin for the ring connector of TRS 3. (gpio_pin_t)")
+set(PIN_LED_STATUS                          GPIO_PIN_D7
+    CACHE STRING                            "GPIO pin for the status LED. (gpio_pin_t)")
+set(PIN_LED_KEY                             GPIO_PIN_D6
+    CACHE STRING                            "GPIO pin for the key LED. (gpio_pin_t)")
+
+# Set compile definitions
+add_compile_definitions(
+    _PIN_IO_PIN_TRS_0_TIP=${PIN_IO_PIN_TRS_0_TIP}
+    _PIN_IO_PIN_TRS_0_RING=${PIN_IO_PIN_TRS_0_RING}
+    _PIN_IO_PIN_TRS_1_TIP=${PIN_IO_PIN_TRS_1_TIP}
+    _PIN_IO_PIN_TRS_1_RING=${PIN_IO_PIN_TRS_1_RING}
+    _PIN_IO_PIN_TRS_2_TIP=${PIN_IO_PIN_TRS_2_TIP}
+    _PIN_IO_PIN_TRS_2_RING=${PIN_IO_PIN_TRS_2_RING}
+    _PIN_IO_PIN_TRS_3_TIP=${PIN_IO_PIN_TRS_3_TIP}
+    _PIN_IO_PIN_TRS_3_RING=${PIN_IO_PIN_TRS_3_RING}
+    _PIN_LED_STATUS=${PIN_LED_STATUS}
+    _PIN_LED_KEY=${PIN_LED_KEY}
+)
