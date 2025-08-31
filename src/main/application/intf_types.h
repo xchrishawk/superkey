@@ -39,17 +39,37 @@ typedef uint16_t intf_message_t;
 enum
 {
     INTF_MESSAGE_REQUEST_AUTOKEY,           /**< Queues a string to be autokeyed.       */
+    INTF_MESSAGE_REQUEST_GET_BUZZER_ENABLED,/**< Get buzzer enablement.                 */
+    INTF_MESSAGE_REQUEST_GET_BUZZER_FREQUENCY,/**< Get buzzer frequency.                */
+    INTF_MESSAGE_REQUEST_GET_INVERT_PADDLES,/**< Gets paddle inversion setting.         */
+    INTF_MESSAGE_REQUEST_GET_IO_POLARITY,   /**< Gets I/O pin polarity.                 */
+    INTF_MESSAGE_REQUEST_GET_IO_STATE,      /**< Gets I/O pin state.                    */
+    INTF_MESSAGE_REQUEST_GET_IO_STATE_FOR_TYPE,/**< Gets I/O type state.                */
+    INTF_MESSAGE_REQUEST_GET_IO_TYPE,       /**< Gets I/O pin type.                     */
+    INTF_MESSAGE_REQUEST_GET_LED_ENABLED,   /**< Gets enablement for LED.               */
+    INTF_MESSAGE_REQUEST_GET_PADDLE_MODE,   /**< Gets the paddle mode.                  */
+    INTF_MESSAGE_REQUEST_GET_WPM,           /**< Get WPM setting.                       */
+    INTF_MESSAGE_REQUEST_GET_WPM_SCALE,     /**< Get element WPM scale.                 */
     INTF_MESSAGE_REQUEST_PANIC,             /**< Immediately stop the keyer.            */
     INTF_MESSAGE_REQUEST_PING,              /**< Check if device is alive.              */
     INTF_MESSAGE_REQUEST_RESTORE_DEFAULT_CONFIG,/**< Restores default configuration.    */
     INTF_MESSAGE_REQUEST_SET_BUZZER_ENABLED,/**< Enable or disable buzzer.              */
     INTF_MESSAGE_REQUEST_SET_BUZZER_FREQUENCY,/**< Set buzzer frequency.                */
+    INTF_MESSAGE_REQUEST_SET_INVERT_PADDLES,/**< Sets paddle inversion setting.         */
+    INTF_MESSAGE_REQUEST_SET_IO_POLARITY,   /**< Sets I/O pin polarity.                 */
+    INTF_MESSAGE_REQUEST_SET_IO_TYPE,       /**< Sets I/O pin type.                     */
+    INTF_MESSAGE_REQUEST_SET_LED_ENABLED,   /**< Sets enablement for LED.               */
+    INTF_MESSAGE_REQUEST_SET_PADDLE_MODE,   /**< Sets the paddle mode.                  */
+    INTF_MESSAGE_REQUEST_SET_WPM,           /**< Set WPM.                               */
+    INTF_MESSAGE_REQUEST_SET_WPM_SCALE,     /**< Set WPM scale.                         */
+    INTF_MESSAGE_REQUEST_VERSION,           /**< Get application version information.   */
 
     INTF_MESSAGE_REPLY_SUCCESS,             /**< Command successful / acknowledged.     */
     INTF_MESSAGE_REPLY_INVALID_MESSAGE,     /**< Request was invalid.                   */
     INTF_MESSAGE_REPLY_INVALID_SIZE,        /**< Size was invalid.                      */
     INTF_MESSAGE_REPLY_INVALID_CRC,         /**< CRC was invalid.                       */
     INTF_MESSAGE_REPLY_INVALID_PAYLOAD,     /**< Payload was invalid.                   */
+    INTF_MESSAGE_REPLY_INVALID_VALUE,       /**< A specified value was invalid.         */
 
     INTF_MESSAGE_COUNT,                     /**< Number of valid message IDs.           */
 };
@@ -65,6 +85,6 @@ typedef struct
     uint16_t        size;                   /**< Total size of message payload.         */
     uint16_t        crc;                    /**< 16-bit CRC of message payload.         */
 
-} intf_header_t;
+} __attribute__((packed)) intf_header_t;
 
 #endif /* !defined( APPLICATION_INTF_TYPES_H ) */
