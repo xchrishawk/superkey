@@ -633,6 +633,7 @@ size_t keyer_autokey_str( char const * str )
 
 }   /* keyer_autokey_str() */
 
+
 bool keyer_get_on( void )
 {
     return( get_keyed() );
