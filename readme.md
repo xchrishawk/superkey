@@ -8,6 +8,8 @@ SuperKey is **100% open source**, and always will be - you are free to build, mo
 
 ![Prototype](doc/prototype.jpg)
 
+![Python Interface](doc/python.jpg)
+
 ## Features
 
 SuperKey provides many useful features for hams:
