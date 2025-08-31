@@ -13,7 +13,8 @@
 
 # ------------------------------------------------------ IMPORTS -------------------------------------------------------
 
-from superkey import Interface, InteractiveInterface
+from superkey.interface import Interface, InteractiveInterface
+from superkey.types import *
 
 # ----------------------------------------------------- PROCEDURES -----------------------------------------------------
 

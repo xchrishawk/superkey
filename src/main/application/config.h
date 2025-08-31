@@ -56,7 +56,7 @@ typedef struct
     /** If set to `true`, the keyer will emit dashes from the left paddle and dots from the right paddle. */
     bool                keyer_paddle_invert;
 
-} config_t;
+} __attribute__((packed)) config_t;
 
 /**
  * @typedef config_version_t

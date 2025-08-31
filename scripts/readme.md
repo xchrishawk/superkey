@@ -35,3 +35,5 @@ function declared on the `Interface` class. No instance is required.
 >>> set_buzzer_frequency(800)
 >>> autokey('cq cq de n0vig n0vig k')
 ```
+
+The `dir()` function may be used to get a list of available functions.
