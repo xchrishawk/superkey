@@ -12,7 +12,7 @@ SuperKey is **100% open source**, and always will be - you are free to build, mo
 
 SuperKey provides many useful features for hams:
 
-- Supports **all types of CW keys** — traight key, paddles, bugs, sideswipers, etc.
+- Supports **all types of CW keys** — straight key, paddles, bugs, sideswipers, etc.
 
 - Supports **all common paddle modes** — iambic, ultimatic, etc.
 
