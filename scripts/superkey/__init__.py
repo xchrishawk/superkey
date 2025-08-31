@@ -7,9 +7,7 @@
 # @cpyrt    © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
 #
 
-# ------------------------------------------------------ EXPORTS -------------------------------------------------------
+# ------------------------------------------------------ IMPORTS -------------------------------------------------------
 
-__all__ = [
-    'superkey_intf',
-    'superkey_types'
-]
+from .interface import *
+from .types import *

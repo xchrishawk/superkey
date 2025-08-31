@@ -257,6 +257,7 @@ static void periodic_50ms( tick_t tick )
 {
     // Periodic processing for modules with 20 Hz tick rates
     buzzer_tick( tick );
+    intf_port_tick( tick );
     io_tick( tick );
     led_tick( tick );
 
@@ -267,7 +268,6 @@ static void periodic_1s( tick_t tick )
 {
     // Periodic processing for modules with 1 Hz tick rates
     config_tick( tick );
-    intf_port_tick( tick );
     debug_port_tick( tick );
 
     // Toggle the status LED. We're still alive!
