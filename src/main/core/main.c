@@ -19,6 +19,8 @@
 #include "application/buzzer.h"
 #include "application/config.h"
 #include "application/debug_port.h"
+#include "application/intf_port.h"
+#include "application/io.h"
 #include "application/keyer.h"
 #include "application/led.h"
 #include "application/storage.h"
@@ -183,6 +185,9 @@ static void handle_usart_rx_complete( usart_t usart )
     // Notify correct module
     switch( usart )
     {
+    case INTF_PORT_USART:
+        intf_port_usart_rx();
+        break;
     case DEBUG_PORT_USART:
         debug_port_usart_rx();
         break;
@@ -208,6 +213,7 @@ static void init( void )
     io_init();
     buzzer_init();
     keyer_init();
+    intf_port_init();
     debug_port_init();
 
     // Flash LEDs to indicate successful startup
@@ -261,6 +267,7 @@ static void periodic_1s( tick_t tick )
 {
     // Periodic processing for modules with 1 Hz tick rates
     config_tick( tick );
+    intf_port_tick( tick );
     debug_port_tick( tick );
 
     // Toggle the status LED. We're still alive!

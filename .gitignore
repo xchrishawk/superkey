@@ -11,5 +11,8 @@
 .vscode/*
 !.vscode/c_cpp_properties.json
 
+# Ignore Python cache
+__pycache__/
+
 # Ignore build directory
 build/

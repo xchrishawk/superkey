@@ -19,7 +19,7 @@
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
 /**
- * @def     assert_debug
+ * @def     assert_debug( _cond )
  * @brief   Checks an assertion in debug builds. Calls `fail()` if the assertion fails.
  */
 #if defined( DEBUG ) && DEBUG == ON
@@ -30,11 +30,29 @@
 #endif
 
 /**
- * @def     assert_always
+ * @def     assert_debug_code( _cond, _code )
+ * @brief   Checks an assertion in debug builds. Calls `fail_code()` with the specified code if the assertion fails.
+ */
+#if defined( DEBUG ) && DEBUG == _ON
+#define assert_debug_code( _cond, _code )                                               \
+    ( ( _cond ) ? ( void )0 : fail_code( _code ) )
+#else
+#define assert_debug_code( _cond, _code )
+#endif
+
+/**
+ * @def     assert_always( _cond )
  * @brief   Checks an assertion in all builds. Calls `fail()` if the assertion fails.
  */
 #define assert_always( _cond )                                                          \
     ( ( _cond ) ? ( void )0 : fail() )
+
+/**
+ * @def     assert_always_code( _cond, _code )
+ * @brief   Checks an assertion in all builds. Calls `fail_code()` with the specified code if the assertion fails.
+ */
+#define assert_always_code( _cond, _code )                                              \
+    ( ( _cond ) ? ( void )0 : fail_code( _code ) )
 
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
 

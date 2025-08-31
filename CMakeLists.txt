@@ -70,21 +70,21 @@ set(CMAKE_CXX_FLAGS_MINSIZEREL      "" CACHE STRING "" FORCE)
 
 # Set preprocessor defines
 add_compile_definitions(
+    # Flags for features
+    _FEATURE_ON=1
+    _FEATURE_OFF=0
     # Device information
     MCU="${DEVICE_MCU}"
     F_CPU=${DEVICE_F_CPU}
     # Build type
     _BUILD_TYPE="${CMAKE_BUILD_TYPE}"
-    $<$<CONFIG:Debug>:_DEBUG=1>
+    $<$<CONFIG:Debug>:_DEBUG=_FEATURE_ON>
     $<$<CONFIG:Release>:NDEBUG>
-    $<$<CONFIG:Release>:_DEBUG=0>
+    $<$<CONFIG:Release>:_DEBUG=_FEATURE_OFF>
     $<$<CONFIG:RelWithDebInfo>:NDEBUG>
-    $<$<CONFIG:RelWithDebuInfo>:_DEBUG=0>
+    $<$<CONFIG:RelWithDebuInfo>:_DEBUG=_FEATURE_OFF>
     $<$<CONFIG:MinSizeRel>:NDEBUG>
-    $<$<CONFIG:MinSizeRel>:_DEBUG=0>
-    # Flags for features
-    _FEATURE_ON=1
-    _FEATURE_OFF=0
+    $<$<CONFIG:MinSizeRel>:_DEBUG=_FEATURE_OFF>
 )
 
 # Set compiler options

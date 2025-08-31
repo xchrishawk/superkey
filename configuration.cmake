@@ -21,11 +21,14 @@ add_compile_definitions(
 # -- Feature Options --
 
 # Define values
+set(FEATURE_OPT_INTF_PORT_BAUD              USART_BAUD_19200
+    CACHE STRING                            "Baud rate for interface port. (usart_baud_t)")
 set(FEATURE_OPT_DEBUG_PORT_BAUD             USART_BAUD_19200
     CACHE STRING                            "Baud rate for debug port. (usart_baud_t)")
 
 # Set compile definitions
 add_compile_definitions(
+    _FEATURE_OPT_INTF_PORT_BAUD=${FEATURE_OPT_INTF_PORT_BAUD}
     _FEATURE_OPT_DEBUG_PORT_BAUD=${FEATURE_OPT_DEBUG_PORT_BAUD}
 )
 

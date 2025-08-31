@@ -59,7 +59,7 @@ _Static_assert( array_count( s_reg_tbl ) == USART_COUNT, "Invalid register table
  * @def     RX_BUF_SIZE
  * @brief   Buffer size for received data.
  */
-#define RX_BUF_SIZE     8
+#define RX_BUF_SIZE     64
 
 /**
  * @def     TX_BUF_SIZE
@@ -144,12 +144,12 @@ _Static_assert( DOR0 == DOR1 &&
 /* --------------------------------------------------- VARIABLES ---------------------------------------------------- */
 
 // Asynchronous receive buffer
-static byte_t s_rx_buf[ USART_COUNT ][ RX_BUF_SIZE ];
+static volatile byte_t s_rx_buf[ USART_COUNT ][ RX_BUF_SIZE ];
 static volatile size_t s_rx_head[ USART_COUNT ];
 static volatile size_t s_rx_tail[ USART_COUNT ];
 
 // Asynchronous transmit buffer
-static byte_t s_tx_buf[ USART_COUNT ][ TX_BUF_SIZE ];
+static volatile byte_t s_tx_buf[ USART_COUNT ][ TX_BUF_SIZE ];
 static volatile size_t s_tx_head[ USART_COUNT ];
 static volatile size_t s_tx_tail[ USART_COUNT ];
 
