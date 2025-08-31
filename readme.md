@@ -6,22 +6,34 @@ SuperKey is a fully featured, open source CW / Morse code keyer for amateur radi
 provide **all keyer functionality** required by the modern ham radio enthusiast, as simply and cheaply as possible.
 SuperKey is **100% open source**, and always will be - you are free to build, modify, and tinker with your own SuperKey.
 
+![Prototype](doc/prototype.jpg)
+
 ## Features
 
 SuperKey provides many useful features for hams:
 
-- Supports **all types of CW keys** — straight key, paddles, bugs, sideswipers, etc.
-- Supports **all common paddle modes**  — iambic, ultimatic, etc.
-- Allows **keyboard text entry and automatic Morse code generation** in Autokey mode.
-- Device is **configured and controlled by computer** connected to the USB port.
+- Supports **all types of CW keys** — traight key, paddles, bugs, sideswipers, etc.
 
-The SuperKey hardware has:
+- Supports **all common paddle modes** — iambic, ultimatic, etc.
 
-- Three fully configurable TRS inputs (6 pins total).
-- One fully configurable TRS output (2 pins total).
-- One USB-B connector for computer data and power.
-- One (optional) "keyer on" buzzer with configurable audio frequency.
-- One (optional) "keyer on" LED.
+- Supports **all types of radios** — if it has a keyer input, you can connect a SuperKey to it.
+
+- Connects **multiple keys to a single radio** — no need to choose between straight key and paddles!
+
+- Connects **multiple radios to a single key** — if that's something you need to do (🤨), SuperKey can do it for you.
+
+- Allows **keyboard text entry and automatic Morse code generation** with autokeyer support.
+
+- Supports speeds from **1 WPM to 100 WPM**, with **exact timing control** of all Morse code elements.
+
+- Keyer output is **millisecond accurate**, verified by oscilloscope.
+
+- Hardware **LED and buzzer output** — practice when you're away from your radio, even silently!
+
+- All functionality is **programmable via a Python interface**, allowing advanced use cases.
+
+SuperKey is under active development as of August 2025. The prototype hardware is continuing to evolve, and new features
+are being added continuously.
 
 ## Documentation
 
@@ -33,6 +45,8 @@ The SuperKey hardware has:
 
 [![Build - AVR ATmega1284P (Debug)](https://github.com/xchrishawk/superkey/actions/workflows/build-atmega1284p-debug.yaml/badge.svg)](https://github.com/xchrishawk/superkey/actions/workflows/build-atmega1284p-debug.yaml)<br/>
 [![Build - AVR ATmega1284P (Release)](https://github.com/xchrishawk/superkey/actions/workflows/build-atmega1284p-release.yaml/badge.svg)](https://github.com/xchrishawk/superkey/actions/workflows/build-atmega1284p-release.yaml)
+
+These workflows may also be used as a reference example of setting up a SuperKey development workspace.
 
 ## Credits
 

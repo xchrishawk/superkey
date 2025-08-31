@@ -14,6 +14,7 @@
 #include "application/intf_port.h"
 #include "application/intf_types.h"
 #include "application/keyer.h"
+#include "core/sys.h"
 #include "drivers/usart.h"
 #include "utility/constants.h"
 #include "utility/crc.h"
@@ -27,10 +28,17 @@
  */
 #define RX_BUF_SIZE     INTF_MESSAGE_MAX_SIZE
 
+/**
+ * @def     RX_BUF_TIMEOUT
+ * @brief   Timeout for stale data in buffer.
+ */
+#define RX_BUF_TIMEOUT  250 * TICKS_PER_MSEC
+
 /* --------------------------------------------------- VARIABLES ---------------------------------------------------- */
 
 static byte_t s_rx_buf[ RX_BUF_SIZE ];      /**< Local receive buffer.                  */
 static size_t s_rx_count = 0;               /**< Number of bytes in receive buffer.     */
+static tick_t s_rx_tick = 0;                /**< Tick of most recent byte.              */
 
 /* ----------------------------------------------------- MACROS ----------------------------------------------------- */
 
@@ -114,8 +122,10 @@ void intf_port_init( void )
 
 void intf_port_tick( tick_t tick )
 {
-    // No-op currently
-    ( void )tick;
+    // Reset the RX buffer if the data has timed out.
+    // This is to prevent stale data from malformed packets from lingering and interfering with future packets.
+    if( sys_elapsed( tick, s_rx_tick ) > RX_BUF_TIMEOUT )
+        s_rx_count = 0;
 
 }   /* intf_port_tick() */
 
@@ -125,6 +135,7 @@ void intf_port_usart_rx( void )
     while( rx_buf_avail() != 0 &&
            usart_rx( INTF_PORT_USART, s_rx_buf + s_rx_count, 1 ) )
     {
+        s_rx_tick = sys_get_tick();
         s_rx_count++;
         evaluate_rx_buf();
     }
@@ -273,6 +284,9 @@ static void process_message_request_ping( intf_header_t const * header, void con
         send_empty_packet( INTF_MESSAGE_REPLY_INVALID_PAYLOAD );
         return;
     }
+
+    // Send a friendly greeting to the user
+    keyer_autokey_str( "73ee" );
 
     // Send reply
     send_empty_packet( INTF_MESSAGE_REPLY_SUCCESS );
