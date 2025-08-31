@@ -25,6 +25,7 @@
 /**
  * @def     OCRA_GPIO_PIN
  * @brief   The GPIO pin associated with the OCRA pin connected to the buzzer.
+ * @note    This is hard-coded (not configurable), since the timer output is locked to a specific pin.
  */
 #define OCRA_GPIO_PIN       GPIO_PIN_D5
 

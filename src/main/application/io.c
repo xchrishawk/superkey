@@ -26,14 +26,14 @@
 
 static gpio_pin_t const s_pin_tbl[] =
 {
-    GPIO_PIN_A0,                            /* IO_PIN_TRS_0_TIP                         */
-    GPIO_PIN_A1,                            /* IO_PIN_TRS_0_RING                        */
-    GPIO_PIN_A2,                            /* IO_PIN_TRS_1_TIP                         */
-    GPIO_PIN_A3,                            /* IO_PIN_TRS_1_RING                        */
-    GPIO_PIN_A4,                            /* IO_PIN_TRS_2_TIP                         */
-    GPIO_PIN_A5,                            /* IO_PIN_TRS_2_RING                        */
-    GPIO_PIN_A6,                            /* IO_PIN_TRS_3_TIP                         */
-    GPIO_PIN_A7,                            /* IO_PIN_TRS_3_RING                        */
+    _PIN_IO_PIN_TRS_0_TIP,
+    _PIN_IO_PIN_TRS_0_RING,
+    _PIN_IO_PIN_TRS_1_TIP,
+    _PIN_IO_PIN_TRS_1_RING,
+    _PIN_IO_PIN_TRS_2_TIP,
+    _PIN_IO_PIN_TRS_2_RING,
+    _PIN_IO_PIN_TRS_3_TIP,
+    _PIN_IO_PIN_TRS_3_RING,
 };
 _Static_assert( array_count( s_pin_tbl ) == IO_PIN_COUNT, "Invalid pin table!" );
 

@@ -33,6 +33,10 @@ enum
 /**
  * @typedef gpio_pin_t
  * @brief   Enumeration of the supported GPIO pins.
+ * @note    Note that the availability of a pin in this enumeration does not necessarily mean that it may be used for
+ *          I/O. Many of the I/O pins are being used for their alternative functions, and attempting to use them as GPIO
+ *          pins will result in undefined behavior. Refer to doc/hardware-guide.md for more details on the usage of each
+ *          pin.
  */
 typedef uint8_t gpio_pin_t;
 enum
