@@ -301,10 +301,11 @@ static void strobe_write_enable( void )
 {
     // The write to EEPE must happen within 4 clock cycles of the write to EEMPE.
     // Clear interrupt flag while writing bits to prevent this from being interrupted.
+    bool intrpt_en = sys_intrpt_enabled();
     sys_cli();
     set_bit( EECR, EEMPE );     // enable writes
     set_bit( EECR, EEPE );      // command write
-    sys_sei();
+    sys_set_intrpt_enabled( intrpt_en );
 
 }   /* strobe_write_enable() */
 
