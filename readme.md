@@ -1,6 +1,6 @@
 # SuperKey
 
-**SuperKey** - the greatest CW keyer the world has ever seen.
+**SuperKey** - the greatest CW keyer the world has ever seen
 
 SuperKey is a fully featured, open source CW / Morse code keyer for amateur radio operators. The goal of SuperKey is to
 provide **all keyer functionality** required by the modern ham radio enthusiast, as simply and cheaply as possible.
@@ -32,12 +32,31 @@ SuperKey provides many useful features for hams:
 
 - Hardware **LED and buzzer output** — practice when you're away from your radio, even silently!
 
-- All functionality is **programmable via a Python interface**, allowing advanced use cases.
+- Supports a **robust serial interface**, allowing tight integration with third-party software.
+
+- All functionality is **programmable via a Python library**, allowing advanced use cases.
+
+
+## Hardware
 
 SuperKey is under active development as of August 2025. The prototype hardware is continuing to evolve, and new features
-are being added continuously.
+are being added continuously. Once a basic design has been finalized, I will upload a bill of materials and CAD files
+for the PCB. The current plan is for SuperKey to be equipped with at least the following hardware:
+
+- [Microchip ATmega1284P](https://www.microchip.com/en-us/product/ATmega1284p) microcontroller
+- [FTDI FT232](https://www.digikey.com/en/resources/datasheets/ftdi/ft232r) USB-to-TTL adapter
+- Four 1/8" TRS sockets, for a total of eight fully configurable I/O pins.
+- USB-Mini connector providing power and a serial connection to the PC.
+- Auxiliary UART for debugging.
+- Two LEDs (unit status and keyer output).
+- One piezo buzzer with configurable audio frequency.
+
+Power is provided via the USB connector. I also plan to add a hardware user interface of some sort, to allow performing
+basic functions without requiring a PC connection. The details for this are TBD.
 
 ## Documentation
+
+⚠️ _Documentation is incomplete and under construction._
 
 - [User's Guide](doc/user-guide.md) - **NEW USERS START HERE!** User-focused instruction manual for the SuperKey.
 - [Developer's Guide](doc/developer-guide.md) - Documentation for developers who want to modify the SuperKey software.
@@ -48,7 +67,7 @@ are being added continuously.
 [![Build - AVR ATmega1284P (Debug)](https://github.com/xchrishawk/superkey/actions/workflows/build-atmega1284p-debug.yaml/badge.svg)](https://github.com/xchrishawk/superkey/actions/workflows/build-atmega1284p-debug.yaml)<br/>
 [![Build - AVR ATmega1284P (Release)](https://github.com/xchrishawk/superkey/actions/workflows/build-atmega1284p-release.yaml/badge.svg)](https://github.com/xchrishawk/superkey/actions/workflows/build-atmega1284p-release.yaml)
 
-These workflows may also be used as a reference example of setting up a SuperKey development workspace.
+The linked GitHub workflows may be used as a reference example of setting up a SuperKey development environment.
 
 ## Credits
 
@@ -61,7 +80,7 @@ SuperKey is licensed under the GPLv3 license. See the [LICENSE](LICENSE) file fo
 ![License: GPLv3](https://img.shields.io/badge/License-GPLv3-blue.svg)
 
 ```
-Copyright (C) 2025 Chris Vig.
+Copyright (C) 2025 Chris Vig (chris@invictus.so).
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
