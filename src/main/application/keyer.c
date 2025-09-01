@@ -65,6 +65,7 @@ enum
 
 static bool s_keyed = false;                /**< Is the keyer hardware currently keyed? */
 static bool s_panicked = false;             /**< Was the keyer panic activated?         */
+static bool s_trainer_mode = false;         /**< Is trainer mode on?                    */
 
 static state_t s_state = STATE_OFF;         /**< Currently active keyer state.          */
 
@@ -655,11 +656,19 @@ keyer_paddle_mode_t keyer_get_paddle_mode( void )
 }   /* keyer_get_paddle_mode() */
 
 
+bool keyer_get_trainer_mode_enabled( void )
+{
+    return( s_trainer_mode );
+
+}   /* keyer_get_trainer_mode_enabled() */
+
+
 void keyer_init( void )
 {
     // Initialize local state
     s_keyed = false;
     s_panicked = false;
+    s_trainer_mode = false;
     s_state = STATE_OFF;
     s_el = WPM_ELEMENT_NONE;
     s_lockout_el = WPM_ELEMENT_NONE;
@@ -707,6 +716,15 @@ void keyer_set_paddle_mode( keyer_paddle_mode_t mode )
     config_set( & config );
 
 }   /* keyer_set_paddle_mode() */
+
+
+void keyer_set_trainer_mode_enabled( bool enabled )
+{
+    s_trainer_mode = enabled;
+
+    update_hardware();
+
+}   /* keyer_set_trainer_mode_enabled() */
 
 
 void keyer_tick( tick_t tick )
@@ -1053,7 +1071,7 @@ static void set_keyed( bool keyed )
 
 static void update_hardware( void )
 {
-    io_set_output_state_type( IO_TYPE_OUTPUT_KEYER, s_keyed ? IO_STATE_ON : IO_STATE_OFF );
+    io_set_output_state_type( IO_TYPE_OUTPUT_KEYER, s_keyed && ! s_trainer_mode ? IO_STATE_ON : IO_STATE_OFF );
     led_set_on( LED_KEY, s_keyed );
     buzzer_set_on( s_keyed );
 

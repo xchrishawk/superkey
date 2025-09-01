@@ -48,6 +48,7 @@ enum
     INTF_MESSAGE_REQUEST_GET_IO_TYPE,       /**< Gets I/O pin type.                     */
     INTF_MESSAGE_REQUEST_GET_LED_ENABLED,   /**< Gets enablement for LED.               */
     INTF_MESSAGE_REQUEST_GET_PADDLE_MODE,   /**< Gets the paddle mode.                  */
+    INTF_MESSAGE_REQUEST_GET_TRAINER_MODE,  /**< Gets enablement for trainer mode.      */
     INTF_MESSAGE_REQUEST_GET_WPM,           /**< Get WPM setting.                       */
     INTF_MESSAGE_REQUEST_GET_WPM_SCALE,     /**< Get element WPM scale.                 */
     INTF_MESSAGE_REQUEST_PANIC,             /**< Immediately stop the keyer.            */
@@ -60,6 +61,7 @@ enum
     INTF_MESSAGE_REQUEST_SET_IO_TYPE,       /**< Sets I/O pin type.                     */
     INTF_MESSAGE_REQUEST_SET_LED_ENABLED,   /**< Sets enablement for LED.               */
     INTF_MESSAGE_REQUEST_SET_PADDLE_MODE,   /**< Sets the paddle mode.                  */
+    INTF_MESSAGE_REQUEST_SET_TRAINER_MODE,  /**< Set enablement for trainer mode.       */
     INTF_MESSAGE_REQUEST_SET_WPM,           /**< Set WPM.                               */
     INTF_MESSAGE_REQUEST_SET_WPM_SCALE,     /**< Set WPM scale.                         */
     INTF_MESSAGE_REQUEST_VERSION,           /**< Get application version information.   */

@@ -87,6 +87,13 @@ bool keyer_get_paddle_invert( void );
 keyer_paddle_mode_t keyer_get_paddle_mode( void );
 
 /**
+ * @fn      keyer_get_trainer_mode_enabled( void )
+ * @brief   Returns `true` if trainer mode is enabled.
+ * @note    In trainer mode, the keyer output to any connected radios will not actually be activated.
+ */
+bool keyer_get_trainer_mode_enabled( void );
+
+/**
  * @fn      keyer_init( void )
  * @brief   Initializes the keyer module.
  * @note    Requires that the following modules have been initialized:
@@ -118,6 +125,13 @@ void keyer_set_paddle_invert( bool invert );
  * @note    This modifies the application configuration.
  */
 void keyer_set_paddle_mode( keyer_paddle_mode_t mode );
+
+/**
+ * @fn      keyer_set_trainer_mode_enabled( bool )
+ * @brief   Enables or disables trainer mode.
+ * @note    In trainer mode, the keyer output to any connected radios will not actually be activated.
+ */
+void keyer_set_trainer_mode_enabled( bool enabled );
 
 /**
  * @fn      keyer_tick( tick_t )

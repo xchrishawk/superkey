@@ -164,6 +164,12 @@ static void process_message_request_get_led_enabled( intf_header_t const * heade
 static void process_message_request_get_paddle_mode( intf_header_t const * header, void const * payload );
 
 /**
+ * @fn      process_message_request_get_trainer_mode( intf_header_t const *, void const * )
+ * @brief   Processes the specified interface message with the `INTF_MESSAGE_REQUEST_GET_TRAINER_MODE` message ID.
+ */
+static void process_message_request_get_trainer_mode( intf_header_t const * header, void const * payload );
+
+/**
  * @fn      process_message_request_get_wpm( intf_header_t const *, void const * )
  * @brief   Processes the specified interface message with the `INTF_MESSAGE_REQUEST_GET_WPM` message ID.
  */
@@ -234,6 +240,12 @@ static void process_message_request_set_led_enabled( intf_header_t const * heade
  * @brief   Processes the specified interface message with the `INTF_MESSAGE_REQUEST_SET_PADDLE_MODE` message ID.
  */
 static void process_message_request_set_paddle_mode( intf_header_t const * header, void const * payload );
+
+/**
+ * @fn      process_message_request_set_trainer_mode( intf_header_t const *, void const * )
+ * @brief   Processes the specified interface message with the `INTF_MESSAGE_REQUEST_SET_TRAINER_MODE` message ID.
+ */
+static void process_message_request_set_trainer_mode( intf_header_t const * header, void const * payload );
 
 /**
  * @fn      process_message_request_set_wpm( intf_header_t const *, void const * )
@@ -410,6 +422,10 @@ static void process_message( intf_header_t const * header, void const * payload 
         process_message_request_get_paddle_mode( header, payload );
         break;
 
+    case INTF_MESSAGE_REQUEST_GET_TRAINER_MODE:
+        process_message_request_get_trainer_mode( header, payload );
+        break;
+
     case INTF_MESSAGE_REQUEST_GET_WPM:
         process_message_request_get_wpm( header, payload );
         break;
@@ -456,6 +472,10 @@ static void process_message( intf_header_t const * header, void const * payload 
 
     case INTF_MESSAGE_REQUEST_SET_PADDLE_MODE:
         process_message_request_set_paddle_mode( header, payload );
+        break;
+
+    case INTF_MESSAGE_REQUEST_SET_TRAINER_MODE:
+        process_message_request_set_trainer_mode( header, payload );
         break;
 
     case INTF_MESSAGE_REQUEST_SET_WPM:
@@ -607,6 +627,17 @@ static void process_message_request_get_led_enabled( intf_header_t const * heade
     send_packet( INTF_MESSAGE_REPLY_SUCCESS, & enabled, sizeof( enabled ) );
 
 }   /* process_message_request_get_paddle_mode() */
+
+
+static void process_message_request_get_trainer_mode( intf_header_t const * header, void const * payload )
+{
+    ( void )payload;
+    VALIDATE_PAYLOAD_SIZE_OR_BAIL( 0 );
+
+    bool enabled = keyer_get_trainer_mode_enabled();
+    send_packet( INTF_MESSAGE_REPLY_SUCCESS, & enabled, sizeof( enabled ) );
+
+}   /* process_message_request_get_trainer_mode() */
 
 
 static void process_message_request_get_wpm( intf_header_t const * header, void const * payload )
@@ -773,6 +804,17 @@ static void process_message_request_set_paddle_mode( intf_header_t const * heade
     send_empty_packet( INTF_MESSAGE_REPLY_SUCCESS );
 
 }   /* process_message_request_set_paddle_mode() */
+
+
+static void process_message_request_set_trainer_mode( intf_header_t const * header, void const * payload )
+{
+    VALIDATE_PAYLOAD_SIZE_OR_BAIL( sizeof( bool ) );
+
+    bool enabled = *( ( bool const * )payload );
+    keyer_set_trainer_mode_enabled( enabled );
+    send_empty_packet( INTF_MESSAGE_REPLY_SUCCESS );
+
+}   /* process_message_request_set_trainer_mode() */
 
 
 static void process_message_request_set_wpm( intf_header_t const * header, void const * payload )
