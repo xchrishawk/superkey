@@ -5,6 +5,9 @@
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-29
  * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ *
+ * This module implements a binary serial port which allows controlling the SuperKey device. Numerous commands are
+ * supported to perform functions like configuring the device, auto-keying characters, etc.
  */
 
 #if !defined( APPLICATION_INTF_PORT_H )
