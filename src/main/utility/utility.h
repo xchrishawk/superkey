@@ -5,6 +5,9 @@
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-16
  * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ *
+ * @details
+ * Header defining miscellaneous utility macros.
  */
 
 #if !defined( UTILITY_UTILITY_H )

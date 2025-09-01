@@ -10,36 +10,17 @@ produced by [Microchip Technology](https://www.microchip.com/). The datasheet fo
 The microcontroller uses a [dual inline package (DIP)](https://en.wikipedia.org/wiki/Dual_in-line_package)
 configuration, since this is the easiest type of integrated circuit for hobbyists to work with.
 
-### Clock
+The microcontroller has the following resources:
 
-The device uses a crystal oscillator with a frequency of 16 MHz as its primary clock inputs. This is connected to the
-`XTAL1` and `XTAL2` pins as shown in the schematic.
-
-![Crystal Schematic](xtal.png "Crystal Schematic")
-
-### Fuses
-
-The microcontroller fuse configuration was calculated using [this site](https://www.engbedded.com/fusecalc/). The fuses
-are set for the following options:
-
-- External Crystal Oscillator
-  - Frequency 8.0+ MHz
-  - Start-up time 16K clocks + 0 ms
-- Enable SPI programming
-- Enable JTAG
-- Enable brown-out detection at 2.7 V
-
-This leads to the following fuse bytes:
-
-- Low: `0xDF`
-- High: `0x99`
-- Extended: `0xFD`
-
-The fuses can be programmed with the following `avrdude` command:
-
-```
-avrdude -c avrispmkii -P usb -p m1284p -U lfuse:w:0xdf:m -U hfuse:w:0x99:m -U efuse:w:0xfd:m
-```
+- 128 kilobytes Flash memory (program data)
+- 4 kilobytes EEPROM memory (non-volatile storage)
+- 16 kilobytes static RAM
+- 32 GPIO lines
+- 4 hardware timers / counters
+- 2 USARTs
+- I2C interface
+- SPI interface
+- 8-channel, 10-bit ADC
 
 ### Pinout
 
@@ -47,7 +28,7 @@ The pinout for the ATmega1284P is shown below:
 
 ![Device Pinout](pinout.png "Device Pinout")
 
-### Pin Assignments
+#### Pin Assignments
 
 The current pin assignments are shown in the table below. Pins which are not listed are currently unassigned.
 
@@ -80,11 +61,33 @@ The current pin assignments are shown in the table below. Pins which are not lis
 | 39  | `PA1`    | Input TRS 0 Ring           |                           |
 | 40  | `PA0`    | Input TRS 0 Tip            |                           |
 
-## Firmware Upload
+### Clock
 
-The executable is uploaded to the MCU using [`avrdude`](https://www.nongnu.org/avrdude/) and an
-[AVRISP mkII programmer](https://a.co/d/59zSwb5).
+The device uses a crystal oscillator with a frequency of 16 MHz as its primary clock inputs. This is connected to the
+`XTAL1` and `XTAL2` pins as shown in the schematic. The capacitors are **22 pF**.
+
+![Crystal Schematic](xtal.png "Crystal Schematic")
+
+### Fuses
+
+The microcontroller fuse configuration was calculated using [this site](https://www.engbedded.com/fusecalc/). The fuses
+are set for the following options:
+
+- External Crystal Oscillator
+  - Frequency 8.0+ MHz
+  - Start-up time 16K clocks + 0 ms
+- Enable SPI programming
+- Enable JTAG
+- Enable brown-out detection at 2.7 V
+
+This leads to the following fuse bytes:
+
+- Low: `0xDF`
+- High: `0x99`
+- Extended: `0xFD`
+
+The fuses can be programmed with the following `avrdude` command:
 
 ```
-avrdude -c avrispmkii -P usb -p m1284p -U flash:w:superkey.ihex -D
+avrdude -c avrispmkii -P usb -p m1284p -U lfuse:w:0xdf:m -U hfuse:w:0x99:m -U efuse:w:0xfd:m
 ```

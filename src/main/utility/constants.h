@@ -5,6 +5,9 @@
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-19
  * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ *
+ * @details
+ * Defines shared constants for the entire application.
  */
 
 #if !defined( UTILITY_CONSTANTS_H )

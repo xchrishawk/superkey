@@ -5,6 +5,11 @@
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-29
  * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ *
+ * @details
+ * This module is responsible for handling the device's I/O pins (i.e., the TRS connectors). Each pin may be
+ * individually configured as an input or an output with a specific type. This allows abstracting the details of the
+ * GPIO interface from client modules (like the keyer).
  */
 
 #if !defined( APPLICATION_IO_H )

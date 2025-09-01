@@ -5,6 +5,9 @@
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-29
  * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ *
+ * @details
+ * This header file defines types and constants used by the interface serial port.
  */
 
 #if !defined( APPLICATION_INTF_TYPES_H )

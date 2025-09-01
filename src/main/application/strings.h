@@ -5,6 +5,10 @@
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-28
  * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ *
+ * @details
+ * This module provides string utilities, as well as conversion functions for converting back and forth between strings
+ * and SuperKey internal types.
  */
 
 #if !defined( APPLICATION_STRINGS_H )

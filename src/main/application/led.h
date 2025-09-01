@@ -5,6 +5,9 @@
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-17
  * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ *
+ * @details
+ * This module is responsible for managing the device's hardware LEDs.
  */
 
 #if !defined( APPLICATION_LED_H )

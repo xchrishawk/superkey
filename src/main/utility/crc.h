@@ -5,6 +5,10 @@
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-26
  * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ *
+ * @details
+ * Defines utility functions for calculating 8 and 16-bit CRCs of arbitrary data buffers. These are used for data
+ * verification by the EEPROM and USART interfaces.
  */
 
 #if !defined( UTILITY_CRC_H )

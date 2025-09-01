@@ -5,6 +5,11 @@
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-17
  * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ *
+ * @details
+ * The system module provides a very simple scheduling and event handling system. A heartbeat "tick" event is produced
+ * at a consistent defined rate, and is used to increment a device tick counter. A mechanism is provided for other
+ * modules to notify the main loop of incoming events. The device sleeps while waiting for an event, to save power.
  */
 
 #if !defined( CORE_SYS_H )

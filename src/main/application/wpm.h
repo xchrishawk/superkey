@@ -5,6 +5,11 @@
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-22
  * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ *
+ * @details
+ * This module is responsible for calculating the duration of each Morse code element, as well as other utilities
+ * related to Morse code and Morse code elements. The duration of each code element is individually scalable, to allow
+ * special use cases (like Farnsworth or Koch timing).
  */
 
 #if !defined( APPLICATION_WPM_H )

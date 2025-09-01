@@ -5,6 +5,9 @@
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-23
  * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ *
+ * @details
+ * This module provides accessors to get the application's version information.
  */
 
 #if !defined( CORE_VERSION_H )

@@ -5,6 +5,9 @@
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-25
  * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ *
+ * @details
+ * This module provides a low-level driver for the device's EEPROM storage.
  */
 
 #if !defined( DRIVERS_EEPROM_H )

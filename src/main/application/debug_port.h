@@ -5,6 +5,11 @@
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-20
  * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ *
+ * @details
+ * This module defines a simple serial debug port which may be used for debugging and testing the device. The debug port
+ * implementation is large, and may be excluded from the application by defining `_FEATURE_ENABLE_DEBUG_PORT` to
+ * `_FEATURE_OFF`.
  */
 
 #if !defined( APPLICATION_DEBUG_PORT_H )

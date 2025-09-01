@@ -5,6 +5,11 @@
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-19
  * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ *
+ * @details
+ * This module is responsible for performing the primary keyer function of the application. It implements a simple state
+ * machine which responds to user inputs and produces the expected keyer output. Several different keyer modes and
+ * options are supported.
  */
 
 #if !defined( APPLICATION_KEYER_H )

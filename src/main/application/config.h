@@ -5,6 +5,10 @@
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-20
  * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ *
+ * @details
+ * This module is responsible for handling the application's configuration. Getters and setters for individual
+ * configuration items are not provided - instead, client modules should implement these, if required.
  */
 
 #if !defined( APPLICATION_CONFIG_H )

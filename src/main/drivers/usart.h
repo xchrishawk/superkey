@@ -5,6 +5,12 @@
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-17
  * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ *
+ * @details
+ * This module provides a low-level driver for the device's USARTs. Synchronous and asynchronous TX and RX are all
+ * supported. A selection of baud rates are available. Small local buffers are provided for each USART. The module
+ * notifies main of received data, and the event should be forwarded on to the consumer so that the data can be
+ * retrieved.
  */
 
 #if !defined( DRIVERS_USART_H )

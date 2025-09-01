@@ -5,6 +5,10 @@
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-26
  * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ *
+ * @details
+ * This module acts as an abstract data storage mechanism for the rest of the application. It hides the details of the
+ * underlying EEPROM interface, and automatically handles versioning, CRCs, etc.
  */
 
 #if !defined( APPLICATION_STORAGE_H )

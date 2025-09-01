@@ -5,6 +5,10 @@
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-16
  * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ *
+ * @details
+ * This module is the main entry point of the application. It is responsible for initializing the device, and
+ * coordinating the main loop.
  */
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */

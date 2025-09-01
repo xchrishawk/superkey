@@ -5,6 +5,11 @@
  * @author  Chris Vig (chris@invictus.so)
  * @date    2025-08-17
  * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
+ *
+ * @details
+ * This module provides a low-level driver for the device's GPIO pins. While all pins are technically "controllable",
+ * it is important to remember that some pins are being used for their alternative functions, and attempting to use them
+ * as GPIO pins will result in incorrect behavior. See doc/hardware-guide.md for more details.
  */
 
 #if !defined( DRIVERS_GPIO_H )
