@@ -1,5 +1,5 @@
 /**
- * @brief   src/main/application/io.c
+ * @file    src/main/application/io.c
  * @brief   Implementation for the keyer input / output module.
  *
  * @author  Chris Vig (chris@invictus.so)

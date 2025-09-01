@@ -6,9 +6,7 @@ SuperKey is a fully featured, open source CW / Morse code keyer for amateur radi
 provide **all keyer functionality** required by the modern ham radio enthusiast, as simply and cheaply as possible.
 SuperKey is **100% open source**, and always will be - you are free to build, modify, and tinker with your own SuperKey.
 
-![Prototype](https://github.com/user-attachments/assets/562650b9-a3b6-4f34-8f54-a3d0bb142bc6)
-
-![Python Interface](https://github.com/user-attachments/assets/ab01b046-c7d4-4f6a-a0b4-01f7c1304780)
+![Prototype](https://github.com/user-attachments/assets/562650b9-a3b6-4f34-8f54-a3d0bb142bc6) ![Python Interface](https://github.com/user-attachments/assets/ab01b046-c7d4-4f6a-a0b4-01f7c1304780)
 
 ## Features
 
@@ -36,7 +34,6 @@ SuperKey provides many useful features for hams:
 
 - All functionality is **programmable via a Python library**, allowing advanced use cases.
 
-
 ## Hardware
 
 SuperKey is under active development as of August 2025. The prototype hardware is continuing to evolve, and new features
@@ -54,16 +51,18 @@ for the PCB. The current plan is for SuperKey to be equipped with at least the f
 Power is provided via the USB connector. I also plan to add a hardware user interface of some sort, to allow performing
 basic functions without requiring a PC connection. The details for this are TBD.
 
+![Hardware Layout](https://github.com/user-attachments/assets/48e51617-bd74-42ce-a9fa-693ca33a8610)
+
 ## Documentation
 
 ⚠️ _Documentation is incomplete and under construction!_
 
 All documentation for SuperKey is located in the project's [GitHub wiki](https://github.com/xchrishawk/superkey/wiki).
 
-- [User's Guide](https://github.com/xchrishawk/superkey/wiki/User's-Guide) - **NEW USERS START HERE!** User-focused
+- [User Guide](https://github.com/xchrishawk/superkey/wiki/User-Guide) - **NEW USERS START HERE!** User-focused
   instruction manual for the SuperKey.
-- [Developer's Guide](https://github.com/xchrishawk/superkey/wiki/Developer's-Guide) - Documentation for developers who
-  want to modify the SuperKey software.
+- [Developer Guide](https://github.com/xchrishawk/superkey/wiki/Developer-Guide) - Documentation for developers who want
+  to modify the SuperKey software.
 - [Hardware Guide](https://github.com/xchrishawk/superkey/wiki/Hardware-Guide) - Description of SuperKey hardware and
   how to build it.
 

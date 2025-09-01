@@ -1,5 +1,5 @@
 /**
- * @brief   src/main/application/io.h
+ * @file    src/main/application/io.h
  * @brief   Header for the keyer input / output module.
  *
  * @author  Chris Vig (chris@invictus.so)
@@ -116,7 +116,7 @@ io_polarity_t io_get_polarity( io_pin_t pin );
 io_state_t io_get_state( io_pin_t pin );
 
 /**
- * @fn      io_get_state( io_type_t )
+ * @fn      io_get_state_type( io_type_t )
  * @brief   Returns the state of the specified I/O type.
  * @note    This will return `IO_STATE_ON` if *any* pin with this input type is currently `IO_STATE_ON`.
  */

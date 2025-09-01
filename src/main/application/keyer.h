@@ -66,7 +66,7 @@ enum
 bool keyer_autokey_char( char c );
 
 /**
- * @fn      keyer_autokey( char const * )
+ * @fn      keyer_autokey_str( char const * )
  * @brief   Adds the specified string to the keyer's autokey buffer.
  * @returns The number of characters that were successfully queued.
  */
