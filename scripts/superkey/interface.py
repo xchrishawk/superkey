@@ -176,6 +176,13 @@ class Interface:
         self.__send_packet(MessageID.REQUEST_GET_PADDLE_MODE)
         return PaddleMode(self.__check_reply('<B')[0])
 
+    def get_trainer_mode(self) -> bool:
+        """
+        Sends the `REQUEST_GET_TRAINER_MODE` command. Returns whether trainer mode is enabled or not.
+        """
+        self.__send_packet(MessageID.REQUEST_GET_TRAINER_MODE)
+        return self.__check_reply('<?')[0]
+
     def get_wpm(self) -> float:
         """
         Sends the `REQUEST_GET_WPM` command. Returns the current WPM setting.
@@ -258,6 +265,13 @@ class Interface:
         Sends the `REQUEST_SET_PADDLE_MODE` command. Sets the current keyer paddle mode.
         """
         self.__send_packet(MessageID.REQUEST_SET_PADDLE_MODE, struct.pack('<B', mode))
+        self.__check_reply_empty()
+
+    def set_trainer_mode(self, enabled: bool):
+        """
+        Sends the `SET_TRAINER_MODE` command. Enables or disables trainer mode.
+        """
+        self.__send_packet(MessageID.REQUEST_SET_TRAINER_MODE, struct.pack('<?', enabled))
         self.__check_reply_empty()
 
     def set_wpm(self, wpm: float):
