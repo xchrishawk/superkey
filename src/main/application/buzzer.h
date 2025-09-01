@@ -36,14 +36,14 @@ typedef uint16_t buzzer_freq_t;
  * @brief   The minimum supported frequency for the buzzer, in Hz.
  * @note    This is empirical, based on audio quality with the current buzzer hardware.
  */
-#define BUZZER_MINIMUM_FREQUENCY    400
+#define BUZZER_MINIMUM_FREQUENCY    100
 
 /**
  * @def     BUZZER_MAXIMUM_FREQUENCY
  * @brief   The maximum supported frequency for the buzzer, in Hz.
  * @note    This is empirical, based on audio quality with the current buzzer hardware.
  */
-#define BUZZER_MAXIMUM_FREQUENCY    2000
+#define BUZZER_MAXIMUM_FREQUENCY    5000
 
 _Static_assert( BUZZER_MINIMUM_FREQUENCY < BUZZER_MAXIMUM_FREQUENCY, "Invalid frequency range!" );
 
