@@ -6,9 +6,9 @@ SuperKey is a fully featured, open source CW / Morse code keyer for amateur radi
 provide **all keyer functionality** required by the modern ham radio enthusiast, as simply and cheaply as possible.
 SuperKey is **100% open source**, and always will be - you are free to build, modify, and tinker with your own SuperKey.
 
-![Prototype](doc/prototype.jpg)
+![Prototype](https://github.com/user-attachments/assets/562650b9-a3b6-4f34-8f54-a3d0bb142bc6)
 
-![Python Interface](doc/python.jpg)
+![Python Interface](https://github.com/user-attachments/assets/ab01b046-c7d4-4f6a-a0b4-01f7c1304780)
 
 ## Features
 
@@ -56,11 +56,16 @@ basic functions without requiring a PC connection. The details for this are TBD.
 
 ## Documentation
 
-⚠️ _Documentation is incomplete and under construction._
+⚠️ _Documentation is incomplete and under construction!_
 
-- [User's Guide](doc/user-guide.md) - **NEW USERS START HERE!** User-focused instruction manual for the SuperKey.
-- [Developer's Guide](doc/developer-guide.md) - Documentation for developers who want to modify the SuperKey software.
-- [Hardware Guide](doc/hardware-guide.md) - Description of SuperKey hardware and how to build it.
+All documentation for SuperKey is located in the project's [GitHub wiki](https://github.com/xchrishawk/superkey/wiki).
+
+- [User's Guide](https://github.com/xchrishawk/superkey/wiki/User's-Guide) - **NEW USERS START HERE!** User-focused
+  instruction manual for the SuperKey.
+- [Developer's Guide](https://github.com/xchrishawk/superkey/wiki/Developer's-Guide) - Documentation for developers who
+  want to modify the SuperKey software.
+- [Hardware Guide](https://github.com/xchrishawk/superkey/wiki/Hardware-Guide) - Description of SuperKey hardware and
+  how to build it.
 
 ## Build Status
 
