@@ -30,6 +30,15 @@ The following command line arguments are supported:
 - `--timeout` - Serial port timeout, in seconds.
 - `--silent` - If specified, input will not be echoed back to the console.
 
+### Notes
+
+- Characters are queued for transmission as they are typed.
+- Newlines may be typed to help separate messages, but are ignored by the keyer.
+- Prosigns may be entered by preceding the characters with a backslash
+  - (e.g., entering `\ar` will result in the prosign `· — · — ·` being keyed).
+- Prosigns with between 2 and 9 characters are supported by immediately following the backslash with a digit.
+  - (e.g., entering `\3sos` will result in the prosign `· · · — — — · · ·` being keyed).
+
 ## Interactive Python Environment
 
 The `interactive.py` script can be used to quickly enter a REPL-like environment for interfacing with your SuperKey. It
