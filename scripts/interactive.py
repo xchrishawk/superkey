@@ -23,10 +23,11 @@ def parse_args():
     Parses the command line arguments.
     """
     import argparse
+    from superkey.constants import SUPERKEY_DEFAULT_PORT, SUPERKEY_DEFAULT_BAUDRATE, SUPERKEY_DEFAULT_TIMEOUT
     parser = argparse.ArgumentParser(description='SuperKey Interactive')
-    parser.add_argument('--port', type=str, default='COM1', help='Serial port to connect to.')
-    parser.add_argument('--baudrate', type=int, default=19200, help='Serial port baud rate.')
-    parser.add_argument('--timeout', type=float, default=1., help='Serial port timeout (s).')
+    parser.add_argument('--port', type=str, default=SUPERKEY_DEFAULT_PORT, help='Serial port to connect to.')
+    parser.add_argument('--baudrate', type=int, default=SUPERKEY_DEFAULT_BAUDRATE, help='Serial port baud rate.')
+    parser.add_argument('--timeout', type=float, default=SUPERKEY_DEFAULT_TIMEOUT, help='Serial port timeout (s).')
     return parser.parse_args()
 
 # --------------------------------------------------- MAIN PROCEDURE ---------------------------------------------------

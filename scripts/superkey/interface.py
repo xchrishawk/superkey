@@ -13,6 +13,7 @@ import serial
 import struct
 from typing import Optional, Tuple
 
+from .constants import *
 from .types import *
 
 # ------------------------------------------------------ EXPORTS -------------------------------------------------------
@@ -81,7 +82,10 @@ class Interface:
     """
     Class encapsulating the serial interface provided by the SuperKey hardware.
     """
-    def __init__(self, port: str = "COM1", baudrate: int = 19200, timeout: Optional[float] = 1.0):
+    def __init__(self,
+                 port: str = SUPERKEY_DEFAULT_PORT,
+                 baudrate: int = SUPERKEY_DEFAULT_BAUDRATE,
+                 timeout: Optional[float] = SUPERKEY_DEFAULT_TIMEOUT):
         """
         Initializes a new instance with the specified serial port configuration.
         """
