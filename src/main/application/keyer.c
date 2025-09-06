@@ -121,16 +121,24 @@ static size_t autokey_avail( void );
 static size_t autokey_count( void );
 
 /**
- * @fn      autokey_dequeue( wpm_element_t * )
+ * @fn      autokey_dequeue_el( wpm_element_t * )
  * @brief   Dequeues an element from the autokey buffer.
  */
-static bool autokey_dequeue( wpm_element_t * el );
+static bool autokey_dequeue_el( wpm_element_t * el );
 
 /**
- * @fn      autokey_enqueue( void )
+ * @fn      autokey_enqueue_char( char, bool )
+ * @brief   Enqueues the required elements for the specified character in the autokey buffer.
+ * @note    If `include_letter_space` is `false`, the trailing letter space will not be added. This is intended to
+ *          support prosigns and other symbol combinations.
+ */
+static bool autokey_enqueue_char( char c, bool include_letter_space );
+
+/**
+ * @fn      autokey_enqueue_el( void )
  * @brief   Enqueues the specified element in the autokey buffer.
  */
-static bool autokey_enqueue( wpm_element_t el );
+static bool autokey_enqueue_el( wpm_element_t el );
 
 /**
  * @fn      do_state_autokey( tick_t, bool )
@@ -203,431 +211,34 @@ static void update_ticks( tick_t tick );
 
 bool keyer_autokey_char( char c )
 {
-    switch( c )
-    {
-    case ' ':
-        // Space
-        return( autokey_enqueue( WPM_ELEMENT_WORD_SPACE ) );
-
-    case 'a':
-    case 'A':
-        // Letter A
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'b':
-    case 'B':
-        // Letter B
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'c':
-    case 'C':
-        // Letter C
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'd':
-    case 'D':
-        // Letter D
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'e':
-    case 'E':
-        // Letter E
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'f':
-    case 'F':
-        // Letter F
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'g':
-    case 'G':
-        // Letter G
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'h':
-    case 'H':
-        // Letter H
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'i':
-    case 'I':
-        // Letter I
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'j':
-    case 'J':
-        // Letter J
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'k':
-    case 'K':
-        // Letter K
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'l':
-    case 'L':
-        // Letter L
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'm':
-    case 'M':
-        // Letter M
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'n':
-    case 'N':
-        // Letter N
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'o':
-    case 'O':
-        // Letter O
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'p':
-    case 'P':
-        // Letter P
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'q':
-    case 'Q':
-        // Letter Q
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'r':
-    case 'R':
-        // Letter R
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 's':
-    case 'S':
-        // Letter S
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 't':
-    case 'T':
-        // Letter T
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'u':
-    case 'U':
-        // Letter U
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'v':
-    case 'V':
-        // Letter V
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'w':
-    case 'W':
-        // Letter W
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'x':
-    case 'X':
-        // Letter X
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'y':
-    case 'Y':
-        // Letter Y
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case 'z':
-    case 'Z':
-        // Letter Z
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case '0':
-        // Number 0
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case '1':
-        // Number 1
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case '2':
-        // Number 2
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case '3':
-        // Number 3
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case '4':
-        // Number 4
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case '5':
-        // Number 5
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case '6':
-        // Number 6
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case '7':
-        // Number 7
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case '8':
-        // Number 8
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case '9':
-        // Number 9
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case '.':
-        // Period
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case ',':
-        // Comma
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case '?':
-        // Question mark
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case '\'':
-        // Single quote
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case '!':
-        // Exclamation mark
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) );
-
-    case '-':
-        // Dash
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) );
-
-    case '/':
-        // Slash
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case '=':
-        // Equals sign
-        return( autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case '+':
-        // Plus sign
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case '"':
-        // Double quote
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    case '_':
-        // Underscore
-        return( autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_DOT ) &&
-                autokey_enqueue( WPM_ELEMENT_DASH ) &&
-                autokey_enqueue( WPM_ELEMENT_LETTER_SPACE ) );
-
-    default:
-        return( false );
-    }
+    return( keyer_autokey_char_ex( c, KEYER_AUTOKEY_FLAG_NONE ) );
 
 }   /* keyer_autokey_char() */
 
 
+bool keyer_autokey_char_ex( char c, keyer_autokey_flag_field_t flags )
+{
+    bool include_letter_space = ! is_bit_set( flags, KEYER_AUTOKEY_FLAG_NO_LETTER_SPACE );
+
+    return( autokey_enqueue_char( c, include_letter_space ) );
+
+}   /* keyer_autokey_char_ex() */
+
+
 size_t keyer_autokey_str( char const * str )
 {
+    return( keyer_autokey_str_ex( str, KEYER_AUTOKEY_FLAG_NONE ) );
+
+}   /* keyer_autokey_str() */
+
+
+size_t keyer_autokey_str_ex( char const * str, keyer_autokey_flag_field_t flags )
+{
+    bool include_letter_space = ! is_bit_set( flags, KEYER_AUTOKEY_FLAG_NO_LETTER_SPACE );
+
     size_t count = 0;
     while( * str )
-        if( keyer_autokey_char( *( str++ ) ) )
+        if( autokey_enqueue_char( *( str++ ), include_letter_space ) )
             count++;
 
     return( count );
@@ -785,7 +396,7 @@ static size_t autokey_count( void )
 }   /* autokey_count() */
 
 
-static bool autokey_dequeue( wpm_element_t * el )
+static bool autokey_dequeue_el( wpm_element_t * el )
 {
     if( autokey_count() == 0 )
         return( false );
@@ -794,10 +405,444 @@ static bool autokey_dequeue( wpm_element_t * el )
     increment_rollover( s_autokey_tail, AUTOKEY_BUF_SZ );
     return( true );
 
-}   /* autokey_dequeue() */
+}   /* autokey_dequeue_el() */
 
 
-static bool autokey_enqueue( wpm_element_t el )
+static bool autokey_enqueue_char( char c, bool include_letter_space )
+{
+    // Helper macro for the trailing letter space
+    #define autokey_enqueue_letter_space()                                              \
+        ( include_letter_space ? autokey_enqueue_el( WPM_ELEMENT_LETTER_SPACE ) : true )
+
+    // Interpret the character literally
+    switch( c )
+    {
+    case ' ':
+        // Space
+        // (only enqueued if the buffer is not empty, otherwise ignored)
+        if( autokey_count() != 0 )
+            return( autokey_enqueue_el( WPM_ELEMENT_WORD_SPACE ) );
+        else
+            return( false );
+
+    case 'a':
+    case 'A':
+        // Letter A
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'b':
+    case 'B':
+        // Letter B
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'c':
+    case 'C':
+        // Letter C
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'd':
+    case 'D':
+        // Letter D
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'e':
+    case 'E':
+        // Letter E
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'f':
+    case 'F':
+        // Letter F
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'g':
+    case 'G':
+        // Letter G
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'h':
+    case 'H':
+        // Letter H
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'i':
+    case 'I':
+        // Letter I
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'j':
+    case 'J':
+        // Letter J
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'k':
+    case 'K':
+        // Letter K
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'l':
+    case 'L':
+        // Letter L
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'm':
+    case 'M':
+        // Letter M
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'n':
+    case 'N':
+        // Letter N
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'o':
+    case 'O':
+        // Letter O
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'p':
+    case 'P':
+        // Letter P
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'q':
+    case 'Q':
+        // Letter Q
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'r':
+    case 'R':
+        // Letter R
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case 's':
+    case 'S':
+        // Letter S
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case 't':
+    case 'T':
+        // Letter T
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'u':
+    case 'U':
+        // Letter U
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'v':
+    case 'V':
+        // Letter V
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'w':
+    case 'W':
+        // Letter W
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'x':
+    case 'X':
+        // Letter X
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'y':
+    case 'Y':
+        // Letter Y
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    case 'z':
+    case 'Z':
+        // Letter Z
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case '0':
+        // Number 0
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    case '1':
+        // Number 1
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    case '2':
+        // Number 2
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    case '3':
+        // Number 3
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    case '4':
+        // Number 4
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    case '5':
+        // Number 5
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case '6':
+        // Number 6
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case '7':
+        // Number 7
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case '8':
+        // Number 8
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case '9':
+        // Number 9
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case '.':
+        // Period
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    case ',':
+        // Comma
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    case '?':
+        // Question mark
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case '\'':
+        // Single quote
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case '!':
+        // Exclamation mark
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) );
+
+    case '-':
+        // Dash
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) );
+
+    case '/':
+        // Slash
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case '=':
+        // Equals sign
+        return( autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    case '+':
+        // Plus sign
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case '"':
+        // Double quote
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_letter_space() );
+
+    case '_':
+        // Underscore
+        return( autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DOT ) &&
+                autokey_enqueue_el( WPM_ELEMENT_DASH ) &&
+                autokey_enqueue_letter_space() );
+
+    default:
+        return( false );
+    }
+
+    // Clean up macro
+    #undef autokey_enqueue_letter_space
+
+}   /* autokey_enqueue_char() */
+
+
+static bool autokey_enqueue_el( wpm_element_t el )
 {
     if( autokey_avail() == 0 )
         return( false );
@@ -806,7 +851,7 @@ static bool autokey_enqueue( wpm_element_t el )
     increment_rollover( s_autokey_head, AUTOKEY_BUF_SZ );
     return( true );
 
-}   /* autokey_enqueue() */
+}   /* autokey_enqueue_el() */
 
 
 static void do_state_autokey( tick_t tick, bool new_state )
@@ -814,7 +859,7 @@ static void do_state_autokey( tick_t tick, bool new_state )
     ( void )new_state;
 
     wpm_element_t el;
-    if( ! s_panicked && is_start_tick_passed( tick ) && autokey_dequeue( & el ) )
+    if( ! s_panicked && is_start_tick_passed( tick ) && autokey_dequeue_el( & el ) )
     {
         // Get info for current state
         bool prev_el_was_letter_space = ( s_el == WPM_ELEMENT_LETTER_SPACE );

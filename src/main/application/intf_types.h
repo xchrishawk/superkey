@@ -42,6 +42,7 @@ typedef uint16_t intf_message_t;
 enum
 {
     INTF_MESSAGE_REQUEST_AUTOKEY,           /**< Queues a string to be autokeyed.       */
+    INTF_MESSAGE_REQUEST_AUTOKEY_EX,        /**< Queues a string to be autokeyed with flags. */
     INTF_MESSAGE_REQUEST_GET_BUZZER_ENABLED,/**< Get buzzer enablement.                 */
     INTF_MESSAGE_REQUEST_GET_BUZZER_FREQUENCY,/**< Get buzzer frequency.                */
     INTF_MESSAGE_REQUEST_GET_INVERT_PADDLES,/**< Gets paddle inversion setting.         */
