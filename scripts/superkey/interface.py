@@ -11,7 +11,7 @@
 
 import serial
 import struct
-from typing import Optional, Tuple
+from typing import Iterable, Optional, Tuple
 
 from .constants import *
 from .types import *
@@ -110,11 +110,22 @@ class Interface:
         if self.serial is not None and self.serial.is_open:
             self.serial.close()
 
-    def autokey(self, string: str):
+    def autokey(self, string: str, flags: Iterable[AutokeyFlag] = []):
         """
-        Sends the `REQUEST_AUTOKEY` command. Queues the specified string to be automatically keyed.
+        Sends the `REQUEST_AUTOKEY_EX` command. Queues the specified string to be automatically keyed.
         """
-        self.__send_packet(MessageID.REQUEST_AUTOKEY, bytes(string, encoding='ascii') + b'\x00')
+        # Get flag byte, setting each bit individually
+        flag_byte = 0
+        for flag in flags:
+            flag_byte = flag_byte | (1 << int(flag))
+
+        # Assemble payload
+        payload = (struct.pack('<B', flag_byte) +           # First byte is flags
+                   bytes(string, encoding='ascii') +        # Then the string
+                   b'\x00')                                 # Null terminator needs to be added manually
+
+        # Send packet and check reply
+        self.__send_packet(MessageID.REQUEST_AUTOKEY_EX, payload)
         self.__check_reply_empty()
 
     def get_buzzer_enabled(self) -> bool:

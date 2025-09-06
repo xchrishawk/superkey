@@ -14,6 +14,7 @@ from enum import IntEnum
 # ------------------------------------------------------ EXPORTS -------------------------------------------------------
 
 __all__ = [
+    'AutokeyFlag',
     'CodeElement',
     'IOPin',
     'IOPolarity',
@@ -24,6 +25,15 @@ __all__ = [
 ]
 
 # ------------------------------------------------------- TYPES --------------------------------------------------------
+
+# Autokey option flags (corresponds to keyer_autokey_flag_t)
+AutokeyFlag = IntEnum(
+    'AutokeyFlag',
+    [
+        'NO_LETTER_SPACE',
+    ],
+    start = 0
+)
 
 # Morse code elements (corresponds to wpm_element_t)
 CodeElement = IntEnum(
@@ -94,6 +104,7 @@ MessageID = IntEnum(
     [
         # Requests
         'REQUEST_AUTOKEY',
+        'REQUEST_AUTOKEY_EX',
         'REQUEST_GET_BUZZER_ENABLED',
         'REQUEST_GET_BUZZER_FREQUENCY',
         'REQUEST_GET_INVERT_PADDLES',

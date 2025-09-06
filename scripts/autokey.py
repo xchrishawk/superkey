@@ -20,6 +20,7 @@ from superkey import *
 _ASCII_BACKSPACE = 0x08
 _ASCII_NEWLINE = 0x0D
 _ASCII_ESCAPE = 0x1B
+_ASCII_BACKSLASH = 0x5C
 
 # ----------------------------------------------------- PROCEDURES -----------------------------------------------------
 
@@ -73,6 +74,11 @@ def _immediate_mode(port: str = SUPERKEY_DEFAULT_PORT,
     # Open interface
     with Interface(port=port, baudrate=baudrate, timeout=timeout) as intf:
 
+        # Tracking variables
+        last_char_was_backslash = False
+        prosign_count = 0
+        prosign_string = ''
+
         # Loop until commanded to quit
         while True:
 
@@ -88,7 +94,29 @@ def _immediate_mode(port: str = SUPERKEY_DEFAULT_PORT,
             # Panic if the user pressed backspace key
             if code == _ASCII_BACKSPACE:
                 intf.panic()
+                prosign_count = 0
+                prosign_string = ''
+                last_char_was_backslash = False
                 continue
+
+            # Start a prosign if the user pressed backslash key
+            if code == _ASCII_BACKSLASH:
+                print(chr(_ASCII_BACKSLASH), end='', flush=True)
+                prosign_count = 2
+                prosign_string = ''
+                last_char_was_backslash = True
+                continue
+
+            # If the last character was a backslash, and the next character is a digit from 2 to 9, then change the
+            # number of characters we're expecting for the prosign
+            if last_char_was_backslash and code >= 0x32 and code <= 0x39:
+                print(chr(code), end='', flush=True)
+                prosign_count = code - 0x30
+                last_char_was_backslash = False
+                continue
+
+            # Unconditionally clear flag
+            last_char_was_backslash = False
 
             # Ignore unknown characters, but allow newlines to print
             should_autokey = _should_autokey(code)
@@ -106,7 +134,22 @@ def _immediate_mode(port: str = SUPERKEY_DEFAULT_PORT,
 
             # Send character to keyer
             if should_autokey:
-                intf.autokey(char)
+
+                # Handle prosigns
+                if prosign_count != 0:
+                    if len(prosign_string) < prosign_count:
+                        prosign_string += char
+                    if len(prosign_string) == prosign_count:
+                        intf.autokey(prosign_string[:-1], [AutokeyFlag.NO_LETTER_SPACE])
+                        intf.autokey(prosign_string[-1])
+                        prosign_count = 0
+                        prosign_string = ''
+
+                # Otherwise, key normally
+                else:
+                    intf.autokey(char)
+
+            # Send character to console
             if echo and should_print:
                 print(char, end='', flush=True)
 

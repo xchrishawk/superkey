@@ -21,8 +21,37 @@
 #include <stdlib.h>
 
 #include "utility/types.h"
+#include "utility/utility.h"
+
+/* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
+
+/**
+ * @def     KEYER_AUTOKEY_FLAG_NONE
+ * @brief   Value for `keyer_autokey_flag_field_t` indicating that no flags are selected.
+ */
+#define KEYER_AUTOKEY_FLAG_NONE ( 0 )
 
 /* ----------------------------------------------------- TYPES ------------------------------------------------------ */
+
+/**
+ * @typedef keyer_autokey_flag_t
+ * @brief   Enumeration of options for the autokey function.
+ */
+typedef uint8_t keyer_autokey_flag_t;
+enum
+{
+    KEYER_AUTOKEY_FLAG_NO_LETTER_SPACE,     /**< No letter space after letters.         */
+
+    KEYER_AUTOKEY_FLAG_COUNT,               /**< Number of valid flags.                 */
+};
+
+/**
+ * @typedef keyer_autokey_flag_field_t
+ * @brief   Bitfield of autokey options indexed by `keyer_autokey_flag_t`.
+ */
+typedef uint8_t keyer_autokey_flag_field_t;
+
+_Static_assert( sizeof_bits( keyer_autokey_flag_field_t ) >= KEYER_AUTOKEY_FLAG_COUNT, "Type not large enough!" );
 
 /**
  * @typedef keyer_paddle_mode_t
@@ -62,15 +91,31 @@ enum
  * @fn      keyer_autokey_char( char )
  * @brief   Adds the specified character to the keyer's autokey buffer.
  * @returns `true` if the character was successfully queued.
+ * @note    This is equivalent to calling `keyer_autokey_char_ex()` with the `flags` set to `KEYER_AUTOKEY_FLAG_NONE`.
  */
 bool keyer_autokey_char( char c );
+
+/**
+ * @fn      keyer_autokey_char_ex( char, keyer_autokey_flag_field_t )
+ * @brief   Adds the specified character to the keyer's autokey buffer with the specified flags.
+ * @returns `true` if the character was successfully queued.
+ */
+bool keyer_autokey_char_ex( char c, keyer_autokey_flag_field_t flags );
 
 /**
  * @fn      keyer_autokey_str( char const * )
  * @brief   Adds the specified string to the keyer's autokey buffer.
  * @returns The number of characters that were successfully queued.
+ * @note    This is equivalent to calling `keyer_autokey_str_ex()` with the `flags` set to `KEYER_AUTOKEY_FLAG_NONE`.
  */
 size_t keyer_autokey_str( char const * str );
+
+/**
+ * @fn      keyer_autokey_str_ex( char const *, keyer_autokey_flag_field_t )
+ * @brief   Adds the specified string to the keyer's autokey buffer with the specified flags.
+ * @returns The number of characters that were successfully queued.
+ */
+size_t keyer_autokey_str_ex( char const * str, keyer_autokey_flag_field_t flags );
 
 /**
  * @fn      keyer_get_on( void )

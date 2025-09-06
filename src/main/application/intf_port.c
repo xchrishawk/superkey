@@ -110,6 +110,12 @@ static void process_message( intf_header_t const * header, void const * payload 
 static void process_message_request_autokey( intf_header_t const * header, void const * payload );
 
 /**
+ * @fn      process_message_request_autokey_ex( intf_header_t const *, void const * )
+ * @brief   Processes the specified interface message with the `INTF_MESSAGE_REQUEST_AUTOKEY_EX` message ID.
+ */
+static void process_message_request_autokey_ex( intf_header_t const * header, void const * payload );
+
+/**
  * @fn      process_message_request_get_buzzer_enabled( intf_header_t const *, void const * )
  * @brief   Processes the specified interface message with the `INTF_MESSAGE_REQUEST_GET_BUZZER_ENABLED` message ID.
  */
@@ -386,6 +392,10 @@ static void process_message( intf_header_t const * header, void const * payload 
         process_message_request_autokey( header, payload );
         break;
 
+    case INTF_MESSAGE_REQUEST_AUTOKEY_EX:
+        process_message_request_autokey_ex( header, payload );
+        break;
+
     case INTF_MESSAGE_REQUEST_GET_BUZZER_ENABLED:
         process_message_request_get_buzzer_enabled( header, payload );
         break;
@@ -501,9 +511,10 @@ static void process_message( intf_header_t const * header, void const * payload 
 
 static void process_message_request_autokey( intf_header_t const * header, void const * payload )
 {
-    // Ensure string is null terminated
     char const * str = ( char const * )payload;
-    if( str[ header->size - 1 ] != NULL_CHAR )
+
+    // Ensure we have enough data and string is null terminated
+    if( header->size == 0 || str[ header->size - 1 ] != NULL_CHAR )
     {
         send_empty_packet( INTF_MESSAGE_REPLY_INVALID_PAYLOAD );
         return;
@@ -516,6 +527,34 @@ static void process_message_request_autokey( intf_header_t const * header, void 
     send_empty_packet( INTF_MESSAGE_REPLY_SUCCESS );
 
 }   /* process_message_request_autokey() */
+
+
+static void process_message_request_autokey_ex( intf_header_t const * header, void const * payload )
+{
+    typedef struct
+    {
+        keyer_autokey_flag_field_t flags;
+        char c;
+    } format_t;
+
+    format_t const * pkt = ( format_t const * )payload;
+    char const * str = ( char const * )( & pkt->c );
+
+    // Ensure we have enough data and string is null terminated
+    if( header->size < sizeof( format_t ) ||
+        str[ header->size - sizeof( keyer_autokey_flag_field_t ) - 1 ] != NULL_CHAR )
+    {
+        send_empty_packet( INTF_MESSAGE_REPLY_INVALID_PAYLOAD );
+        return;
+    }
+
+    // Key string
+    keyer_autokey_str_ex( str, pkt->flags );
+
+    // Send reply
+    send_empty_packet( INTF_MESSAGE_REPLY_SUCCESS );
+
+}   /* process_message_request_autokey_ex() */
 
 
 static void process_message_request_get_buzzer_enabled( intf_header_t const * header, void const * payload )
