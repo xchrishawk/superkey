@@ -32,6 +32,7 @@ def _parse_args():
     parser.add_argument('--port', type=str, default=SUPERKEY_DEFAULT_PORT, help='Serial port to connect to.')
     parser.add_argument('--baudrate', type=int, default=SUPERKEY_DEFAULT_BAUDRATE, help='Serial port baud rate.')
     parser.add_argument('--timeout', type=float, default=SUPERKEY_DEFAULT_TIMEOUT, help='Serial port timeout (s).')
+    parser.add_argument('--immediate', action=argparse.BooleanOptionalAction, help='Use immediate mode?')
     parser.add_argument('--silent', action=argparse.BooleanOptionalAction, help='Disable output to console?')
     return parser.parse_args()
 
@@ -57,6 +58,124 @@ def _should_autokey(code: int) -> bool:
             (code >= 0x61 and code <= 0x7A))      # lower case letter
 
 
+def _buffered_mode(port: str = SUPERKEY_DEFAULT_PORT,
+                   baudrate: int = SUPERKEY_DEFAULT_BAUDRATE,
+                   timeout: float = SUPERKEY_DEFAULT_TIMEOUT):
+    """
+    Runs the autokeyer in buffered mode.
+    """
+    with Interface(port=port, baudrate=baudrate, timeout=timeout) as intf:
+        while True:
+
+            # Get next input from user
+            line = input('> ')
+
+            # Check for special commands
+            if line == ':q' or line == ':quit':
+                # Exit program
+                break
+
+            elif line == ':!' or line == ':panic':
+                # Panic
+                intf.panic()
+                continue
+
+            elif line == ':wpm':
+                # Print WPM status
+                print(f'WPM: {intf.get_wpm():.1f}')
+                continue
+
+            elif line[:5] == ':wpm ':
+                # Set WPM
+                try:
+                    intf.set_wpm(float(line[5:]))
+                except ValueError:
+                    print('Invalid WPM?')
+                continue
+
+            elif line == ':buzzer':
+                # Print buzzer status
+                print(f'Buzzer: {'On' if intf.get_buzzer_enabled() else 'Off'} ({intf.get_buzzer_frequency()} Hz)')
+                continue
+
+            elif line == ':buzzer off':
+                # Turn buzzer off
+                intf.set_buzzer_enabled(False)
+                continue
+
+            elif line == ':buzzer on':
+                # Turn buzzer on
+                intf.set_buzzer_enabled(True)
+                continue
+
+            elif line[:12] == ':buzzer frequency':
+                # Set buzzer frequency
+                try:
+                    intf.set_buzzer_frequency(int(line[12:]))
+                except ValueError:
+                    print('Invalid frequency?')
+                continue
+
+            elif line == ':paddle':
+                # Print paddle mode
+                mode = intf.get_paddle_mode()
+                if mode == PaddleMode.IAMBIC:
+                    print('Paddle mode: IAMBIC')
+                elif mode == PaddleMode.ULTIMATIC:
+                    print('Paddle mode: ULTIMATIC')
+                elif mode == PaddleMode.ULTIMATIC_ALTERNATE:
+                    print('Paddle mode: ULTIMATIC_ALTERNATE')
+                else:
+                    print('Paddle mode: unknown?')
+                continue
+
+            elif line == ':paddle iambic':
+                # Set paddles to iambic mode
+                intf.set_paddle_mode(PaddleMode.IAMBIC)
+                continue
+
+            elif line == ':paddle ultimatic':
+                # Set paddles to ultimatic mode
+                intf.set_paddle_mode(PaddleMode.ULTIMATIC)
+                continue
+
+            elif line == ':paddle ultimatic_alternate':
+                # Set paddles to ultimatic alternate mode
+                intf.set_paddle_mode(PaddleMode.ULTIMATIC_ALTERNATE)
+                continue
+
+            elif line == ':trainer':
+                # Print trainer mode status
+                print(f'Trainer mode: {'On' if intf.get_trainer_mode() else 'Off'}')
+                continue
+
+            elif line == ':trainer on':
+                # Enable trainer mode
+                intf.set_trainer_mode(True)
+                continue
+
+            elif line == ':trainer off':
+                # Disable trainer mode
+                intf.set_trainer_mode(False)
+                continue
+
+            elif line[0] == ':':
+                # Unknown command?
+                print('Unknown command?')
+                continue
+
+            # Split line into tokens and send in either normal or prosign mode
+            tokens = line.split('\\')
+            prosign = False
+            for token in tokens:
+                if prosign and len(token) > 1:
+                    intf.autokey(token[:-1], flags=[AutokeyFlag.NO_LETTER_SPACE])
+                    intf.autokey(token[-1])
+                elif len(token) != 0:
+                    intf.autokey(token)
+                prosign = not prosign
+
+
 def _immediate_mode(port: str = SUPERKEY_DEFAULT_PORT,
                     baudrate: int = SUPERKEY_DEFAULT_BAUDRATE,
                     timeout: float = SUPERKEY_DEFAULT_TIMEOUT,
@@ -75,8 +194,7 @@ def _immediate_mode(port: str = SUPERKEY_DEFAULT_PORT,
     with Interface(port=port, baudrate=baudrate, timeout=timeout) as intf:
 
         # Tracking variables
-        last_char_was_backslash = False
-        prosign_count = 0
+        prosign_active = False
         prosign_string = ''
 
         # Loop until commanded to quit
@@ -94,37 +212,19 @@ def _immediate_mode(port: str = SUPERKEY_DEFAULT_PORT,
             # Panic if the user pressed backspace key
             if code == _ASCII_BACKSPACE:
                 intf.panic()
-                prosign_count = 0
-                prosign_string = ''
-                last_char_was_backslash = False
                 continue
 
             # Start a prosign if the user pressed backslash key
             if code == _ASCII_BACKSLASH:
                 print(chr(_ASCII_BACKSLASH), end='', flush=True)
-                prosign_count = 2
-                prosign_string = ''
-                last_char_was_backslash = True
-                continue
-
-            # If the last character was a backslash, and the next character is a digit from 2 to 9, then change the
-            # number of characters we're expecting for the prosign
-            if last_char_was_backslash and code >= 0x32 and code <= 0x39:
-                print(chr(code), end='', flush=True)
-                prosign_count = code - 0x30
-                last_char_was_backslash = False
-                continue
-
-            # Unconditionally clear flag
-            last_char_was_backslash = False
+                prosign_active = not prosign_active
+                if prosign_active:
+                    prosign_string = ''
+                    continue
 
             # Ignore unknown characters, but allow newlines to print
             should_autokey = _should_autokey(code)
             should_print = should_autokey or code == _ASCII_NEWLINE
-
-            # Bail if there's nothing to do
-            if not should_autokey and not should_print:
-                continue
 
             # Convert character code to string, fixing newlines
             if code != _ASCII_NEWLINE:
@@ -132,22 +232,21 @@ def _immediate_mode(port: str = SUPERKEY_DEFAULT_PORT,
             else:
                 char = '\r\n'
 
-            # Send character to keyer
-            if should_autokey:
-
-                # Handle prosigns
-                if prosign_count != 0:
-                    if len(prosign_string) < prosign_count:
-                        prosign_string += char
-                    if len(prosign_string) == prosign_count:
-                        intf.autokey(prosign_string[:-1], [AutokeyFlag.NO_LETTER_SPACE])
-                        intf.autokey(prosign_string[-1])
-                        prosign_count = 0
-                        prosign_string = ''
-
-                # Otherwise, key normally
+            # Handle prosigns
+            if prosign_active and should_autokey:
+                prosign_string += char
+            elif not prosign_active and len(prosign_string) != 0:
+                assert code == _ASCII_BACKSLASH, 'Logic error!'
+                if len(prosign_string) > 1:
+                    intf.autokey(prosign_string[:-1], [AutokeyFlag.NO_LETTER_SPACE])
+                    intf.autokey(prosign_string[-1])
                 else:
-                    intf.autokey(char)
+                    intf.autokey(prosign_string)
+                prosign_string = ''
+
+            # Send character to keyer
+            elif should_autokey:
+                intf.autokey(char)
 
             # Send character to console
             if echo and should_print:
@@ -159,8 +258,13 @@ if __name__ == '__main__':
 
     # Read arguments
     args = _parse_args()
-    _immediate_mode(port = args.port,
-                    baudrate = args.baudrate,
-                    timeout = args.timeout,
-                    echo = not args.silent,
-                    print_help = not args.silent)
+    if args.immediate:
+        _immediate_mode(port = args.port,
+                        baudrate = args.baudrate,
+                        timeout = args.timeout,
+                        echo = not args.silent,
+                        print_help = not args.silent)
+    else:
+        _buffered_mode(port=args.port,
+                       baudrate=args.baudrate,
+                       timeout=args.timeout)
