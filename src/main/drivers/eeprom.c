@@ -236,19 +236,36 @@ static byte_t get_data( void )
 
 static void ready_isr( void )
 {
-    // If no data is left, disable the interrupt and return
-    if( write_buf_count() == 0 )
+    // Loop until finding a byte that isn't already set correctly
+    while( write_buf_count() != 0 )
     {
-        set_eeprom_interrupt_enabled( false );
-        return;
+        // Read current data from EEPROM
+        set_address( s_write_buf[ s_write_tail ].address );
+        strobe_read_enable();
+        byte_t current_data = get_data();
+
+        // Does the current data match what we want to write?
+        if( current_data != s_write_buf[ s_write_tail ].data )
+        {
+            // Data doesn't match - write it, then stop looping
+            set_write_mode_erase_write();
+            set_address( s_write_buf[ s_write_tail ].address );
+            set_data( s_write_buf[ s_write_tail ].data );
+            strobe_write_enable();
+            increment_rollover( s_write_tail, WRITE_BUF_SZ );
+            break;
+        }
+        else
+        {
+            // Data matches - ignore this byte and continue looping
+            increment_rollover( s_write_tail, WRITE_BUF_SZ );
+            continue;
+        }
     }
 
-    // Write the next byte
-    set_write_mode_erase_write();
-    set_address( s_write_buf[ s_write_tail ].address );
-    set_data( s_write_buf[ s_write_tail ].data );
-    increment_rollover( s_write_tail, WRITE_BUF_SZ );
-    strobe_write_enable();
+    // If all data was consumed, clear the interrupt
+    if( write_buf_count() == 0 )
+        set_eeprom_interrupt_enabled( false );
 
 }   /* ready_isr() */
 
