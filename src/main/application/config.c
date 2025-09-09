@@ -187,6 +187,9 @@ bool config_set( config_t const * config )
 
     s_config = * config;
     s_modified = true;
+
+    flush( sys_get_tick() );
+
     return( true );
 
 }   /* config_set() */

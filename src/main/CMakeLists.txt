@@ -25,6 +25,8 @@ set(EXECUTABLE_SOURCE   application/buzzer.c
                         application/keyer.h
                         application/led.c
                         application/led.h
+                        application/quick_msg.c
+                        application/quick_msg.h
                         application/storage.c
                         application/storage.h
                         application/strings.c

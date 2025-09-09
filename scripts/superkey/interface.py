@@ -24,6 +24,7 @@ __all__ = [
     'InvalidSizeError',
     'InvalidCRCError',
     'InvalidPayloadError',
+    'InvalidValueError',
     'Interface',
     'InteractiveInterface',
 ]
@@ -128,6 +129,13 @@ class Interface:
         self.__send_packet(MessageID.REQUEST_AUTOKEY_EX, payload)
         self.__check_reply_empty()
 
+    def autokey_quick_msg(self, index: int):
+        """
+        Sends the `REQUEST_AUTOKEY_QUICK_MSG` command. Keys a quick message.
+        """
+        self.__send_packet(MessageID.REQUEST_AUTOKEY_QUICK_MSG, struct.pack('<B', index))
+        self.__check_reply_empty()
+
     def get_buzzer_enabled(self) -> bool:
         """
         Sends the `REQUEST_GET_BUZZER_ENABLED` command. Returns whether the buzzer is enabled or not.
@@ -191,6 +199,13 @@ class Interface:
         self.__send_packet(MessageID.REQUEST_GET_PADDLE_MODE)
         return PaddleMode(self.__check_reply('<B')[0])
 
+    def get_quick_msg(self, index: int) -> str:
+        """
+        Sends the `REQUEST_GET_QUICK_MSG` command. Returns the text of the specified quick message.
+        """
+        self.__send_packet(MessageID.REQUEST_GET_QUICK_MSG, struct.pack('<B', index))
+        return str(self.__check_reply(), encoding='ascii')[:-1]
+
     def get_trainer_mode(self) -> bool:
         """
         Sends the `REQUEST_GET_TRAINER_MODE` command. Returns whether trainer mode is enabled or not.
@@ -211,6 +226,13 @@ class Interface:
         """
         self.__send_packet(MessageID.REQUEST_GET_WPM_SCALE, struct.pack('<B', element))
         return self.__check_reply('<f')[0]
+
+    def invalidate_quick_msg(self, idx: int):
+        """
+        Sends the `REQUEST_INVALIDATE_QUICK_MSG` command. Deletes the specified quick message.
+        """
+        self.__send_packet(MessageID.REQUEST_INVALIDATE_QUICK_MSG, struct.pack('<B', idx))
+        self.__check_reply_empty()
 
     def panic(self):
         """
@@ -280,6 +302,19 @@ class Interface:
         Sends the `REQUEST_SET_PADDLE_MODE` command. Sets the current keyer paddle mode.
         """
         self.__send_packet(MessageID.REQUEST_SET_PADDLE_MODE, struct.pack('<B', mode))
+        self.__check_reply_empty()
+
+    def set_quick_msg(self, index: int, string: str):
+        """
+        Sends the `REQUEST_SET_QUICK_MSG` command. Sets the text of a quick message.
+        """
+        # Assemble payload
+        payload = (struct.pack('<B', index) +               # First byte is index
+                   bytes(string, encoding='ascii') +        # Then the string
+                   b'\x00')                                 # Null terminator needs to be added manually
+
+        # Send packet and check reply
+        self.__send_packet(MessageID.REQUEST_SET_QUICK_MSG, payload)
         self.__check_reply_empty()
 
     def set_trainer_mode(self, enabled: bool):
@@ -361,7 +396,7 @@ class Interface:
         # Unpack the header and verify the size and CRC are correct
         return self.__class__.__unpack_header(reply)
 
-    def __check_reply(self, format: str) -> Tuple[any, ...]:
+    def __check_reply(self, format: Optional[str] = None) -> Tuple[any, ...] | bytes:
         """
         Attempts to receive a reply with a payload from the device.
         """
@@ -383,11 +418,20 @@ class Interface:
         if payload is not None and self.__class__.__crc16(payload) != crc:
             raise InterfaceError('Reply: Invalid CRC?')
 
-        # Check payload length
-        if len(payload) != struct.calcsize(format):
-            raise InterfaceError('Reply: Invalid payload?')
+        # Do we have a format string?
+        if format is not None:
 
-        return struct.unpack(format, payload)
+            # Check payload length
+            if len(payload) != struct.calcsize(format):
+                raise InterfaceError('Reply: Invalid payload?')
+
+            # Unpack struct and return
+            return struct.unpack(format, payload)
+
+        else:
+
+            # Return packed bytes
+            return payload
 
     def __check_reply_empty(self):
         """
