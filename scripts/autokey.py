@@ -182,6 +182,11 @@ def _buffered_mode(port: str = SUPERKEY_DEFAULT_PORT,
                         intf.autokey_quick_msg(int(match.group(1)))
                         continue
 
+                elif line_equals(':version'):
+                    # Print version information
+                    print(intf.version())
+                    continue
+
                 elif line_starts_with(':'):
                     # Unknown command?
                     print('Unknown command?')
