@@ -17,6 +17,8 @@
 
 #include <stdint.h>
 
+#include "utility/utility.h"
+
 /* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
 
 /**
@@ -91,6 +93,6 @@ typedef struct
     uint16_t        size;                   /**< Total size of message payload.         */
     uint16_t        crc;                    /**< 16-bit CRC of message payload.         */
 
-} __attribute__((packed)) intf_header_t;
+} PACKED_STRUCT intf_header_t;
 
 #endif /* !defined( APPLICATION_INTF_TYPES_H ) */

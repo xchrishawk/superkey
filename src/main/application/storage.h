@@ -19,18 +19,22 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "application/config.h"
+/* --------------------------------------------------- CONSTANTS ---------------------------------------------------- */
+
+/**
+ * @def     STORAGE_CONFIG_SIZE
+ * @brief   The number of bytes allocated for each configuration data slot.
+ * @note    The config module should fail a static assert if this size is not large enough.
+ */
+#define STORAGE_CONFIG_SIZE     ( 64 )
 
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
 
 /**
- * @fn      storage_get_config( config_t * )
- * @brief   Gets the stored application configuration from storage.
- * @returns `true` if the configuration was successfully retrieved.
- * @note    This will return `false` if the version number does not match the specified value, if the stored size is
- *          invalid, or if the CRC does not match.
+ * @fn      storage_get_config( void * data, size_t size )
+ * @brief   Gets the stored configuration from non-volatile memory.
  */
-bool storage_get_config( config_version_t version, size_t size, void * config );
+bool storage_get_config( void * data, size_t size );
 
 /**
  * @fn      storage_init( void )
@@ -40,9 +44,9 @@ bool storage_get_config( config_version_t version, size_t size, void * config );
 void storage_init( void );
 
 /**
- * @fn      storage_set_config( config_t const * )
- * @brief   Stores the specified configuration.
+ * @fn      storage_set_config( void const *, size_t )
+ * @brief   Sets the stored configuration in non-volatile memory.
  */
-void storage_set_config( config_version_t version, size_t size, void * config );
+void storage_set_config( void const * data, size_t size );
 
 #endif /* !defined( APPLICATION_STORAGE_H ) */
