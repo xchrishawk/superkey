@@ -49,7 +49,7 @@ enum
 };
 
 /**
- * @typedef config_storage_t
+ * @struct  config_storage_t
  * @brief   Struct defining data saved in storage for unit configuration.
  */
 typedef struct

@@ -3,7 +3,7 @@
  * @brief   Header for the quick message module.
  *
  * @author  Chris Vig (chris@invictus.so)
- * @date    2025-09-10
+ * @date    2025-09-08
  * @cpyrt   © 2025 by Chris Vig. Licensed under the GNU General Public License v3 (GPLv3).
  */
 
