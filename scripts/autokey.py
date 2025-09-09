@@ -71,7 +71,7 @@ def _buffered_mode(port: str = SUPERKEY_DEFAULT_PORT,
             line = input('> ')
 
             # Check for special commands
-            if line == ':q' or line == ':quit':
+            if line == ':q' or line == ':quit' or line == ':exit':
                 # Exit program
                 break
 
@@ -108,10 +108,10 @@ def _buffered_mode(port: str = SUPERKEY_DEFAULT_PORT,
                 intf.set_buzzer_enabled(True)
                 continue
 
-            elif line[:12] == ':buzzer frequency':
+            elif line[:18] == ':buzzer frequency ':
                 # Set buzzer frequency
                 try:
-                    intf.set_buzzer_frequency(int(line[12:]))
+                    intf.set_buzzer_frequency(int(line[18:]))
                 except ValueError:
                     print('Invalid frequency?')
                 continue
