@@ -27,6 +27,7 @@
 #include "application/io.h"
 #include "application/keyer.h"
 #include "application/led.h"
+#include "application/quick_msg.h"
 #include "application/storage.h"
 #include "core/sys.h"
 #include "drivers/eeprom.h"
@@ -213,6 +214,7 @@ static void init( void )
     sys_init();
     storage_init();
     config_init();
+    quick_msg_init();
     led_init();
     io_init();
     buzzer_init();
@@ -272,6 +274,7 @@ static void periodic_1s( tick_t tick )
 {
     // Periodic processing for modules with 1 Hz tick rates
     config_tick( tick );
+    quick_msg_tick( tick );
     debug_port_tick( tick );
 
     // Toggle the status LED. We're still alive!

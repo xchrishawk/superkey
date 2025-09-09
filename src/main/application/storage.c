@@ -80,6 +80,18 @@ typedef struct
 } PACKED_STRUCT storage_config_t;
 
 /**
+ * @struct  storage_quick_msg_t
+ * @brief   Struct defining the layout for each quick message slot.
+ * @note    This type is not intended to be instantiated - it is used only to calculate offsets.
+ */
+typedef struct
+{
+    storage_header_t    header;             /**< Header for this slot.                  */
+    byte_t              data[ STORAGE_QUICK_MSG_SIZE ]; /**< Data for this slot.        */
+
+} PACKED_STRUCT storage_quick_msg_t;
+
+/**
  * @struct  storage_t
  * @brief   Struct defining the overall layout for the entire EEPROM storage.
  * @note    This type is not intended to be instantiated - it is used only to calculate offsets.
@@ -88,6 +100,7 @@ typedef struct
 {
     layout_t            layout;             /**< Storage layout version.                */
     storage_config_t    config[ SLOT_COUNT ]; /**< Slots for configuration storage.     */
+    storage_quick_msg_t quick_msgs[ STORAGE_QUICK_MSG_COUNT ][ SLOT_COUNT ]; /**< Slots for quick message storage. */
 
 } PACKED_STRUCT storage_t;
 
@@ -101,6 +114,15 @@ _Static_assert( sizeof( storage_t ) <= EEPROM_COUNT, "Too much storage allocated
  */
 #define ADDR( _field )                                                                  \
     ( ( eeprom_addr_t )( offsetof( storage_t, _field ) ) )
+
+/**
+ * @def     IS_VALID_FLAG_VALID( _valid )
+ * @brief   Returns `true` if the specified `valid` flag is considered valid.
+ * @note    This does an explicit comparison against `true` (i.e., `1`) to prevent an invalid EEPROM value of 0xFF from
+ *          being interpreted as a valid flag.
+ */
+#define IS_VALID_FLAG_VALID( _valid )                                                   \
+    ( ( _valid ) == true )
 
 /**
  * @def     OTHER_SLOT( _slot )
@@ -135,6 +157,24 @@ static void init_layout( void );
 static bool is_config_valid( slot_t slot );
 
 /**
+ * @fn      is_quick_msg_valid( uint8_t, slot_t )
+ * @brief   Returns `true` if the `valid` flag is set to `true` (i.e., `1`) for the specified quick message slot.
+ * @note    This only checks the `valid` flag - it does not validate the size or CRC.
+ */
+static bool is_quick_msg_valid( uint8_t index, slot_t slot );
+
+/**
+ * @fn      quick_msg_addresses( uint8_t, slot_t, eeprom_addr_t *, eeprom_addr_t *, eeprom_addr_t *, eeprom_addr_t * )
+ * @brief   Gets the EEPROM addresses for the quick message with the specified index in the specified slot.
+ */
+static void quick_msg_addresses( uint8_t index,
+                                 slot_t slot,
+                                 eeprom_addr_t * valid_addr,
+                                 eeprom_addr_t * size_addr,
+                                 eeprom_addr_t * crc_addr,
+                                 eeprom_addr_t * data_addr );
+
+/**
  * @fn      read_config( slot_t, void *, size_t )
  * @brief   Reads configuration data from the specified slot.
  * @returns `true` if the data was successfully read into the buffer.
@@ -142,10 +182,23 @@ static bool is_config_valid( slot_t slot );
 static bool read_config( slot_t slot, void * data, size_t size );
 
 /**
+ * @fn      read_quick_msg( uint8_t, slot_t, void *, size_t )
+ * @brief   Reads a quick message from the specified slot.
+ * @returns `true` if the data was successfully read into the buffer.
+ */
+static bool read_quick_msg( uint8_t index, slot_t slot, void * data, size_t size );
+
+/**
  * @fn      write_config( slot_t, void const *, size_t )
  * @brief   Writes the specified configuration data to the specified slot.
  */
 static void write_config( slot_t slot, void const * data, size_t size );
+
+/**
+ * @fn      write_quick_msg( uint8_t, slot_t, void const *, size_t )
+ * @brief   Writes the specified quick message to the specified slot.
+ */
+static void write_quick_msg( uint8_t index, slot_t slot, void const * data, size_t size );
 
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
 
@@ -158,6 +211,17 @@ bool storage_get_config( void * data, size_t size )
     return( false );
 
 }   /* storage_get_config() */
+
+
+bool storage_get_quick_msg( uint8_t index, void * data, size_t size )
+{
+    for( slot_t slot = 0; slot < SLOT_COUNT; slot++ )
+        if( read_quick_msg( index, slot, data, size ) )
+            return( true );
+
+    return( false );
+
+}   /* storage_get_quick_msg() */
 
 
 void storage_init( void )
@@ -185,6 +249,23 @@ void storage_set_config( void const * data, size_t size )
     write_config( SLOT_0, data, size );
 
 }   /* storage_set_config() */
+
+
+void storage_set_quick_msg( uint8_t index, void const * data, size_t size )
+{
+    // Write to first empty slot
+    for( slot_t slot = 0; slot < SLOT_COUNT; slot++ )
+    {
+        if( is_quick_msg_valid( index, slot ) )
+            continue;
+        write_quick_msg( index, slot, data, size );
+        return;
+    }
+
+    // If no empty slot found, overwrite first slot
+    write_quick_msg( index, SLOT_0, data, size );
+
+}   /* storage_set_quick_msg() */
 
 
 static void config_addresses( slot_t slot,
@@ -230,11 +311,46 @@ static bool is_config_valid( slot_t slot )
     bool valid = false;
     eeprom_read( valid_addr, & valid, sizeof( valid ) );
 
-    // We do an explicit comparison against true (i.e., 1) here.
-    // This is to prevent the empty value of 0xFF from being interpreted as a "valid" flag.
-    return( valid == true );
+    return( IS_VALID_FLAG_VALID( valid ) );
 
 }   /* is_config_valid() */
+
+
+static bool is_quick_msg_valid( uint8_t index, slot_t slot )
+{
+    eeprom_addr_t valid_addr = EEPROM_COUNT;
+    quick_msg_addresses( index, slot, & valid_addr, NULL, NULL, NULL );
+
+    bool valid = false;
+    eeprom_read( valid_addr, & valid, sizeof( valid ) );
+
+    return( IS_VALID_FLAG_VALID( valid ) );
+
+}   /* is_quick_msg_valid() */
+
+
+static void quick_msg_addresses( uint8_t index,
+                                 slot_t slot,
+                                 eeprom_addr_t * valid_addr,
+                                 eeprom_addr_t * size_addr,
+                                 eeprom_addr_t * crc_addr,
+                                 eeprom_addr_t * data_addr )
+{
+    // Calculate base address
+    eeprom_addr_t base = ADDR( quick_msgs );
+    base += sizeof( storage_quick_msg_t ) * ( ( index * SLOT_COUNT ) + slot );
+
+    // Assign individual addresses
+    if( valid_addr )
+        * valid_addr = base + offsetof( storage_quick_msg_t, header.valid );
+    if( size_addr )
+        * size_addr = base + offsetof( storage_quick_msg_t, header.size );
+    if( crc_addr )
+        * crc_addr = base + offsetof( storage_quick_msg_t, header.crc );
+    if( data_addr )
+        * data_addr = base + offsetof( storage_quick_msg_t, data );
+
+}   /* quick_msg_addresses() */
 
 
 static bool read_config( slot_t slot, void * data, size_t size )
@@ -270,6 +386,39 @@ static bool read_config( slot_t slot, void * data, size_t size )
 }   /* read_config() */
 
 
+static bool read_quick_msg( uint8_t index, slot_t slot, void * data, size_t size )
+{
+    // Read and check validity flag
+    if( ! is_quick_msg_valid( index, slot ) )
+        return( false );
+
+    // Get other addresses we need
+    eeprom_addr_t size_addr, crc_addr, data_addr;
+    quick_msg_addresses( index, slot, NULL, & size_addr, & crc_addr, & data_addr );
+
+    // Read and check stored size
+    size_t stored_size = 0;
+    eeprom_read( size_addr, & stored_size, sizeof( stored_size ) );
+    if( stored_size > size )
+        return( false );
+
+    // Read data into buffer
+    eeprom_read( data_addr, data, size );
+
+    // Calculate CRC for data we read out
+    crc16_t crc = crc_calc_crc16( data, size );
+
+    // Read and check stored CRC
+    crc16_t stored_crc = 0;
+    eeprom_read( crc_addr, & stored_crc, sizeof( stored_crc ) );
+    if( stored_crc != crc )
+        return( false );
+
+    return( true );
+
+}   /* read_quick_msg() */
+
+
 static void write_config( slot_t slot, void const * data, size_t size )
 {
     // Get EEPROM addresses
@@ -294,3 +443,29 @@ static void write_config( slot_t slot, void const * data, size_t size )
     eeprom_write( other_valid_addr, & valid, sizeof( valid ) );
 
 }   /* write_config() */
+
+
+static void write_quick_msg( uint8_t index, slot_t slot, void const * data, size_t size )
+{
+    // Get EEPROM addresses
+    eeprom_addr_t valid_addr, size_addr, crc_addr, data_addr, other_valid_addr;
+    quick_msg_addresses( index, slot, & valid_addr, & size_addr, & crc_addr, & data_addr );
+    quick_msg_addresses( index, OTHER_SLOT( slot ), & other_valid_addr, NULL, NULL, NULL );
+
+    // Get metadata
+    bool valid = true;
+    crc16_t crc = crc_calc_crc16( data, size );
+
+    // Write data buffer
+    eeprom_write( data_addr, data, size );
+
+    // Write metadata, setting the validity flag last
+    eeprom_write( size_addr, & size, sizeof( size ) );
+    eeprom_write( crc_addr, & crc, sizeof( crc ) );
+    eeprom_write( valid_addr, & valid, sizeof( valid ) );
+
+    // Finally, clear the validity byte for the opposite-side quick message
+    valid = false;
+    eeprom_write( other_valid_addr, & valid, sizeof( valid ) );
+
+}   /* write_quick_msg() */

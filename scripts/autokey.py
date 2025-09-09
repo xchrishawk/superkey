@@ -11,6 +11,7 @@
 
 import argparse
 from msvcrt import getch
+import re
 
 from superkey import *
 
@@ -66,114 +67,150 @@ def _buffered_mode(port: str = SUPERKEY_DEFAULT_PORT,
     """
     with Interface(port=port, baudrate=baudrate, timeout=timeout) as intf:
         while True:
+            try:
 
-            # Get next input from user
-            line = input('> ')
+                # Get next input from user
+                line = input('> ')
 
-            # Check for special commands
-            if line == ':q' or line == ':quit' or line == ':exit':
-                # Exit program
-                break
+                # Helper functions
+                def line_equals(x: str) -> bool:
+                    return line.casefold() == x.casefold()
+                def line_starts_with(x: str) -> bool:
+                    return line.casefold().startswith(x.casefold())
 
-            elif line == ':!' or line == ':panic':
-                # Panic
-                intf.panic()
-                continue
+                # Check for special commands
+                if line_equals(':q') or line_equals(':quit') or line_equals(':exit'):
+                    # Exit program
+                    break
 
-            elif line == ':wpm':
-                # Print WPM status
-                print(f'WPM: {intf.get_wpm():.1f}')
-                continue
+                elif line_equals(':!') or line_equals(':panic'):
+                    # Panic
+                    intf.panic()
+                    continue
 
-            elif line[:5] == ':wpm ':
-                # Set WPM
-                try:
-                    intf.set_wpm(float(line[5:]))
-                except ValueError:
-                    print('Invalid WPM?')
-                continue
+                elif line_equals(':wpm'):
+                    # Print WPM status
+                    print(f'WPM: {intf.get_wpm():.1f}')
+                    continue
 
-            elif line == ':buzzer':
-                # Print buzzer status
-                print(f'Buzzer: {'On' if intf.get_buzzer_enabled() else 'Off'} ({intf.get_buzzer_frequency()} Hz)')
-                continue
+                elif line_starts_with(':wpm '):
+                    # Set WPM
+                    try:
+                        intf.set_wpm(float(line[5:]))
+                    except ValueError:
+                        print('Invalid WPM?')
+                    continue
 
-            elif line == ':buzzer off':
-                # Turn buzzer off
-                intf.set_buzzer_enabled(False)
-                continue
+                elif line_equals(':buzzer'):
+                    # Print buzzer status
+                    print(f'Buzzer: {'On' if intf.get_buzzer_enabled() else 'Off'} ({intf.get_buzzer_frequency()} Hz)')
+                    continue
 
-            elif line == ':buzzer on':
-                # Turn buzzer on
-                intf.set_buzzer_enabled(True)
-                continue
+                elif line_equals(':buzzer off'):
+                    # Turn buzzer off
+                    intf.set_buzzer_enabled(False)
+                    continue
 
-            elif line[:18] == ':buzzer frequency ':
-                # Set buzzer frequency
-                try:
-                    intf.set_buzzer_frequency(int(line[18:]))
-                except ValueError:
-                    print('Invalid frequency?')
-                continue
+                elif line_equals(':buzzer on'):
+                    # Turn buzzer on
+                    intf.set_buzzer_enabled(True)
+                    continue
 
-            elif line == ':paddle':
-                # Print paddle mode
-                mode = intf.get_paddle_mode()
-                if mode == PaddleMode.IAMBIC:
-                    print('Paddle mode: IAMBIC')
-                elif mode == PaddleMode.ULTIMATIC:
-                    print('Paddle mode: ULTIMATIC')
-                elif mode == PaddleMode.ULTIMATIC_ALTERNATE:
-                    print('Paddle mode: ULTIMATIC_ALTERNATE')
-                else:
-                    print('Paddle mode: unknown?')
-                continue
+                elif line_starts_with(':buzzer frequency '):
+                    # Set buzzer frequency
+                    try:
+                        intf.set_buzzer_frequency(int(line[18:]))
+                    except ValueError:
+                        print('Invalid frequency?')
+                    continue
 
-            elif line == ':paddle iambic':
-                # Set paddles to iambic mode
-                intf.set_paddle_mode(PaddleMode.IAMBIC)
-                continue
+                elif line_equals(':paddle'):
+                    # Print paddle mode
+                    mode = intf.get_paddle_mode()
+                    if mode == PaddleMode.IAMBIC:
+                        print('Paddle mode: Iambic')
+                    elif mode == PaddleMode.ULTIMATIC:
+                        print('Paddle mode: Ultimatic')
+                    elif mode == PaddleMode.ULTIMATIC_ALTERNATE:
+                        print('Paddle mode: Ultimatic Alternate')
+                    else:
+                        print('Paddle mode: unknown?')
+                    continue
 
-            elif line == ':paddle ultimatic':
-                # Set paddles to ultimatic mode
-                intf.set_paddle_mode(PaddleMode.ULTIMATIC)
-                continue
+                elif line_equals(':paddle iambic'):
+                    # Set paddles to iambic mode
+                    intf.set_paddle_mode(PaddleMode.IAMBIC)
+                    continue
 
-            elif line == ':paddle ultimatic_alternate':
-                # Set paddles to ultimatic alternate mode
-                intf.set_paddle_mode(PaddleMode.ULTIMATIC_ALTERNATE)
-                continue
+                elif line_equals(':paddle ultimatic'):
+                    # Set paddles to ultimatic mode
+                    intf.set_paddle_mode(PaddleMode.ULTIMATIC)
+                    continue
 
-            elif line == ':trainer':
-                # Print trainer mode status
-                print(f'Trainer mode: {'On' if intf.get_trainer_mode() else 'Off'}')
-                continue
+                elif line_equals(':paddle ultimatic_alternate'):
+                    # Set paddles to ultimatic alternate mode
+                    intf.set_paddle_mode(PaddleMode.ULTIMATIC_ALTERNATE)
+                    continue
 
-            elif line == ':trainer on':
-                # Enable trainer mode
-                intf.set_trainer_mode(True)
-                continue
+                elif line_equals(':trainer'):
+                    # Print trainer mode status
+                    print(f'Trainer mode: {'On' if intf.get_trainer_mode() else 'Off'}')
+                    continue
 
-            elif line == ':trainer off':
-                # Disable trainer mode
-                intf.set_trainer_mode(False)
-                continue
+                elif line_equals(':trainer on'):
+                    # Enable trainer mode
+                    intf.set_trainer_mode(True)
+                    continue
 
-            elif line[0] == ':':
-                # Unknown command?
-                print('Unknown command?')
-                continue
+                elif line_equals(':trainer off'):
+                    # Disable trainer mode
+                    intf.set_trainer_mode(False)
+                    continue
 
-            # Split line into tokens and send in either normal or prosign mode
-            tokens = line.split('\\')
-            prosign = False
-            for token in tokens:
-                if prosign and len(token) > 1:
-                    intf.autokey(token[:-1], flags=[AutokeyFlag.NO_LETTER_SPACE])
-                    intf.autokey(token[-1])
-                elif len(token) != 0:
-                    intf.autokey(token)
-                prosign = not prosign
+                elif line_starts_with(':qm'):
+                    # Handle this with regex for easier processing
+                    if match := re.match(r'^:qm get (\d+)$', line, re.IGNORECASE):
+                        print(intf.get_quick_msg(int(match.group(1))))
+                        continue
+                    elif match := re.match(r'^:qm set (\d+) (.+)$', line, re.IGNORECASE):
+                        intf.set_quick_msg(int(match.group(1)), match.group(2))
+                        continue
+                    elif match := re.match(r'^:qm del (\d+)$', line, re.IGNORECASE):
+                        intf.invalidate_quick_msg(int(match.group(1)))
+                        continue
+                    elif match := re.match(r'^:qm (\d+)$', line, re.IGNORECASE):
+                        intf.autokey_quick_msg(int(match.group(1)))
+                        continue
+
+                elif line_starts_with(':'):
+                    # Unknown command?
+                    print('Unknown command?')
+                    continue
+
+                # Split line into tokens and send in either normal or prosign mode
+                tokens = line.split('\\')
+                prosign = False
+                for token in tokens:
+                    if prosign and len(token) > 1:
+                        intf.autokey(token[:-1], flags=[AutokeyFlag.NO_LETTER_SPACE])
+                        intf.autokey(token[-1])
+                    elif len(token) != 0:
+                        intf.autokey(token)
+                    prosign = not prosign
+
+            # Ultra-graceful error handling
+            except InvalidMessageError:
+                print('SuperKey responds: invalid message!')
+            except InvalidSizeError:
+                print('SuperKey responds: invalid size!')
+            except InvalidCRCError:
+                print('SuperKey responds: invalid CRC!')
+            except InvalidPayloadError:
+                print('SuperKey responds: invalid payload!')
+            except InvalidValueError:
+                print('SuperKey responds: invalid value!')
+            except InterfaceError:
+                print('SuperKey responds: unknown error!')
 
 
 def _immediate_mode(port: str = SUPERKEY_DEFAULT_PORT,

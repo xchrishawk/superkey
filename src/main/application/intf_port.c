@@ -18,6 +18,7 @@
 #include "application/intf_types.h"
 #include "application/keyer.h"
 #include "application/led.h"
+#include "application/quick_msg.h"
 #include "application/wpm.h"
 #include "core/sys.h"
 #include "core/version.h"
@@ -116,6 +117,12 @@ static void process_message_request_autokey( intf_header_t const * header, void 
 static void process_message_request_autokey_ex( intf_header_t const * header, void const * payload );
 
 /**
+ * @fn      process_message_request_autokey_quick_msg( intf_header_t const *, void const * )
+ * @brief   Processes the specified interface message with the `INTF_MESSAGE_REQUEST_AUTOKEY_QUICK_MSG` message ID.
+ */
+static void process_message_request_autokey_quick_msg( intf_header_t const * header, void const * payload );
+
+/**
  * @fn      process_message_request_get_buzzer_enabled( intf_header_t const *, void const * )
  * @brief   Processes the specified interface message with the `INTF_MESSAGE_REQUEST_GET_BUZZER_ENABLED` message ID.
  */
@@ -170,6 +177,12 @@ static void process_message_request_get_led_enabled( intf_header_t const * heade
 static void process_message_request_get_paddle_mode( intf_header_t const * header, void const * payload );
 
 /**
+ * @fn      process_message_request_get_quick_msg( intf_header_t const *, void const * )
+ * @brief   Processes the specified interface message with the `INTF_MESSAGE_REQUEST_GET_QUICK_MSG` message ID.
+ */
+static void process_message_request_get_quick_msg( intf_header_t const * header, void const * payload );
+
+/**
  * @fn      process_message_request_get_trainer_mode( intf_header_t const *, void const * )
  * @brief   Processes the specified interface message with the `INTF_MESSAGE_REQUEST_GET_TRAINER_MODE` message ID.
  */
@@ -186,6 +199,12 @@ static void process_message_request_get_wpm( intf_header_t const * header, void 
  * @brief   Processes the specified interface message with the `INTF_MESSAGE_REQUEST_GET_WPM_SCALE` message ID.
  */
 static void process_message_request_get_wpm_scale( intf_header_t const * header, void const * payload );
+
+/**
+ * @fn      process_message_request_invalidate_quick_msg( intf_header_t const *, void const * )
+ * @brief   Processes the specified interface message with the `INTF_MESSAGE_REQUEST_INVALIDATE_QUICK_MSG` message ID.
+ */
+static void process_message_request_invalidate_quick_msg( intf_header_t const * header, void const * payload );
 
 /**
  * @fn      process_message_request_panic( intf_header_t const *, void const * )
@@ -248,6 +267,12 @@ static void process_message_request_set_led_enabled( intf_header_t const * heade
 static void process_message_request_set_paddle_mode( intf_header_t const * header, void const * payload );
 
 /**
+ * @fn      process_message_request_set_quick_msg( intf_header_t const *, void const * )
+ * @brief   Processes the specified interface message with the `INTF_MESSAGE_REQUEST_SET_QUICK_MSG` message ID.
+ */
+static void process_message_request_set_quick_msg( intf_header_t const * header, void const * payload );
+
+/**
  * @fn      process_message_request_set_trainer_mode( intf_header_t const *, void const * )
  * @brief   Processes the specified interface message with the `INTF_MESSAGE_REQUEST_SET_TRAINER_MODE` message ID.
  */
@@ -281,7 +306,7 @@ static void send_empty_packet( intf_message_t message );
  * @fn      send_packet( intf_message_t message, void *, size_t )
  * @brief   Sends a packet with the specified message ID and payload.
  */
-static void send_packet( intf_message_t message, void * payload, size_t size );
+static void send_packet( intf_message_t message, void const * payload, size_t size );
 
 /* --------------------------------------------------- PROCEDURES --------------------------------------------------- */
 
@@ -396,6 +421,10 @@ static void process_message( intf_header_t const * header, void const * payload 
         process_message_request_autokey_ex( header, payload );
         break;
 
+    case INTF_MESSAGE_REQUEST_AUTOKEY_QUICK_MSG:
+        process_message_request_autokey_quick_msg( header, payload );
+        break;
+
     case INTF_MESSAGE_REQUEST_GET_BUZZER_ENABLED:
         process_message_request_get_buzzer_enabled( header, payload );
         break;
@@ -432,6 +461,10 @@ static void process_message( intf_header_t const * header, void const * payload 
         process_message_request_get_paddle_mode( header, payload );
         break;
 
+    case INTF_MESSAGE_REQUEST_GET_QUICK_MSG:
+        process_message_request_get_quick_msg( header, payload );
+        break;
+
     case INTF_MESSAGE_REQUEST_GET_TRAINER_MODE:
         process_message_request_get_trainer_mode( header, payload );
         break;
@@ -442,6 +475,10 @@ static void process_message( intf_header_t const * header, void const * payload 
 
     case INTF_MESSAGE_REQUEST_GET_WPM_SCALE:
         process_message_request_get_wpm_scale( header, payload );
+        break;
+
+    case INTF_MESSAGE_REQUEST_INVALIDATE_QUICK_MSG:
+        process_message_request_invalidate_quick_msg( header, payload );
         break;
 
     case INTF_MESSAGE_REQUEST_PANIC:
@@ -482,6 +519,10 @@ static void process_message( intf_header_t const * header, void const * payload 
 
     case INTF_MESSAGE_REQUEST_SET_PADDLE_MODE:
         process_message_request_set_paddle_mode( header, payload );
+        break;
+
+    case INTF_MESSAGE_REQUEST_SET_QUICK_MSG:
+        process_message_request_set_quick_msg( header, payload );
         break;
 
     case INTF_MESSAGE_REQUEST_SET_TRAINER_MODE:
@@ -557,6 +598,23 @@ static void process_message_request_autokey_ex( intf_header_t const * header, vo
 }   /* process_message_request_autokey_ex() */
 
 
+static void process_message_request_autokey_quick_msg( intf_header_t const * header, void const * payload )
+{
+    VALIDATE_PAYLOAD_SIZE_OR_BAIL( sizeof( quick_msg_idx_t ) );
+
+    quick_msg_idx_t idx = *( ( quick_msg_idx_t const * )payload );
+    if( idx >= QUICK_MSG_IDX_COUNT || ! quick_msg_is_valid( idx ) )
+    {
+        send_empty_packet( INTF_MESSAGE_REPLY_INVALID_VALUE );
+        return;
+    }
+
+    quick_msg_key( idx );
+    send_empty_packet( INTF_MESSAGE_REPLY_SUCCESS );
+
+}   /* process_message_request_autokey_quick_msg() */
+
+
 static void process_message_request_get_buzzer_enabled( intf_header_t const * header, void const * payload )
 {
     ( void )payload;
@@ -588,17 +646,6 @@ static void process_message_request_get_invert_paddles( intf_header_t const * he
     send_packet( INTF_MESSAGE_REPLY_SUCCESS, & inverted, sizeof( inverted ) );
 
 }   /* process_message_request_get_invert_paddles() */
-
-
-static void process_message_request_get_paddle_mode( intf_header_t const * header, void const * payload )
-{
-    ( void )payload;
-    VALIDATE_PAYLOAD_SIZE_OR_BAIL( 0 );
-
-    keyer_paddle_mode_t mode = keyer_get_paddle_mode();
-    send_packet( INTF_MESSAGE_REPLY_SUCCESS, & mode, sizeof( mode ) );
-
-}   /* process_message_request_get_paddle_mode() */
 
 
 static void process_message_request_get_io_polarity( intf_header_t const * header, void const * payload )
@@ -668,6 +715,34 @@ static void process_message_request_get_led_enabled( intf_header_t const * heade
 }   /* process_message_request_get_paddle_mode() */
 
 
+static void process_message_request_get_paddle_mode( intf_header_t const * header, void const * payload )
+{
+    ( void )payload;
+    VALIDATE_PAYLOAD_SIZE_OR_BAIL( 0 );
+
+    keyer_paddle_mode_t mode = keyer_get_paddle_mode();
+    send_packet( INTF_MESSAGE_REPLY_SUCCESS, & mode, sizeof( mode ) );
+
+}   /* process_message_request_get_paddle_mode() */
+
+
+static void process_message_request_get_quick_msg( intf_header_t const * header, void const * payload )
+{
+    VALIDATE_PAYLOAD_SIZE_OR_BAIL( sizeof( quick_msg_idx_t ) );
+
+    quick_msg_idx_t idx = *( ( quick_msg_idx_t const * )payload );
+    if( idx >= QUICK_MSG_IDX_COUNT )
+    {
+        send_empty_packet( INTF_MESSAGE_REPLY_INVALID_VALUE );
+        return;
+    }
+
+    char const * str = quick_msg_get( idx );
+    send_packet( INTF_MESSAGE_REPLY_SUCCESS, str, strlen( str ) + 1 );
+
+}   /* process_message_request_get_quick_msg() */
+
+
 static void process_message_request_get_trainer_mode( intf_header_t const * header, void const * payload )
 {
     ( void )payload;
@@ -701,6 +776,23 @@ static void process_message_request_get_wpm_scale( intf_header_t const * header,
     send_packet( INTF_MESSAGE_REPLY_SUCCESS, & scale, sizeof( wpm_element_scale_t ) );
 
 }   /* process_message_request_get_wpm_scale() */
+
+
+static void process_message_request_invalidate_quick_msg( intf_header_t const * header, void const * payload )
+{
+    VALIDATE_PAYLOAD_SIZE_OR_BAIL( sizeof( quick_msg_idx_t ) );
+
+    quick_msg_idx_t idx = *( ( quick_msg_idx_t const * )payload );
+    if( idx >= QUICK_MSG_IDX_COUNT )
+    {
+        send_empty_packet( INTF_MESSAGE_REPLY_INVALID_VALUE );
+        return;
+    }
+
+    quick_msg_invalidate( idx );
+    send_empty_packet( INTF_MESSAGE_REPLY_SUCCESS );
+
+}   /* process_message_request_invalidate_quick_msg() */
 
 
 static void process_message_request_panic( intf_header_t const * header, void const * payload )
@@ -845,6 +937,34 @@ static void process_message_request_set_paddle_mode( intf_header_t const * heade
 }   /* process_message_request_set_paddle_mode() */
 
 
+static void process_message_request_set_quick_msg( intf_header_t const * header, void const * payload )
+{
+    typedef struct
+    {
+        quick_msg_idx_t idx;
+        char c;
+    } format_t;
+
+    format_t const * pkt = ( format_t const * )payload;
+    char const * str = ( char const * )( & pkt->c );
+
+    // Ensure we have enough data and string is null terminated
+    if( header->size < sizeof( format_t ) ||
+        str[ header->size - sizeof( quick_msg_idx_t ) - 1 ] != NULL_CHAR )
+    {
+        send_empty_packet( INTF_MESSAGE_REPLY_INVALID_VALUE );
+        return;
+    }
+
+    // Set string
+    quick_msg_set( pkt->idx, str );
+
+    // Send reply
+    send_empty_packet( INTF_MESSAGE_REPLY_SUCCESS );
+
+}   /* process_message_request_set_quick_msg() */
+
+
 static void process_message_request_set_trainer_mode( intf_header_t const * header, void const * payload )
 {
     VALIDATE_PAYLOAD_SIZE_OR_BAIL( sizeof( bool ) );
@@ -925,7 +1045,7 @@ static void send_empty_packet( intf_message_t message )
 }   /* send_empty_packet() */
 
 
-static void send_packet( intf_message_t message, void * payload, size_t size )
+static void send_packet( intf_message_t message, void const * payload, size_t size )
 {
     intf_header_t header;
     header.message = message;

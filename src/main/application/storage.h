@@ -26,7 +26,21 @@
  * @brief   The number of bytes allocated for each configuration data slot.
  * @note    The config module should fail a static assert if this size is not large enough.
  */
-#define STORAGE_CONFIG_SIZE     ( 64 )
+#define STORAGE_CONFIG_SIZE         ( 64 )
+
+/**
+ * @def     STORAGE_QUICK_MSG_COUNT
+ * @brief   The number of quick messages that the storage system supports.
+ * @note    The quick message module should fail a static assert if this count is not large enough.
+ */
+#define STORAGE_QUICK_MSG_COUNT     ( 16 )
+
+/**
+ * @def     STORAGE_QUICK_MSG_SIZE
+ * @brief   The number of bytes allocated for each quick message data slot.
+ * @note    The quick message module should fail a static assert if this size is not large enough.
+ */
+#define STORAGE_QUICK_MSG_SIZE      ( 64 )
 
 /* ---------------------------------------------- PROCEDURE PROTOTYPES ---------------------------------------------- */
 
@@ -35,6 +49,12 @@
  * @brief   Gets the stored configuration from non-volatile memory.
  */
 bool storage_get_config( void * data, size_t size );
+
+/**
+ * @fn      storage_get_quick_msg( uint8_t, void *, size_t )
+ * @brief   Gets the stored quick message with the specified index from non-volatile memory.
+ */
+bool storage_get_quick_msg( uint8_t index, void * data, size_t size );
 
 /**
  * @fn      storage_init( void )
@@ -48,5 +68,11 @@ void storage_init( void );
  * @brief   Sets the stored configuration in non-volatile memory.
  */
 void storage_set_config( void const * data, size_t size );
+
+/**
+ * @fn      storage_set_quick_msg( uint8_t, void const *, size_t )
+ * @brief   Sets the stored quick message with the specified index in non-volatile memory.
+ */
+void storage_set_quick_msg( uint8_t index, void const * data, size_t size );
 
 #endif /* !defined( APPLICATION_STORAGE_H ) */
