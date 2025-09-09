@@ -37,6 +37,13 @@
     __attribute__((noreturn))
 
 /**
+ * @def     PACKED_STRUCT
+ * @brief   May be placed after a struct definition to ensure that no pad bytes are added.
+ */
+#define PACKED_STRUCT                                                                   \
+    __attribute__((packed))
+
+/**
  * @def     array_count( _a )
  * @brief   Returns the number of elements in the specified array.
  */

@@ -24,6 +24,7 @@
 #include "application/keyer.h"
 #include "application/led.h"
 #include "application/wpm.h"
+#include "utility/utility.h"
 
 /* ----------------------------------------------------- TYPES ------------------------------------------------------ */
 
@@ -60,7 +61,7 @@ typedef struct
     /** If set to `true`, the keyer will emit dashes from the left paddle and dots from the right paddle. */
     bool                keyer_paddle_invert;
 
-} __attribute__((packed)) config_t;
+} PACKED_STRUCT config_t;
 
 /**
  * @typedef config_version_t
