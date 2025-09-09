@@ -31,7 +31,7 @@
  * @def     VERSION_REVISION
  * @brief   The application's revision version number.
  */
-#define VERSION_REVISION            2
+#define VERSION_REVISION            3
 
 // Public variables
 uint8_t const PRODUCT_VERSION_MAJOR = VERSION_MAJOR;
