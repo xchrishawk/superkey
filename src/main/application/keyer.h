@@ -103,6 +103,12 @@ bool keyer_autokey_char( char c );
 bool keyer_autokey_char_ex( char c, keyer_autokey_flag_field_t flags );
 
 /**
+ * @fn      keyer_autokey_count( void )
+ * @brief   Returns the number of Morse code elements currently in the autokey buffer.
+ */
+size_t keyer_autokey_count( void );
+
+/**
  * @fn      keyer_autokey_str( char const * )
  * @brief   Adds the specified string to the keyer's autokey buffer.
  * @returns The number of characters that were successfully queued.

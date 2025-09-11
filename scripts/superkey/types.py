@@ -104,6 +104,7 @@ MessageID = IntEnum(
     [
         # Requests
         'REQUEST_AUTOKEY',
+        'REQUEST_AUTOKEY_COUNT',
         'REQUEST_AUTOKEY_EX',
         'REQUEST_AUTOKEY_QUICK_MSG',
         'REQUEST_GET_BUZZER_ENABLED',
