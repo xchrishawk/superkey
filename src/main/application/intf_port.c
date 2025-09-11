@@ -111,6 +111,12 @@ static void process_message( intf_header_t const * header, void const * payload 
 static void process_message_request_autokey( intf_header_t const * header, void const * payload );
 
 /**
+ * @fn      process_message_request_autokey_count( intf_header_t const *, void const * )
+ * @brief   Processes the specified interface message with the `INTF_MESSAGE_REQUEST_AUTOKEY_COUNT` message ID.
+ */
+static void process_message_request_autokey_count( intf_header_t const * header, void const * payload );
+
+/**
  * @fn      process_message_request_autokey_ex( intf_header_t const *, void const * )
  * @brief   Processes the specified interface message with the `INTF_MESSAGE_REQUEST_AUTOKEY_EX` message ID.
  */
@@ -417,6 +423,10 @@ static void process_message( intf_header_t const * header, void const * payload 
         process_message_request_autokey( header, payload );
         break;
 
+    case INTF_MESSAGE_REQUEST_AUTOKEY_COUNT:
+        process_message_request_autokey_count( header, payload );
+        break;
+
     case INTF_MESSAGE_REQUEST_AUTOKEY_EX:
         process_message_request_autokey_ex( header, payload );
         break;
@@ -568,6 +578,17 @@ static void process_message_request_autokey( intf_header_t const * header, void 
     send_empty_packet( INTF_MESSAGE_REPLY_SUCCESS );
 
 }   /* process_message_request_autokey() */
+
+
+static void process_message_request_autokey_count( intf_header_t const * header, void const * payload )
+{
+    ( void )payload;
+    VALIDATE_PAYLOAD_SIZE_OR_BAIL( 0 );
+
+    size_t count = keyer_autokey_count();
+    send_packet( INTF_MESSAGE_REPLY_SUCCESS, & count, sizeof( count ) );
+
+}   /* process_message_request_autokey_count() */
 
 
 static void process_message_request_autokey_ex( intf_header_t const * header, void const * payload )

@@ -11,6 +11,7 @@
 
 import serial
 import struct
+import time
 from typing import Iterable, Optional, Tuple
 
 from .constants import *
@@ -111,7 +112,7 @@ class Interface:
         if self.serial is not None and self.serial.is_open:
             self.serial.close()
 
-    def autokey(self, string: str, flags: Iterable[AutokeyFlag] = []):
+    def autokey(self, string: str, flags: Iterable[AutokeyFlag] = [], block: bool = False):
         """
         Sends the `REQUEST_AUTOKEY_EX` command. Queues the specified string to be automatically keyed.
         """
@@ -129,12 +130,31 @@ class Interface:
         self.__send_packet(MessageID.REQUEST_AUTOKEY_EX, payload)
         self.__check_reply_empty()
 
+        # If blocking was selected, wait for autokey to complete
+        if block:
+            self.autokey_wait()
+
+    def autokey_count(self) -> int:
+        """
+        Sends the `REQUEST_AUTOKEY_COUNT` command. Returns the number of Morse code elements in the autokey buffer.
+        """
+        self.__send_packet(MessageID.REQUEST_AUTOKEY_COUNT)
+        return self.__check_reply('<H')[0]
+
     def autokey_quick_msg(self, index: int):
         """
         Sends the `REQUEST_AUTOKEY_QUICK_MSG` command. Keys a quick message.
         """
         self.__send_packet(MessageID.REQUEST_AUTOKEY_QUICK_MSG, struct.pack('<B', index))
         self.__check_reply_empty()
+
+    def autokey_wait(self, delay: float = 0.25):
+        """
+        Waits until the autokey buffer is empty.
+        NOTE: This is not an interface call - it periodically polls `autokey_count()`.
+        """
+        while self.autokey_count() != 0:
+            time.sleep(delay)
 
     def get_buzzer_enabled(self) -> bool:
         """

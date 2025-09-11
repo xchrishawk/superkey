@@ -225,6 +225,13 @@ bool keyer_autokey_char_ex( char c, keyer_autokey_flag_field_t flags )
 }   /* keyer_autokey_char_ex() */
 
 
+size_t keyer_autokey_count( void )
+{
+    return( autokey_count() );
+
+}   /* keyer_autokey_count() */
+
+
 size_t keyer_autokey_str( char const * str )
 {
     return( keyer_autokey_str_ex( str, KEYER_AUTOKEY_FLAG_NONE ) );
