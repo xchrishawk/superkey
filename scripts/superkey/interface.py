@@ -148,7 +148,7 @@ class Interface:
         self.__send_packet(MessageID.REQUEST_AUTOKEY_QUICK_MSG, struct.pack('<B', index))
         self.__check_reply_empty()
 
-    def autokey_wait(self, delay: float = 0.25):
+    def autokey_wait(self, delay: float = 0.1):
         """
         Waits until the autokey buffer is empty.
         NOTE: This is not an interface call - it periodically polls `autokey_count()`.
