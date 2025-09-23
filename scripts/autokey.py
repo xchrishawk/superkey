@@ -187,6 +187,19 @@ def _buffered_mode(port: str = SUPERKEY_DEFAULT_PORT,
                     print(intf.version())
                     continue
 
+                elif line_equals(':humanizer'):
+                    # Print humanizer level
+                    print(intf.get_humanizer_level())
+                    continue
+
+                elif line_starts_with(':humanizer'):
+                    # Set humanizer level
+                    try:
+                        intf.set_humanizer_level(float(line[10:]))
+                    except ValueError:
+                        print('Invalid level?')
+                    continue
+
                 elif line_starts_with(':'):
                     # Unknown command?
                     print('Unknown command?')

@@ -141,6 +141,12 @@ static void process_message_request_get_buzzer_enabled( intf_header_t const * he
 static void process_message_request_get_buzzer_frequency( intf_header_t const * header, void const * payload );
 
 /**
+ * @fn      process_message_request_get_humanizer_level( intf_header_t const *, void const * )
+ * @brief   Processes the specified interface message with the `INTF_MESSAGE_REQUEST_GET_HUMANIZER_LEVEL` message ID.
+ */
+static void process_message_request_get_humanizer_level( intf_header_t const * header, void const * payload );
+
+/**
  * @fn      process_message_request_get_invert_paddles( intf_header_t const *, void const * )
  * @brief   Processes the specified interface message with the `INTF_MESSAGE_REQUEST_GET_INVERT_PADDLES` message ID.
  */
@@ -241,6 +247,12 @@ static void process_message_request_set_buzzer_enabled( intf_header_t const * he
  * @brief   Processes the specified interface message with the `INTF_MESSAGE_REQUEST_SET_BUZZER_FREQUENCY` message ID.
  */
 static void process_message_request_set_buzzer_frequency( intf_header_t const * header, void const * payload );
+
+/**
+ * @fn      process_message_request_set_humanizer_level( intf_header_t const *, void const * )
+ * @brief   Processes the specified interface message with the `INTF_MESSAGE_REQUEST_SET_HUMANIZER_LEVEL` message ID.
+ */
+static void process_message_request_set_humanizer_level( intf_header_t const * header, void const * payload );
 
 /**
  * @fn      process_message_request_set_invert_paddles( intf_header_t const *, void const * )
@@ -443,6 +455,10 @@ static void process_message( intf_header_t const * header, void const * payload 
         process_message_request_get_buzzer_frequency( header, payload );
         break;
 
+    case INTF_MESSAGE_REQUEST_GET_HUMANIZER_LEVEL:
+        process_message_request_get_humanizer_level( header, payload );
+        break;
+
     case INTF_MESSAGE_REQUEST_GET_INVERT_PADDLES:
         process_message_request_get_invert_paddles( header, payload );
         break;
@@ -509,6 +525,10 @@ static void process_message( intf_header_t const * header, void const * payload 
 
     case INTF_MESSAGE_REQUEST_SET_BUZZER_FREQUENCY:
         process_message_request_set_buzzer_frequency( header, payload );
+        break;
+
+    case INTF_MESSAGE_REQUEST_SET_HUMANIZER_LEVEL:
+        process_message_request_set_humanizer_level( header, payload );
         break;
 
     case INTF_MESSAGE_REQUEST_SET_INVERT_PADDLES:
@@ -656,6 +676,17 @@ static void process_message_request_get_buzzer_frequency( intf_header_t const * 
     send_packet( INTF_MESSAGE_REPLY_SUCCESS, & freq, sizeof( freq ) );
 
 }   /* process_message_request_get_buzzer_frequency() */
+
+
+static void process_message_request_get_humanizer_level( intf_header_t const * header, void const * payload )
+{
+    ( void )payload;
+    VALIDATE_PAYLOAD_SIZE_OR_BAIL( 0 );
+
+    float level = keyer_get_humanizer_level();
+    send_packet( INTF_MESSAGE_REPLY_SUCCESS, & level, sizeof( level ) );
+
+}   /* process_message_request_get_humanizer_level() */
 
 
 static void process_message_request_get_invert_paddles( intf_header_t const * header, void const * payload )
@@ -873,6 +904,19 @@ static void process_message_request_set_buzzer_frequency( intf_header_t const * 
     send_empty_packet( INTF_MESSAGE_REPLY_SUCCESS );
 
 }   /* process_message_request_set_buzzer_frequency() */
+
+
+static void process_message_request_set_humanizer_level( intf_header_t const * header, void const * payload )
+{
+    VALIDATE_PAYLOAD_SIZE_OR_BAIL( sizeof( float ) );
+
+    float level = *( ( float const * )payload );
+    VALIDATE_RANGE_OR_BAIL( level, KEYER_HUMANIZER_LEVEL_MIN, KEYER_HUMANIZER_LEVEL_MAX );
+
+    keyer_set_humanizer_level( level );
+    send_empty_packet( INTF_MESSAGE_REPLY_SUCCESS );
+
+}   /* process_message_request_set_humanizer_level() */
 
 
 static void process_message_request_set_invert_paddles( intf_header_t const * header, void const * payload )

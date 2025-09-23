@@ -9,6 +9,7 @@
 
 /* ---------------------------------------------------- INCLUDES ---------------------------------------------------- */
 
+#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -66,6 +67,7 @@ enum
 static bool s_keyed = false;                /**< Is the keyer hardware currently keyed? */
 static bool s_panicked = false;             /**< Was the keyer panic activated?         */
 static bool s_trainer_mode = false;         /**< Is trainer mode on?                    */
+static float s_humanizer_level = KEYER_HUMANIZER_OFF;/**< Humanizer level.              */
 
 static state_t s_state = STATE_OFF;         /**< Currently active keyer state.          */
 
@@ -189,6 +191,12 @@ static bool get_keyed( void );
 static state_t get_next_state( void );
 
 /**
+ * @fn      humanize_delay( tick_t )
+ * @brief   Applies a random variation to the specified delay.
+ */
+static tick_t humanize_delay( tick_t delay );
+
+/**
  * @fn      set_keyed( bool )
  * @brief   Sets whether the keyer hardware is keying or not.
  */
@@ -253,6 +261,13 @@ size_t keyer_autokey_str_ex( char const * str, keyer_autokey_flag_field_t flags 
 }   /* keyer_autokey_str() */
 
 
+float keyer_get_humanizer_level( void )
+{
+    return( s_humanizer_level );
+
+}   /* keyer_get_humanizer_level() */
+
+
 bool keyer_get_on( void )
 {
     return( get_keyed() );
@@ -287,6 +302,7 @@ void keyer_init( void )
     s_keyed = false;
     s_panicked = false;
     s_trainer_mode = false;
+    s_humanizer_level = KEYER_HUMANIZER_OFF;
     s_state = STATE_OFF;
     s_el = WPM_ELEMENT_NONE;
     s_lockout_el = WPM_ELEMENT_NONE;
@@ -314,6 +330,13 @@ void keyer_panic( void )
     set_keyed( false );
 
 }   /* keyer_panic() */
+
+
+void keyer_set_humanizer_level( float level )
+{
+    s_humanizer_level = clamp( level, KEYER_HUMANIZER_LEVEL_MIN, KEYER_HUMANIZER_LEVEL_MAX );
+
+}   /* keyer_set_humanizer_level() */
 
 
 void keyer_set_paddle_invert( bool invert )
@@ -877,9 +900,11 @@ static void do_state_autokey( tick_t tick, bool new_state )
         if( wpm_element_is_keyed( s_el ) )
         {
             s_lockout_el = s_el;
-            s_el_stop_tick = tick + s_ticks[ s_el ];
+            s_el_stop_tick = tick
+                + humanize_delay( s_ticks[ s_el ] );
             s_el_stop_tick_vld = true;
-            s_el_start_tick = tick + s_ticks[ s_el ] + s_ticks[ WPM_ELEMENT_ELEMENT_SPACE ];
+            s_el_start_tick = tick
+                + humanize_delay( s_ticks[ s_el ] + s_ticks[ WPM_ELEMENT_ELEMENT_SPACE ] );
             s_el_start_tick_vld = true;
             set_keyed( true );
         }
@@ -887,11 +912,12 @@ static void do_state_autokey( tick_t tick, bool new_state )
         {
             s_el_stop_tick = 0;
             s_el_stop_tick_vld = false;
-            s_el_start_tick = tick + s_ticks[ s_el ]
-                            - ( prev_lockout_el_was_keyed ?
-                                s_ticks[ WPM_ELEMENT_ELEMENT_SPACE ] : 0 )
-                            - ( prev_el_was_letter_space ?
-                                ( s_ticks[ WPM_ELEMENT_LETTER_SPACE ] - s_ticks[ WPM_ELEMENT_ELEMENT_SPACE ] ) : 0 );
+            s_el_start_tick = tick
+                + humanize_delay( s_ticks[ s_el ]
+                                - ( prev_lockout_el_was_keyed ?
+                                    s_ticks[ WPM_ELEMENT_ELEMENT_SPACE ] : 0 )
+                                - ( prev_el_was_letter_space ?
+                                   ( s_ticks[ WPM_ELEMENT_LETTER_SPACE ] - s_ticks[ WPM_ELEMENT_ELEMENT_SPACE ] ) : 0 ) );
             s_el_start_tick_vld = true;
         }
     }
@@ -913,9 +939,11 @@ static void do_state_dashes( tick_t tick, bool new_state )
         // Activate keyer hardware
         s_el = WPM_ELEMENT_DASH;
         s_lockout_el = s_el;
-        s_el_stop_tick = tick + s_ticks[ WPM_ELEMENT_DASH ];
+        s_el_stop_tick = tick
+            + humanize_delay( s_ticks[ WPM_ELEMENT_DASH ] );
         s_el_stop_tick_vld = true;
-        s_el_start_tick = tick + s_ticks[ WPM_ELEMENT_DASH ] + s_ticks[ WPM_ELEMENT_ELEMENT_SPACE ];
+        s_el_start_tick = tick
+            + humanize_delay( s_ticks[ WPM_ELEMENT_DASH ] + s_ticks[ WPM_ELEMENT_ELEMENT_SPACE ] );
         s_el_start_tick_vld = true;
         set_keyed( true );
     }
@@ -937,9 +965,11 @@ static void do_state_dots( tick_t tick, bool new_state )
         // Activate keyer hardware
         s_el = WPM_ELEMENT_DOT;
         s_lockout_el = s_el;
-        s_el_stop_tick = tick + s_ticks[ WPM_ELEMENT_DOT ];
+        s_el_stop_tick = tick
+            + humanize_delay( s_ticks[ WPM_ELEMENT_DOT ] );
         s_el_stop_tick_vld = true;
-        s_el_start_tick = tick + s_ticks[ WPM_ELEMENT_DOT ] + s_ticks[ WPM_ELEMENT_ELEMENT_SPACE ];
+        s_el_start_tick = tick
+            + humanize_delay( s_ticks[ WPM_ELEMENT_DOT ] + s_ticks[ WPM_ELEMENT_ELEMENT_SPACE ] );
         s_el_start_tick_vld = true;
         set_keyed( true );
     }
@@ -961,9 +991,11 @@ static void do_state_interleaved( tick_t tick, bool new_state )
         // Activate keyer hardware
         s_el = ( s_lockout_el == WPM_ELEMENT_DOT ? WPM_ELEMENT_DASH : WPM_ELEMENT_DOT );
         s_lockout_el = s_el;
-        s_el_stop_tick = tick + s_ticks[ s_el ];
+        s_el_stop_tick = tick
+            + humanize_delay( s_ticks[ s_el ] );
         s_el_stop_tick_vld = true;
-        s_el_start_tick = tick + s_ticks[ s_el ] + s_ticks[ WPM_ELEMENT_ELEMENT_SPACE ];
+        s_el_start_tick = tick
+            + humanize_delay( s_ticks[ s_el ] + s_ticks[ WPM_ELEMENT_ELEMENT_SPACE ] );
         s_el_start_tick_vld = true;
         set_keyed( true );
     }
@@ -1111,6 +1143,20 @@ static state_t get_next_state( void )
     }
 
 }   /* get_next_state() */
+
+
+static tick_t humanize_delay( tick_t delay )
+{
+    // Early check to avoid expensive floating point operations if not needed
+    if( s_humanizer_level == KEYER_HUMANIZER_OFF )
+        return( delay );
+
+    float rand = ( float )random() / ( float )RANDOM_MAX;
+    tick_t offset = ( tick_t )roundf( ( rand * s_humanizer_level )  * ( 0.5f * s_ticks[ WPM_ELEMENT_DOT ] ) );
+
+    return( delay + offset );
+
+}   /* humanize_delay() */
 
 
 static void set_keyed( bool keyed )

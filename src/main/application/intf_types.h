@@ -49,6 +49,7 @@ enum
     INTF_MESSAGE_REQUEST_AUTOKEY_QUICK_MSG, /**< Queues a quick message to be autokeyed.*/
     INTF_MESSAGE_REQUEST_GET_BUZZER_ENABLED,/**< Get buzzer enablement.                 */
     INTF_MESSAGE_REQUEST_GET_BUZZER_FREQUENCY,/**< Get buzzer frequency.                */
+    INTF_MESSAGE_REQUEST_GET_HUMANIZER_LEVEL,/**< Get humanizer level.                  */
     INTF_MESSAGE_REQUEST_GET_INVERT_PADDLES,/**< Gets paddle inversion setting.         */
     INTF_MESSAGE_REQUEST_GET_IO_POLARITY,   /**< Gets I/O pin polarity.                 */
     INTF_MESSAGE_REQUEST_GET_IO_STATE,      /**< Gets I/O pin state.                    */
@@ -66,6 +67,7 @@ enum
     INTF_MESSAGE_REQUEST_RESTORE_DEFAULT_CONFIG,/**< Restores default configuration.    */
     INTF_MESSAGE_REQUEST_SET_BUZZER_ENABLED,/**< Enable or disable buzzer.              */
     INTF_MESSAGE_REQUEST_SET_BUZZER_FREQUENCY,/**< Set buzzer frequency.                */
+    INTF_MESSAGE_REQUEST_SET_HUMANIZER_LEVEL,/**< Set humanizer level.                  */
     INTF_MESSAGE_REQUEST_SET_INVERT_PADDLES,/**< Sets paddle inversion setting.         */
     INTF_MESSAGE_REQUEST_SET_IO_POLARITY,   /**< Sets I/O pin polarity.                 */
     INTF_MESSAGE_REQUEST_SET_IO_TYPE,       /**< Sets I/O pin type.                     */
