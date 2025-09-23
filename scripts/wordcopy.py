@@ -19,10 +19,11 @@ from utility import wordlist
 
 DEFAULT_COUNT = 20
 DEFAULT_DELAY = 3.
-DEFAULT_WPM = 20.
 DEFAULT_MINLEN = 2
 DEFAULT_MAXLEN = 8
+DEFAULT_WPM = 20.
 DEFAULT_HUMANIZE = 0.
+DEFAULT_TRAINER = True
 
 # ----------------------------------------------------- PROCEDURES -----------------------------------------------------
 
@@ -36,10 +37,11 @@ def _parse_args():
     parser.add_argument('--timeout', type=float, default=SUPERKEY_DEFAULT_TIMEOUT, help='Serial port timeout (s).')
     parser.add_argument('--count', type=int, default=DEFAULT_COUNT, help='Number of words to key.')
     parser.add_argument('--delay', type=float, default=DEFAULT_DELAY, help='Seconds to delay between each word.')
-    parser.add_argument('--wpm', type=float, default=DEFAULT_WPM, help='Words per minute.')
     parser.add_argument('--minlen', type=int, default=DEFAULT_MINLEN, help='Minimum word length.')
     parser.add_argument('--maxlen', type=int, default=DEFAULT_MAXLEN, help='Maximum word length.')
+    parser.add_argument('--wpm', type=float, default=DEFAULT_WPM, help='Words per minute.')
     parser.add_argument('--humanizer', type=float, default=DEFAULT_HUMANIZE, help='Humanizer fraction.')
+    parser.add_argument('--trainer', action=argparse.BooleanOptionalAction, default=DEFAULT_TRAINER, help='Use trainer mode?')
     return parser.parse_args()
 
 def _main(port: str,
@@ -47,10 +49,11 @@ def _main(port: str,
           timeout: float,
           count: int,
           delay: float,
-          wpm: float,
           minlen: int,
           maxlen: int,
-          humanizer: float):
+          wpm: float,
+          humanizer: float,
+          trainer: bool):
     """
     Runs the trainer.
     """
@@ -64,13 +67,14 @@ def _main(port: str,
 
             # Get initial settings
             initial_wpm = intf.get_wpm()
-            initial_trainer_mode = intf.get_trainer_mode()
             initial_humanizer_level = intf.get_humanizer_level()
+            initial_trainer_mode = intf.get_trainer_mode()
 
             # Override settings
             intf.set_wpm(wpm)
-            intf.set_trainer_mode(True)
             intf.set_humanizer_level(humanizer)
+            if trainer:
+                intf.set_trainer_mode(True)
 
             # Run as many times as commanded
             for _ in range(count):
@@ -93,8 +97,9 @@ def _main(port: str,
 
             # Restore initial settings
             intf.set_wpm(initial_wpm)
-            intf.set_trainer_mode(initial_trainer_mode)
             intf.set_humanizer_level(initial_humanizer_level)
+            if trainer:
+                intf.set_trainer_mode(initial_trainer_mode)
 
 
 # -------------------------------------------------- IMPORT PROCEDURE --------------------------------------------------
@@ -110,7 +115,8 @@ if __name__ == '__main__':
           timeout = args.timeout,
           count = args.count,
           delay = args.delay,
-          wpm = args.wpm,
           minlen = args.minlen,
           maxlen = args.maxlen,
-          humanizer = args.humanizer)
+          wpm = args.wpm,
+          humanizer = args.humanizer,
+          trainer = args.trainer)
