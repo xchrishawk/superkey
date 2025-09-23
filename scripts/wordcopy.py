@@ -22,6 +22,7 @@ DEFAULT_DELAY = 3.
 DEFAULT_WPM = 20.
 DEFAULT_MINLEN = 2
 DEFAULT_MAXLEN = 8
+DEFAULT_HUMANIZE = 0.
 
 # ----------------------------------------------------- PROCEDURES -----------------------------------------------------
 
@@ -38,6 +39,7 @@ def _parse_args():
     parser.add_argument('--wpm', type=float, default=DEFAULT_WPM, help='Words per minute.')
     parser.add_argument('--minlen', type=int, default=DEFAULT_MINLEN, help='Minimum word length.')
     parser.add_argument('--maxlen', type=int, default=DEFAULT_MAXLEN, help='Maximum word length.')
+    parser.add_argument('--humanizer', type=float, default=DEFAULT_HUMANIZE, help='Humanizer fraction.')
     return parser.parse_args()
 
 def _main(port: str,
@@ -47,7 +49,8 @@ def _main(port: str,
           delay: float,
           wpm: float,
           minlen: int,
-          maxlen: int):
+          maxlen: int,
+          humanizer: float):
     """
     Runs the trainer.
     """
@@ -62,10 +65,12 @@ def _main(port: str,
             # Get initial settings
             initial_wpm = intf.get_wpm()
             initial_trainer_mode = intf.get_trainer_mode()
+            initial_humanizer_level = intf.get_humanizer_level()
 
             # Override settings
             intf.set_wpm(wpm)
             intf.set_trainer_mode(True)
+            intf.set_humanizer_level(humanizer)
 
             # Run as many times as commanded
             for _ in range(count):
@@ -89,6 +94,7 @@ def _main(port: str,
             # Restore initial settings
             intf.set_wpm(initial_wpm)
             intf.set_trainer_mode(initial_trainer_mode)
+            intf.set_humanizer_level(initial_humanizer_level)
 
 
 # -------------------------------------------------- IMPORT PROCEDURE --------------------------------------------------
@@ -106,4 +112,5 @@ if __name__ == '__main__':
           delay = args.delay,
           wpm = args.wpm,
           minlen = args.minlen,
-          maxlen = args.maxlen)
+          maxlen = args.maxlen,
+          humanizer = args.humanizer)

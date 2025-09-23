@@ -170,6 +170,13 @@ class Interface:
         self.__send_packet(MessageID.REQUEST_GET_BUZZER_FREQUENCY)
         return self.__check_reply('<H')[0]
 
+    def get_humanizer_level(self) -> float:
+        """
+        Sends the `REQUEST_GET_HUMANIZER_LEVEL` command. Returns the current humanizer level as a fraction.
+        """
+        self.__send_packet(MessageID.REQUEST_GET_HUMANIZER_LEVEL)
+        return self.__check_reply('<f')[0]
+
     def get_invert_paddles(self) -> bool:
         """
         Sends the `REQUEST_GET_INVERT_PADDLES` command. Returns whether or not the paddles are inverted.
@@ -287,6 +294,13 @@ class Interface:
         Sends the `REQUEST_SET_BUZZER_FREQUENCY` command. Sets the frequency (in Hz) of the device's built-in buzzer.
         """
         self.__send_packet(MessageID.REQUEST_SET_BUZZER_FREQUENCY, struct.pack('<H', frequency))
+        self.__check_reply_empty()
+
+    def set_humanizer_level(self, level: float):
+        """
+        Sends the `REQUEST_SET_HUMANIZER_LEVEL` command. Sets the humanizer level as a fraction.
+        """
+        self.__send_packet(MessageID.REQUEST_SET_HUMANIZER_LEVEL, struct.pack('<f', level))
         self.__check_reply_empty()
 
     def set_invert_paddles(self, inverted: bool):
