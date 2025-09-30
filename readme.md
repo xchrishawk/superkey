@@ -1,6 +1,6 @@
 # SuperKey
 
-**SuperKey** - the greatest CW keyer the world has ever seen.
+**SuperKey** - the greatest CW keyer the world has ever seen. (Someday, hopefully).
 
 SuperKey is a fully featured, open source CW / Morse code keyer for amateur radio operators. The goal of SuperKey is to
 provide **all keyer functionality** required by the modern ham radio enthusiast, as simply and cheaply as possible.
