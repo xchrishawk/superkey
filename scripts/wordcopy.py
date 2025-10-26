@@ -17,6 +17,7 @@ from utility import wordlist
 
 # ----------------------------------------------------- CONSTANTS ------------------------------------------------------
 
+DEFAULT_SIZE = 1
 DEFAULT_COUNT = 20
 DEFAULT_DELAY = 3.
 DEFAULT_MINLEN = 2
@@ -35,7 +36,8 @@ def _parse_args():
     parser.add_argument('--port', type=str, default=SUPERKEY_DEFAULT_PORT, help='Serial port to connect to.')
     parser.add_argument('--baudrate', type=int, default=SUPERKEY_DEFAULT_BAUDRATE, help='Serial port baud rate.')
     parser.add_argument('--timeout', type=float, default=SUPERKEY_DEFAULT_TIMEOUT, help='Serial port timeout (s).')
-    parser.add_argument('--count', type=int, default=DEFAULT_COUNT, help='Number of words to key.')
+    parser.add_argument('--size', type=int, default=DEFAULT_SIZE, help='Number of words to key per group.')
+    parser.add_argument('--count', type=int, default=DEFAULT_COUNT, help='Number of groups to key.')
     parser.add_argument('--delay', type=float, default=DEFAULT_DELAY, help='Seconds to delay between each word.')
     parser.add_argument('--minlen', type=int, default=DEFAULT_MINLEN, help='Minimum word length.')
     parser.add_argument('--maxlen', type=int, default=DEFAULT_MAXLEN, help='Maximum word length.')
@@ -47,6 +49,7 @@ def _parse_args():
 def _main(port: str,
           baudrate: int,
           timeout: float,
+          size: int,
           count: int,
           delay: float,
           minlen: int,
@@ -80,12 +83,13 @@ def _main(port: str,
             for _ in range(count):
 
                 # Get a random word and key it
-                word = wl.random(min_length=minlen, max_length=maxlen).upper()
-                intf.autokey(word, block=True)
+                words = [wl.random(min_length=minlen, max_length=maxlen).upper() for _ in range(size)]
+                string = ' '.join(words)
+                intf.autokey(string, block=True)
 
                 # Print the word after a delay
                 time.sleep(delay)
-                print(word)
+                print(string)
                 time.sleep(delay * .5)
 
         except KeyboardInterrupt:
@@ -113,6 +117,7 @@ if __name__ == '__main__':
     _main(port = args.port,
           baudrate = args.baudrate,
           timeout = args.timeout,
+          size = args.size,
           count = args.count,
           delay = args.delay,
           minlen = args.minlen,
