@@ -169,7 +169,14 @@ def _buffered_mode(port: str = SUPERKEY_DEFAULT_PORT,
 
                 elif line_starts_with(':qm'):
                     # Handle this with regex for easier processing
-                    if match := re.match(r'^:qm get (\d+)$', line, re.IGNORECASE):
+                    if line_equals(':qm list'):
+                        for idx in range(16):
+                            if msg := intf.get_quick_msg(idx):
+                                print(f'QM {idx}: {msg}')
+                            else:
+                                print(f'QM {idx}: [empty]')
+                        continue
+                    elif match := re.match(r'^:qm get (\d+)$', line, re.IGNORECASE):
                         print(intf.get_quick_msg(int(match.group(1))))
                         continue
                     elif match := re.match(r'^:qm set (\d+) (.+)$', line, re.IGNORECASE):
@@ -180,6 +187,9 @@ def _buffered_mode(port: str = SUPERKEY_DEFAULT_PORT,
                         continue
                     elif match := re.match(r'^:qm (\d+)$', line, re.IGNORECASE):
                         intf.autokey_quick_msg(int(match.group(1)))
+                        continue
+                    else:
+                        print('Unknown quick message command?')
                         continue
 
                 elif line_equals(':version'):
@@ -198,6 +208,10 @@ def _buffered_mode(port: str = SUPERKEY_DEFAULT_PORT,
                         intf.set_humanizer_level(float(line[10:]))
                     except ValueError:
                         print('Invalid level?')
+                    continue
+
+                elif match := re.match(r'^:(\d+)$', line, re.IGNORECASE):
+                    intf.autokey_quick_msg(int(match.group(1)))
                     continue
 
                 elif line_starts_with(':'):
